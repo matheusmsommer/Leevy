@@ -17,6 +17,7 @@ interface Service {
     name: string;
     description?: string;
     category: string;
+    synonyms?: string;
   };
 }
 
@@ -54,7 +55,8 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
             id,
             name,
             description,
-            category
+            category,
+            synonyms
           )
         `)
         .eq('active', true)
@@ -87,11 +89,15 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
     onTotalChange(total);
   };
 
-  const filteredServices = services.filter(service =>
-    service.exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.exam.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (service.exam.description && service.exam.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredServices = services.filter(service => {
+    const searchLower = searchTerm.toLowerCase();
+    const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    
+    return service.exam.name.toLowerCase().includes(searchLower) ||
+           service.exam.category.toLowerCase().includes(searchLower) ||
+           (service.exam.description && service.exam.description.toLowerCase().includes(searchLower)) ||
+           synonymsList.some(synonym => synonym.includes(searchLower));
+  });
 
   const handleServiceToggle = (serviceId: string) => {
     const newServices = selectedServices.includes(serviceId)
@@ -198,6 +204,11 @@ const ServiceCard = ({ service, isSelected, onToggle }: {
             <h4 className="font-medium">{service.exam.name}</h4>
             <Badge variant="secondary" className="text-xs">{service.exam.category}</Badge>
           </div>
+          {service.exam.synonyms && (
+            <p className="text-xs text-gray-500 mb-1">
+              Também conhecido como: {service.exam.synonyms}
+            </p>
+          )}
           {service.exam.description && (
             <p className="text-sm text-gray-600 mb-2">{service.exam.description}</p>
           )}

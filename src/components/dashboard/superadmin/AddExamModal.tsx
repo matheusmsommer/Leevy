@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,10 +20,12 @@ interface AddExamModalProps {
 const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [synonymInput, setSynonymInput] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     category: '',
+    synonyms: [] as string[],
     preparation: '',
     description: '',
     fastingHours: '',
@@ -65,11 +68,35 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     { value: 'specific', label: 'Horário específico' }
   ];
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string | boolean | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAddSynonym = () => {
+    if (synonymInput.trim() && !formData.synonyms.includes(synonymInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        synonyms: [...prev.synonyms, synonymInput.trim()]
+      }));
+      setSynonymInput('');
+    }
+  };
+
+  const handleRemoveSynonym = (synonymToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      synonyms: prev.synonyms.filter(synonym => synonym !== synonymToRemove)
+    }));
+  };
+
+  const handleSynonymKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddSynonym();
+    }
   };
 
   const generatePreparation = () => {
@@ -130,6 +157,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
             name: formData.name,
             code: formData.code.toUpperCase(),
             category: formData.category,
+            synonyms: formData.synonyms.length > 0 ? formData.synonyms.join(',') : null,
             preparation: finalPreparation || null,
             description: formData.description || null
           }
@@ -158,6 +186,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
         name: '',
         code: '',
         category: '',
+        synonyms: [],
         preparation: '',
         description: '',
         fastingHours: '',
@@ -168,6 +197,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
         resultDeliveryDays: '',
         specialInstructions: ''
       });
+      setSynonymInput('');
 
       onExamAdded();
       onOpenChange(false);
@@ -231,6 +261,45 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="synonyms">Sinônimos / Nomes Alternativos</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="synonyms"
+                  value={synonymInput}
+                  onChange={(e) => setSynonymInput(e.target.value)}
+                  onKeyPress={handleSynonymKeyPress}
+                  placeholder="Ex: CBC, Hemograma simples"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddSynonym}
+                  disabled={!synonymInput.trim()}
+                >
+                  Adicionar
+                </Button>
+              </div>
+              {formData.synonyms.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.synonyms.map((synonym, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {synonym}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => handleRemoveSynonym(synonym)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Adicione nomes alternativos para facilitar a busca (ex: CBC para Hemograma Completo)
+              </p>
+            </div>
           </div>
 
           <div className="space-y-4 border rounded-lg p-4 bg-muted/20">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,7 @@ interface ServiceWithCompany {
     name: string;
     description?: string;
     category: string;
+    synonyms?: string;
   };
 }
 
@@ -56,7 +56,8 @@ const SearchServices = () => {
             id,
             name,
             description,
-            category
+            category,
+            synonyms
           )
         `)
         .eq('active', true)
@@ -81,12 +82,16 @@ const SearchServices = () => {
     }
   };
 
-  const filteredServices = services.filter(service =>
-    service.exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.exam.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    service.exam.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredServices = services.filter(service => {
+    const searchLower = searchTerm.toLowerCase();
+    const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    
+    return service.exam.name.toLowerCase().includes(searchLower) ||
+           service.exam.description?.toLowerCase().includes(searchLower) ||
+           service.company.name.toLowerCase().includes(searchLower) ||
+           service.exam.category.toLowerCase().includes(searchLower) ||
+           synonymsList.some(synonym => synonym.includes(searchLower));
+  });
 
   if (isLoading || loading) {
     return (
@@ -158,6 +163,11 @@ const SearchServices = () => {
                       <p className="text-sm text-muted-foreground font-medium">
                         {service.company.name}
                       </p>
+                      {service.exam.synonyms && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Também conhecido como: {service.exam.synonyms}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-primary">
