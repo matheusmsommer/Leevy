@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Plus, Edit, Trash2, TestTube, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -122,6 +122,21 @@ const ServiceManagement = () => {
     }
   };
 
+  const handleViewService = (service: CompanyService) => {
+    console.log('Viewing service:', service.id);
+    // TODO: Implementar modal de visualização
+  };
+
+  const handleEditService = (service: CompanyService) => {
+    console.log('Editing service:', service.id);
+    // TODO: Implementar modal de edição
+  };
+
+  const handleDeleteService = (service: CompanyService) => {
+    console.log('Deleting service:', service.id);
+    // TODO: Implementar modal de exclusão
+  };
+
   if (loading) {
     return (
       <div className="space-y-8">
@@ -149,10 +164,22 @@ const ServiceManagement = () => {
             Gerencie os exames oferecidos pelo seu laboratório
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 shadow-sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar Serviço
-        </Button>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/90 shadow-sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Serviço
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80">
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold">Adicionar Novo Serviço</h4>
+              <p className="text-sm text-muted-foreground">
+                Adiciona um exame do catálogo global aos serviços oferecidos pelo seu laboratório com preço personalizado.
+              </p>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
       </div>
 
       <Card className="border-border shadow-sm">
@@ -208,33 +235,103 @@ const ServiceManagement = () => {
                         R$ {service.price.toFixed(2)}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleToggleActive(service.id, service.active)}
-                        >
-                          {service.active ? (
-                            <Badge className="bg-primary/10 text-primary border-primary/20">
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="border-muted text-muted-foreground">
-                              Inativo
-                            </Badge>
-                          )}
-                        </Button>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleToggleActive(service.id, service.active)}
+                            >
+                              {service.active ? (
+                                <Badge className="bg-primary/10 text-primary border-primary/20">
+                                  Ativo
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="border-muted text-muted-foreground">
+                                  Inativo
+                                </Badge>
+                              )}
+                            </Button>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-64">
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-semibold">
+                                {service.active ? 'Desativar' : 'Ativar'} Serviço
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {service.active 
+                                  ? 'Torna o serviço indisponível para agendamento pelos clientes.'
+                                  : 'Torna o serviço disponível para agendamento pelos clientes.'
+                                }
+                              </p>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2 justify-center">
-                          <Button size="sm" variant="outline" className="border-border hover:bg-accent">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-border hover:bg-accent">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-destructive/20 text-destructive hover:bg-destructive/10">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-border hover:bg-accent"
+                                onClick={() => handleViewService(service)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold">Visualizar Serviço</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Ver detalhes completos do serviço incluindo preço, descrição e estatísticas.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-border hover:bg-accent"
+                                onClick={() => handleEditService(service)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold">Editar Serviço</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Modificar preço, status e outras configurações específicas do seu laboratório.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-destructive/20 text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteService(service)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold text-destructive">Remover Serviço</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Remove o serviço da sua lista de ofertas. Clientes não poderão mais agendar este exame.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
                       </TableCell>
                     </TableRow>

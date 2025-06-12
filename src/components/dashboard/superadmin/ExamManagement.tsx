@@ -4,10 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Plus, Edit, Trash2, TestTube, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import AddExamModal from './AddExamModal';
+import ViewExamModal from './ViewExamModal';
+import EditExamModal from './EditExamModal';
+import DeleteExamModal from './DeleteExamModal';
 
 interface GlobalExam {
   id: string;
@@ -16,6 +20,7 @@ interface GlobalExam {
   category: string;
   preparation?: string;
   description?: string;
+  synonyms?: string;
 }
 
 interface ExamManagementProps {
@@ -28,6 +33,10 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
   const [exams, setExams] = useState<GlobalExam[]>(initialExams);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedExam, setSelectedExam] = useState<GlobalExam | null>(null);
 
   useEffect(() => {
     fetchGlobalExams();
@@ -65,7 +74,30 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
     setShowAddModal(true);
   };
 
+  const handleViewExam = (exam: GlobalExam) => {
+    setSelectedExam(exam);
+    setShowViewModal(true);
+  };
+
+  const handleEditExam = (exam: GlobalExam) => {
+    setSelectedExam(exam);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteExam = (exam: GlobalExam) => {
+    setSelectedExam(exam);
+    setShowDeleteModal(true);
+  };
+
   const handleExamAdded = () => {
+    fetchGlobalExams();
+  };
+
+  const handleExamUpdated = () => {
+    fetchGlobalExams();
+  };
+
+  const handleExamDeleted = () => {
     fetchGlobalExams();
   };
 
@@ -110,10 +142,22 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                 </CardDescription>
               </div>
             </div>
-            <Button onClick={handleAddExam} className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Exame
-            </Button>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <Button onClick={handleAddExam} className="bg-primary hover:bg-primary/90">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Exame
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent className="w-80">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">Adicionar Novo Exame</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Cadastra um novo exame no catálogo global que ficará disponível para todas as empresas do sistema.
+                  </p>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
           </div>
         </CardHeader>
         <CardContent>
@@ -157,15 +201,68 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2 justify-center">
-                          <Button size="sm" variant="outline" className="border-border hover:bg-accent">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-border hover:bg-accent">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-destructive/20 text-destructive hover:bg-destructive/10">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-border hover:bg-accent"
+                                onClick={() => handleViewExam(exam)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold">Visualizar Exame</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Ver todas as informações detalhadas do exame.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-border hover:bg-accent"
+                                onClick={() => handleEditExam(exam)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold">Editar Exame</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Modificar as informações do exame como nome, código, categoria e descrição.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
+
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-destructive/20 text-destructive hover:bg-destructive/10"
+                                onClick={() => handleDeleteExam(exam)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-64">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-semibold text-destructive">Excluir Exame</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Remove permanentemente o exame do sistema. Só é possível se não estiver sendo usado por empresas.
+                                </p>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -181,6 +278,26 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         open={showAddModal}
         onOpenChange={setShowAddModal}
         onExamAdded={handleExamAdded}
+      />
+
+      <ViewExamModal
+        open={showViewModal}
+        onOpenChange={setShowViewModal}
+        exam={selectedExam}
+      />
+
+      <EditExamModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        exam={selectedExam}
+        onExamUpdated={handleExamUpdated}
+      />
+
+      <DeleteExamModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        exam={selectedExam}
+        onExamDeleted={handleExamDeleted}
       />
     </>
   );
