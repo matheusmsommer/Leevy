@@ -4,7 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface GlobalExam {
+interface GlobalService {
   id: string;
   name: string;
   code: string;
@@ -14,35 +14,35 @@ interface GlobalExam {
   synonyms?: string;
 }
 
-interface DeleteExamModalProps {
+interface DeleteServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  exam: GlobalExam | null;
-  onExamDeleted: () => void;
+  service: GlobalService | null;
+  onServiceDeleted: () => void;
 }
 
-const DeleteExamModal = ({ open, onOpenChange, exam, onExamDeleted }: DeleteExamModalProps) => {
+const DeleteServiceModal = ({ open, onOpenChange, service, onServiceDeleted }: DeleteServiceModalProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (!exam) return;
+    if (!service) return;
 
     setLoading(true);
 
     try {
-      // First check if exam is being used by any company services
+      // First check if service is being used by any company services
       const { data: services, error: servicesError } = await supabase
         .from('company_services')
         .select('id')
-        .eq('exam_id', exam.id)
+        .eq('service_id', service.id)
         .limit(1);
 
       if (servicesError) {
         console.error('Error checking services:', servicesError);
         toast({
           title: "Erro ao verificar dependências",
-          description: "Não foi possível verificar se o exame está sendo usado.",
+          description: "Não foi possível verificar se o serviço está sendo usado.",
           variant: "destructive",
         });
         return;
@@ -51,21 +51,21 @@ const DeleteExamModal = ({ open, onOpenChange, exam, onExamDeleted }: DeleteExam
       if (services && services.length > 0) {
         toast({
           title: "Não é possível excluir",
-          description: "Este exame está sendo usado por uma ou mais empresas. Remova das empresas antes de excluir.",
+          description: "Este serviço está sendo usado por uma ou mais empresas. Remova das empresas antes de excluir.",
           variant: "destructive",
         });
         return;
       }
 
       const { error } = await supabase
-        .from('exams')
+        .from('services')
         .delete()
-        .eq('id', exam.id);
+        .eq('id', service.id);
 
       if (error) {
-        console.error('Error deleting exam:', error);
+        console.error('Error deleting service:', error);
         toast({
-          title: "Erro ao excluir exame",
+          title: "Erro ao excluir serviço",
           description: error.message,
           variant: "destructive",
         });
@@ -74,16 +74,16 @@ const DeleteExamModal = ({ open, onOpenChange, exam, onExamDeleted }: DeleteExam
 
       toast({
         title: "Sucesso",
-        description: "Exame excluído com sucesso!",
+        description: "Serviço excluído com sucesso!",
       });
 
-      onExamDeleted();
+      onServiceDeleted();
       onOpenChange(false);
     } catch (error) {
       console.error('Error in handleDelete:', error);
       toast({
         title: "Erro inesperado",
-        description: "Ocorreu um erro ao excluir o exame.",
+        description: "Ocorreu um erro ao excluir o serviço.",
         variant: "destructive",
       });
     } finally {
@@ -91,21 +91,21 @@ const DeleteExamModal = ({ open, onOpenChange, exam, onExamDeleted }: DeleteExam
     }
   };
 
-  if (!exam) return null;
+  if (!service) return null;
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="text-destructive">
-            Excluir Exame
+            Excluir Serviço
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
             <p>
-              Tem certeza que deseja excluir o exame <strong>"{exam.name}"</strong>?
+              Tem certeza que deseja excluir o serviço <strong>"{service.name}"</strong>?
             </p>
             <p className="text-sm text-muted-foreground">
-              Esta ação não pode ser desfeita. O exame será removido permanentemente do sistema.
+              Esta ação não pode ser desfeita. O serviço será removido permanentemente do sistema.
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -126,4 +126,4 @@ const DeleteExamModal = ({ open, onOpenChange, exam, onExamDeleted }: DeleteExam
   );
 };
 
-export default DeleteExamModal;
+export default DeleteServiceModal;

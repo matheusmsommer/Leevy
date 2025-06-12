@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ interface CompanyService {
   id: string;
   price: number;
   active: boolean;
-  exam: {
+  service: {
     id: string;
     name: string;
     code: string;
@@ -57,14 +58,14 @@ const ServiceManagement = () => {
         return;
       }
 
-      // Buscar serviços da empresa com informações do exame
+      // Buscar serviços da empresa com informações do serviço
       const { data, error } = await supabase
         .from('company_services')
         .select(`
           id,
           price,
           active,
-          exam:exams!inner(
+          service:services!inner(
             id,
             name,
             code,
@@ -144,7 +145,7 @@ const ServiceManagement = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Serviços</h1>
             <p className="text-muted-foreground mt-2">
-              Gerencie os exames oferecidos pelo seu laboratório
+              Gerencie os serviços oferecidos pelo seu laboratório
             </p>
           </div>
         </div>
@@ -161,7 +162,7 @@ const ServiceManagement = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Serviços</h1>
           <p className="text-muted-foreground mt-2">
-            Gerencie os exames oferecidos pelo seu laboratório
+            Gerencie os serviços oferecidos pelo seu laboratório
           </p>
         </div>
         <HoverCard>
@@ -175,7 +176,7 @@ const ServiceManagement = () => {
             <div className="space-y-2">
               <h4 className="text-sm font-semibold">Adicionar Novo Serviço</h4>
               <p className="text-sm text-muted-foreground">
-                Adiciona um exame do catálogo global aos serviços oferecidos pelo seu laboratório com preço personalizado.
+                Adiciona um serviço do catálogo global aos serviços oferecidos pelo seu laboratório com preço personalizado.
               </p>
             </div>
           </HoverCardContent>
@@ -191,7 +192,7 @@ const ServiceManagement = () => {
             <div>
               <CardTitle className="text-xl font-semibold text-foreground">Catálogo de Serviços</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Exames disponíveis para venda
+                Serviços disponíveis para venda
               </CardDescription>
             </div>
           </div>
@@ -211,7 +212,7 @@ const ServiceManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-border bg-muted/30">
-                    <TableHead className="text-muted-foreground font-semibold py-4">Nome do Exame</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-4">Nome do Serviço</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Código</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Categoria</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Preço</TableHead>
@@ -222,13 +223,13 @@ const ServiceManagement = () => {
                 <TableBody>
                   {services.map((service) => (
                     <TableRow key={service.id} className="border-border hover:bg-muted/20 transition-colors">
-                      <TableCell className="font-medium text-foreground py-4">{service.exam.name}</TableCell>
+                      <TableCell className="font-medium text-foreground py-4">{service.service.name}</TableCell>
                       <TableCell className="text-foreground font-mono text-sm bg-muted/20 rounded px-2 py-1 w-fit">
-                        {service.exam.code}
+                        {service.service.code}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
-                          {service.exam.category}
+                          {service.service.category}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-foreground font-semibold">
@@ -327,7 +328,7 @@ const ServiceManagement = () => {
                               <div className="space-y-1">
                                 <h4 className="text-sm font-semibold text-destructive">Remover Serviço</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Remove o serviço da sua lista de ofertas. Clientes não poderão mais agendar este exame.
+                                  Remove o serviço da sua lista de ofertas. Clientes não poderão mais agendar este serviço.
                                 </p>
                               </div>
                             </HoverCardContent>

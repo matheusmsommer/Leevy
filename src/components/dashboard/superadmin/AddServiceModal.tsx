@@ -9,22 +9,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ExamPreparationsManager from './ExamPreparationsManager';
+import ServicePreparationsManager from './ServicePreparationsManager';
 import CategorySelector from './CategorySelector';
 
-interface AddExamModalProps {
+interface AddServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
 
-const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
+const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-  const [createdExamId, setCreatedExamId] = useState<string | null>(null);
+  const [createdServiceId, setCreatedServiceId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -39,7 +39,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   useEffect(() => {
     if (open) {
       fetchCategories();
-      setCreatedExamId(null);
+      setCreatedServiceId(null);
       setSelectedSubcategories([]);
     }
   }, [open]);
@@ -47,7 +47,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .select('*')
         .eq('active', true)
         .order('name');
@@ -62,7 +62,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   const fetchSubcategories = async (categoryId: string) => {
     try {
       const { data, error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .select('*')
         .eq('category_id', categoryId)
         .eq('active', true)
@@ -98,24 +98,24 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
     });
   };
 
-  const createExamSubcategories = async (examId: string, subcategoryIds: string[]) => {
+  const createServiceSubcategories = async (serviceId: string, subcategoryIds: string[]) => {
     try {
       if (subcategoryIds.length > 0) {
         const associations = subcategoryIds.map(subcategoryId => ({
-          exam_id: examId,
+          service_id: serviceId,
           subcategory_id: subcategoryId
         }));
 
         const { error } = await supabase
-          .from('exam_subcategory_associations')
+          .from('service_subcategory_associations')
           .insert(associations);
 
         if (error) throw error;
       }
 
-      console.log('Exam subcategories created successfully');
+      console.log('Service subcategories created successfully');
     } catch (error: any) {
-      console.error('Error creating exam subcategories:', error);
+      console.error('Error creating service subcategories:', error);
       throw error;
     }
   };
@@ -135,7 +135,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('exams')
+        .from('services')
         .insert([formData])
         .select()
         .single();
@@ -143,14 +143,14 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
       if (error) throw error;
 
       // Criar associações de subcategorias
-      await createExamSubcategories(data.id, selectedSubcategories);
+      await createServiceSubcategories(data.id, selectedSubcategories);
 
       toast({
         title: "Sucesso",
-        description: "Exame criado com sucesso. Agora você pode adicionar preparações.",
+        description: "Serviço criado com sucesso. Agora você pode adicionar preparações.",
       });
 
-      setCreatedExamId(data.id);
+      setCreatedServiceId(data.id);
       setFormData({
         name: '',
         code: '',
@@ -163,10 +163,10 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
       });
       setSelectedSubcategories([]);
     } catch (error: any) {
-      console.error('Error creating exam:', error);
+      console.error('Error creating service:', error);
       toast({
-        title: "Erro ao criar exame",
-        description: error.message || "Não foi possível criar o exame.",
+        title: "Erro ao criar serviço",
+        description: error.message || "Não foi possível criar o serviço.",
         variant: "destructive",
       });
     } finally {
@@ -175,10 +175,10 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   };
 
   const handleClose = () => {
-    if (createdExamId) {
+    if (createdServiceId) {
       onSuccess();
     }
-    setCreatedExamId(null);
+    setCreatedServiceId(null);
     setFormData({
       name: '',
       code: '',
@@ -198,26 +198,26 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {createdExamId ? 'Configurar Preparações' : 'Adicionar Novo Exame'}
+            {createdServiceId ? 'Configurar Preparações' : 'Adicionar Novo Serviço'}
           </DialogTitle>
           <DialogDescription>
-            {createdExamId 
-              ? 'Exame criado! Agora você pode adicionar preparações específicas.' 
-              : 'Preencha as informações do novo exame'
+            {createdServiceId 
+              ? 'Serviço criado! Agora você pode adicionar preparações específicas.' 
+              : 'Preencha as informações do novo serviço'
             }
           </DialogDescription>
         </DialogHeader>
 
-        {!createdExamId ? (
+        {!createdServiceId ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Nome do Exame *</Label>
+                <Label htmlFor="name">Nome do Serviço *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Nome do exame"
+                  placeholder="Nome do serviço"
                   required
                 />
               </div>
@@ -228,7 +228,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
                   id="code"
                   value={formData.code}
                   onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
-                  placeholder="Código do exame"
+                  placeholder="Código do serviço"
                   required
                 />
               </div>
@@ -282,7 +282,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição do exame"
+                placeholder="Descrição do serviço"
                 rows={3}
               />
             </div>
@@ -315,7 +315,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Instruções de preparo para o exame"
+                placeholder="Instruções de preparo para o serviço"
                 rows={4}
               />
             </div>
@@ -325,7 +325,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? 'Criando...' : 'Criar Exame'}
+                {loading ? 'Criando...' : 'Criar Serviço'}
               </Button>
             </div>
           </form>
@@ -333,7 +333,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
           <div className="space-y-6">
             <div>
               <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
-              <ExamPreparationsManager examId={createdExamId} />
+              <ServicePreparationsManager serviceId={createdServiceId} />
             </div>
             
             <div className="flex justify-end pt-4">
@@ -348,4 +348,4 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   );
 };
 
-export default AddExamModal;
+export default AddServiceModal;

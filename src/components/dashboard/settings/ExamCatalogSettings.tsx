@@ -6,25 +6,25 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { File, Plus, Download, Edit } from 'lucide-react';
 import { Service } from '@/types/business';
 
-interface ExamCatalogSettingsProps {
+interface ServiceCatalogSettingsProps {
   companyId: string;
 }
 
-const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) => {
-  const [exams, setExams] = useState<Service[]>([]);
+const ServiceCatalogSettings: React.FC<ServiceCatalogSettingsProps> = ({ companyId }) => {
+  const [services, setServices] = useState<Service[]>([]);
 
-  const handleAddExam = () => {
-    console.log('Adicionar novo exame');
-    // TODO: Implementar modal para adicionar exame
+  const handleAddService = () => {
+    console.log('Adicionar novo serviço');
+    // TODO: Implementar modal para adicionar serviço
   };
 
-  const handleImportExams = () => {
-    console.log('Importar exames da base Leevy');
+  const handleImportServices = () => {
+    console.log('Importar serviços da base Leevy');
     // TODO: Implementar modal de importação com IA
   };
 
-  const handleEditExam = (examId: string) => {
-    console.log('Editar exame:', examId);
+  const handleEditService = (serviceId: string) => {
+    console.log('Editar serviço:', serviceId);
     // TODO: Implementar modal de edição
   };
 
@@ -33,25 +33,25 @@ const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <File className="h-5 w-5" />
-          Catálogo de Exames
+          Catálogo de Serviços
         </CardTitle>
         <CardDescription>
-          Gerencie todos os exames oferecidos pela sua empresa
+          Gerencie todos os serviços oferecidos pela sua empresa
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {exams.length === 0 ? (
+        {services.length === 0 ? (
           <div className="text-center py-8">
             <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground mb-4">
-              Nenhum exame cadastrado ainda
+              Nenhum serviço cadastrado ainda
             </p>
             <div className="flex gap-2 justify-center">
-              <Button onClick={handleAddExam}>
+              <Button onClick={handleAddService}>
                 <Plus className="h-4 w-4 mr-2" />
-                Criar Exame
+                Criar Serviço
               </Button>
-              <Button variant="outline" onClick={handleImportExams}>
+              <Button variant="outline" onClick={handleImportServices}>
                 <Download className="h-4 w-4 mr-2" />
                 Importar da Base Leevy
               </Button>
@@ -61,14 +61,14 @@ const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) 
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                {exams.length} exames cadastrados
+                {services.length} serviços cadastrados
               </p>
               <div className="flex gap-2">
-                <Button onClick={handleAddExam}>
+                <Button onClick={handleAddService}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Criar Exame
+                  Criar Serviço
                 </Button>
-                <Button variant="outline" onClick={handleImportExams}>
+                <Button variant="outline" onClick={handleImportServices}>
                   <Download className="h-4 w-4 mr-2" />
                   Importar
                 </Button>
@@ -87,12 +87,12 @@ const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {exams.map((exam) => (
-                  <TableRow key={exam.id}>
-                    <TableCell className="font-medium">{exam.name}</TableCell>
-                    <TableCell className="capitalize">{exam.type}</TableCell>
-                    <TableCell>R$ {exam.price.toFixed(2)}</TableCell>
-                    <TableCell>{exam.delivery_time}</TableCell>
+                {services.map((service) => (
+                  <TableRow key={service.id}>
+                    <TableCell className="font-medium">{service.name}</TableCell>
+                    <TableCell className="capitalize">{service.type}</TableCell>
+                    <TableCell>R$ {service.price.toFixed(2)}</TableCell>
+                    <TableCell>{service.delivery_time}</TableCell>
                     <TableCell>
                       <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         Manual
@@ -102,7 +102,7 @@ const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEditExam(exam.id)}
+                        onClick={() => handleEditService(service.id)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -118,4 +118,4 @@ const ExamCatalogSettings: React.FC<ExamCatalogSettingsProps> = ({ companyId }) 
   );
 };
 
-export default ExamCatalogSettings;
+export default ServiceCatalogSettings;

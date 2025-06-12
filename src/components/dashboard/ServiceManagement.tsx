@@ -55,7 +55,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({ companyId }) => {
           id,
           price,
           active,
-          exam:exams!inner(
+          service:services!inner(
             id,
             name,
             category
@@ -78,8 +78,8 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({ companyId }) => {
       // Transformar os dados para o formato esperado
       const transformedServices: Service[] = (data || []).map(service => ({
         id: service.id,
-        name: service.exam.name,
-        type: service.exam.category,
+        name: service.service.name,
+        type: service.service.category,
         price: Number(service.price),
         active: service.active
       }));

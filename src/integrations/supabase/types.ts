@@ -77,10 +77,10 @@ export type Database = {
           created_at: string
           custom_preparation: string | null
           delivery_days: number | null
-          exam_id: string | null
           id: string
           lab_notes: string | null
           price: number
+          service_id: string | null
           updated_at: string
         }
         Insert: {
@@ -90,10 +90,10 @@ export type Database = {
           created_at?: string
           custom_preparation?: string | null
           delivery_days?: number | null
-          exam_id?: string | null
           id?: string
           lab_notes?: string | null
           price: number
+          service_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -103,10 +103,10 @@ export type Database = {
           created_at?: string
           custom_preparation?: string | null
           delivery_days?: number | null
-          exam_id?: string | null
           id?: string
           lab_notes?: string | null
           price?: number
+          service_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -119,225 +119,9 @@ export type Database = {
           },
           {
             foreignKeyName: "company_services_exam_id_fkey"
-            columns: ["exam_id"]
+            columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "exams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exam_categories: {
-        Row: {
-          active: boolean | null
-          created_at: string
-          description: string | null
-          icon: string | null
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean | null
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean | null
-          created_at?: string
-          description?: string | null
-          icon?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      exam_preparations: {
-        Row: {
-          created_at: string
-          exam_id: string
-          id: string
-          is_primary: boolean | null
-          preparation_id: string
-        }
-        Insert: {
-          created_at?: string
-          exam_id: string
-          id?: string
-          is_primary?: boolean | null
-          preparation_id: string
-        }
-        Update: {
-          created_at?: string
-          exam_id?: string
-          id?: string
-          is_primary?: boolean | null
-          preparation_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_preparations_exam_id_fkey"
-            columns: ["exam_id"]
-            isOneToOne: false
-            referencedRelation: "exams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exam_preparations_preparation_id_fkey"
-            columns: ["preparation_id"]
-            isOneToOne: false
-            referencedRelation: "standard_preparations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exam_subcategories: {
-        Row: {
-          active: boolean | null
-          category_id: string | null
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean | null
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean | null
-          category_id?: string | null
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_subcategories_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "exam_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exam_subcategory_associations: {
-        Row: {
-          created_at: string
-          exam_id: string
-          id: string
-          subcategory_id: string
-        }
-        Insert: {
-          created_at?: string
-          exam_id: string
-          id?: string
-          subcategory_id: string
-        }
-        Update: {
-          created_at?: string
-          exam_id?: string
-          id?: string
-          subcategory_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_subcategory_associations_exam_id_fkey"
-            columns: ["exam_id"]
-            isOneToOne: false
-            referencedRelation: "exams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exam_subcategory_associations_subcategory_id_fkey"
-            columns: ["subcategory_id"]
-            isOneToOne: false
-            referencedRelation: "exam_subcategories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exams: {
-        Row: {
-          category: string
-          category_id: string | null
-          code: string
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          patient_friendly_description: string | null
-          preparation: string | null
-          preparation_id: string | null
-          related_diseases: string | null
-          subcategory_id: string | null
-          synonyms: string | null
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          category_id?: string | null
-          code: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          patient_friendly_description?: string | null
-          preparation?: string | null
-          preparation_id?: string | null
-          related_diseases?: string | null
-          subcategory_id?: string | null
-          synonyms?: string | null
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          category_id?: string | null
-          code?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          patient_friendly_description?: string | null
-          preparation?: string | null
-          preparation_id?: string | null
-          related_diseases?: string | null
-          subcategory_id?: string | null
-          synonyms?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exams_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "exam_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exams_preparation_id_fkey"
-            columns: ["preparation_id"]
-            isOneToOne: false
-            referencedRelation: "standard_preparations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exams_subcategory_id_fkey"
-            columns: ["subcategory_id"]
-            isOneToOne: false
-            referencedRelation: "exam_subcategories"
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -531,6 +315,222 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_categories: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_preparations: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          preparation_id: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          preparation_id: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          preparation_id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_preparations_exam_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_preparations_preparation_id_fkey"
+            columns: ["preparation_id"]
+            isOneToOne: false
+            referencedRelation: "standard_preparations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_subcategories: {
+        Row: {
+          active: boolean | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_subcategory_associations: {
+        Row: {
+          created_at: string
+          id: string
+          service_id: string
+          subcategory_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          service_id: string
+          subcategory_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          service_id?: string
+          subcategory_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subcategory_associations_exam_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subcategory_associations_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "service_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          category: string
+          category_id: string | null
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          patient_friendly_description: string | null
+          preparation: string | null
+          preparation_id: string | null
+          related_diseases: string | null
+          subcategory_id: string | null
+          synonyms: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          category_id?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          patient_friendly_description?: string | null
+          preparation?: string | null
+          preparation_id?: string | null
+          related_diseases?: string | null
+          subcategory_id?: string | null
+          synonyms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          category_id?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          patient_friendly_description?: string | null
+          preparation?: string | null
+          preparation_id?: string | null
+          related_diseases?: string | null
+          subcategory_id?: string | null
+          synonyms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exams_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_preparation_id_fkey"
+            columns: ["preparation_id"]
+            isOneToOne: false
+            referencedRelation: "standard_preparations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "service_subcategories"
             referencedColumns: ["id"]
           },
         ]

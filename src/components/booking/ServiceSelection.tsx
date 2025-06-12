@@ -12,7 +12,7 @@ interface Service {
   id: string;
   price: number;
   active: boolean;
-  exam: {
+  service: {
     id: string;
     name: string;
     description?: string;
@@ -51,7 +51,7 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
           id,
           price,
           active,
-          exam:exams!inner(
+          service:services!inner(
             id,
             name,
             description,
@@ -60,7 +60,7 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
           )
         `)
         .eq('active', true)
-        .order('exam.name');
+        .order('service.name');
 
       if (error) {
         console.error('Error fetching services:', error);
@@ -91,11 +91,11 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
 
   const filteredServices = services.filter(service => {
     const searchLower = searchTerm.toLowerCase();
-    const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    const synonymsList = service.service.synonyms ? service.service.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
     
-    return service.exam.name.toLowerCase().includes(searchLower) ||
-           service.exam.category.toLowerCase().includes(searchLower) ||
-           (service.exam.description && service.exam.description.toLowerCase().includes(searchLower)) ||
+    return service.service.name.toLowerCase().includes(searchLower) ||
+           service.service.category.toLowerCase().includes(searchLower) ||
+           (service.service.description && service.service.description.toLowerCase().includes(searchLower)) ||
            synonymsList.some(synonym => synonym.includes(searchLower));
   });
 
@@ -132,7 +132,7 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Buscar exames..."
+          placeholder="Buscar serviços..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -173,7 +173,7 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
             <div className="space-y-2 mb-3">
               {selectedServicesData.map((service) => (
                 <div key={service.id} className="flex justify-between text-sm">
-                  <span>{service.exam.name}</span>
+                  <span>{service.service.name}</span>
                   <span>R$ {service.price.toFixed(2)}</span>
                 </div>
               ))}
@@ -201,16 +201,16 @@ const ServiceCard = ({ service, isSelected, onToggle }: {
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-medium">{service.exam.name}</h4>
-            <Badge variant="secondary" className="text-xs">{service.exam.category}</Badge>
+            <h4 className="font-medium">{service.service.name}</h4>
+            <Badge variant="secondary" className="text-xs">{service.service.category}</Badge>
           </div>
-          {service.exam.synonyms && (
+          {service.service.synonyms && (
             <p className="text-xs text-gray-500 mb-1">
-              Também conhecido como: {service.exam.synonyms}
+              Também conhecido como: {service.service.synonyms}
             </p>
           )}
-          {service.exam.description && (
-            <p className="text-sm text-gray-600 mb-2">{service.exam.description}</p>
+          {service.service.description && (
+            <p className="text-sm text-gray-600 mb-2">{service.service.description}</p>
           )}
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="font-semibold text-blue-600">R$ {service.price.toFixed(2)}</span>

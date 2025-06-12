@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,17 +9,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ExamPreparationsManager from './ExamPreparationsManager';
+import ServicePreparationsManager from './ServicePreparationsManager';
 import CategorySelector from './CategorySelector';
 
-interface EditExamModalProps {
+interface EditServiceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  exam: any;
+  service: any;
 }
 
-const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalProps) => {
+const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServiceModalProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -37,32 +38,32 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   });
 
   useEffect(() => {
-    if (exam && open) {
+    if (service && open) {
       setIsInitializing(true);
-      console.log('Loading exam data:', exam);
+      console.log('Loading service data:', service);
       
-      const examData = {
-        name: exam.name || '',
-        code: exam.code || '',
-        category: exam.category || '',
-        category_id: exam.category_id || '',
-        description: exam.description || '',
-        synonyms: exam.synonyms || '',
-        related_diseases: exam.related_diseases || '',
-        preparation: exam.preparation || ''
+      const serviceData = {
+        name: service.name || '',
+        code: service.code || '',
+        category: service.category || '',
+        category_id: service.category_id || '',
+        description: service.description || '',
+        synonyms: service.synonyms || '',
+        related_diseases: service.related_diseases || '',
+        preparation: service.preparation || ''
       };
       
-      console.log('Setting form data:', examData);
-      setFormData(examData);
+      console.log('Setting form data:', serviceData);
+      setFormData(serviceData);
       
       // Carregar categorias e depois subcategorias
       fetchCategories().then(() => {
         console.log('Categories loaded, now checking for subcategories...');
-        if (exam.category_id && exam.category_id.trim() !== '') {
-          console.log('Fetching subcategories for category_id:', exam.category_id);
-          fetchSubcategories(exam.category_id).then(() => {
-            // Carregar subcategorias associadas ao exame
-            fetchExamSubcategories(exam.id).then(() => {
+        if (service.category_id && service.category_id.trim() !== '') {
+          console.log('Fetching subcategories for category_id:', service.category_id);
+          fetchSubcategories(service.category_id).then(() => {
+            // Carregar subcategorias associadas ao serviço
+            fetchServiceSubcategories(service.id).then(() => {
               setIsInitializing(false);
             });
           });
@@ -74,13 +75,13 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         }
       });
     }
-  }, [exam, open]);
+  }, [service, open]);
 
   const fetchCategories = async () => {
     try {
       console.log('Fetching categories...');
       const { data, error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .select('*')
         .eq('active', true)
         .order('name');
@@ -105,7 +106,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     try {
       console.log('Fetching subcategories for category:', categoryId);
       const { data, error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .select('*')
         .eq('category_id', categoryId)
         .eq('active', true)
@@ -120,21 +121,21 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }
   };
 
-  const fetchExamSubcategories = async (examId: string) => {
+  const fetchServiceSubcategories = async (serviceId: string) => {
     try {
-      console.log('Fetching exam subcategories for exam:', examId);
+      console.log('Fetching service subcategories for service:', serviceId);
       const { data, error } = await supabase
-        .from('exam_subcategory_associations')
+        .from('service_subcategory_associations')
         .select('subcategory_id')
-        .eq('exam_id', examId);
+        .eq('service_id', serviceId);
 
       if (error) throw error;
       
       const subcategoryIds = data?.map(item => item.subcategory_id) || [];
-      console.log('Current exam subcategories:', subcategoryIds);
+      console.log('Current service subcategories:', subcategoryIds);
       setSelectedSubcategories(subcategoryIds);
     } catch (error: any) {
-      console.error('Error fetching exam subcategories:', error);
+      console.error('Error fetching service subcategories:', error);
       setSelectedSubcategories([]);
     }
   };
@@ -181,31 +182,31 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     });
   };
 
-  const updateExamSubcategories = async (examId: string, subcategoryIds: string[]) => {
+  const updateServiceSubcategories = async (serviceId: string, subcategoryIds: string[]) => {
     try {
       // Remover associações existentes
       await supabase
-        .from('exam_subcategory_associations')
+        .from('service_subcategory_associations')
         .delete()
-        .eq('exam_id', examId);
+        .eq('service_id', serviceId);
 
       // Adicionar novas associações
       if (subcategoryIds.length > 0) {
         const associations = subcategoryIds.map(subcategoryId => ({
-          exam_id: examId,
+          service_id: serviceId,
           subcategory_id: subcategoryId
         }));
 
         const { error } = await supabase
-          .from('exam_subcategory_associations')
+          .from('service_subcategory_associations')
           .insert(associations);
 
         if (error) throw error;
       }
 
-      console.log('Exam subcategories updated successfully');
+      console.log('Service subcategories updated successfully');
     } catch (error: any) {
-      console.error('Error updating exam subcategories:', error);
+      console.error('Error updating service subcategories:', error);
       throw error;
     }
   };
@@ -240,11 +241,11 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
       console.log('Update data being sent:', updateData);
       console.log('Selected subcategories:', selectedSubcategories);
 
-      // Atualizar dados do exame
+      // Atualizar dados do serviço
       const { data: updatedData, error } = await supabase
-        .from('exams')
+        .from('services')
         .update(updateData)
-        .eq('id', exam.id)
+        .eq('id', service.id)
         .select()
         .single();
 
@@ -254,22 +255,22 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
       }
 
       // Atualizar associações de subcategorias
-      await updateExamSubcategories(exam.id, selectedSubcategories);
+      await updateServiceSubcategories(service.id, selectedSubcategories);
 
       console.log('Update successful, returned data:', updatedData);
 
       toast({
         title: "Sucesso",
-        description: "Exame atualizado com sucesso.",
+        description: "Serviço atualizado com sucesso.",
       });
 
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      console.error('Error updating exam:', error);
+      console.error('Error updating service:', error);
       toast({
-        title: "Erro ao atualizar exame",
-        description: error.message || "Não foi possível atualizar o exame.",
+        title: "Erro ao atualizar serviço",
+        description: error.message || "Não foi possível atualizar o serviço.",
         variant: "destructive",
       });
     } finally {
@@ -277,27 +278,27 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }
   };
 
-  if (!exam) return null;
+  if (!service) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Editar Exame</DialogTitle>
+          <DialogTitle>Editar Serviço</DialogTitle>
           <DialogDescription>
-            Modifique as informações do exame
+            Modifique as informações do serviço
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Nome do Exame *</Label>
+              <Label htmlFor="name">Nome do Serviço *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Nome do exame"
+                placeholder="Nome do serviço"
                 required
               />
             </div>
@@ -308,7 +309,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
                 id="code"
                 value={formData.code}
                 onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
-                placeholder="Código do exame"
+                placeholder="Código do serviço"
                 required
               />
             </div>
@@ -362,7 +363,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Descrição do exame"
+              placeholder="Descrição do serviço"
               rows={3}
             />
           </div>
@@ -391,7 +392,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
           <div>
             <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
-            <ExamPreparationsManager examId={exam.id} />
+            <ServicePreparationsManager serviceId={service.id} />
           </div>
 
           <div>
@@ -400,7 +401,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
               id="preparation"
               value={formData.preparation}
               onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-              placeholder="Instruções de preparo para o exame"
+              placeholder="Instruções de preparo para o serviço"
               rows={4}
             />
           </div>
@@ -419,4 +420,4 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   );
 };
 
-export default EditExamModal;
+export default EditServiceModal;

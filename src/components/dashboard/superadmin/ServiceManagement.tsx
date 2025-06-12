@@ -8,12 +8,12 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Plus, Edit, Trash2, TestTube, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import AddExamModal from './AddExamModal';
-import ViewExamModal from './ViewExamModal';
-import EditExamModal from './EditExamModal';
-import DeleteExamModal from './DeleteExamModal';
+import AddServiceModal from './AddServiceModal';
+import ViewServiceModal from './ViewServiceModal';
+import EditServiceModal from './EditServiceModal';
+import DeleteServiceModal from './DeleteServiceModal';
 
-interface ExamPreparation {
+interface ServicePreparation {
   id: string;
   is_primary: boolean;
   preparation: {
@@ -23,7 +23,7 @@ interface ExamPreparation {
   };
 }
 
-interface GlobalExam {
+interface GlobalService {
   id: string;
   name: string;
   code: string;
@@ -31,39 +31,39 @@ interface GlobalExam {
   preparation?: string;
   description?: string;
   synonyms?: string;
-  exam_preparations?: ExamPreparation[];
+  service_preparations?: ServicePreparation[];
   subcategory_names?: string[];
 }
 
-interface ExamManagementProps {
-  globalExams: GlobalExam[];
-  onAddExam: () => void;
+interface ServiceManagementProps {
+  globalServices: GlobalService[];
+  onAddService: () => void;
 }
 
-const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagementProps) => {
+const ServiceManagement = ({ globalServices: initialServices, onAddService }: ServiceManagementProps) => {
   const { toast } = useToast();
-  const [exams, setExams] = useState<GlobalExam[]>(initialExams);
+  const [services, setServices] = useState<GlobalService[]>(initialServices);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedExam, setSelectedExam] = useState<GlobalExam | null>(null);
+  const [selectedService, setSelectedService] = useState<GlobalService | null>(null);
 
   useEffect(() => {
-    fetchGlobalExams();
+    fetchGlobalServices();
   }, []);
 
-  const fetchGlobalExams = async () => {
+  const fetchGlobalServices = async () => {
     try {
-      console.log('Fetching global exams with preparations and subcategories...');
+      console.log('Fetching global services with preparations and subcategories...');
       
-      // Buscar exames com suas preparações associadas
-      const { data: examsData, error: examsError } = await supabase
-        .from('exams')
+      // Buscar serviços com suas preparações associadas
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('services')
         .select(`
           *,
-          exam_preparations (
+          service_preparations (
             id,
             is_primary,
             preparation:standard_preparations (
@@ -75,94 +75,94 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         `)
         .order('name', { ascending: true });
 
-      if (examsError) {
-        console.error('Error fetching exams:', examsError);
+      if (servicesError) {
+        console.error('Error fetching services:', servicesError);
         toast({
-          title: "Erro ao carregar exames",
-          description: "Não foi possível carregar os exames.",
+          title: "Erro ao carregar serviços",
+          description: "Não foi possível carregar os serviços.",
           variant: "destructive",
         });
         return;
       }
 
-      // Buscar subcategorias para cada exame
-      const examsWithSubcategories = await Promise.all(
-        (examsData || []).map(async (exam) => {
+      // Buscar subcategorias para cada serviço
+      const servicesWithSubcategories = await Promise.all(
+        (servicesData || []).map(async (service) => {
           const { data: subcategoryData } = await supabase
-            .from('exam_subcategory_associations')
+            .from('service_subcategory_associations')
             .select(`
-              exam_subcategories(name)
+              service_subcategories(name)
             `)
-            .eq('exam_id', exam.id);
+            .eq('service_id', service.id);
 
           const subcategory_names = subcategoryData
-            ?.map(item => (item as any).exam_subcategories?.name)
+            ?.map(item => (item as any).service_subcategories?.name)
             .filter(name => name) || [];
 
           return {
-            ...exam,
+            ...service,
             subcategory_names
           };
         })
       );
 
-      console.log('Global exams loaded with preparations and subcategories:', examsWithSubcategories);
-      setExams(examsWithSubcategories);
+      console.log('Global services loaded with preparations and subcategories:', servicesWithSubcategories);
+      setServices(servicesWithSubcategories);
     } catch (error) {
-      console.error('Error in fetchGlobalExams:', error);
+      console.error('Error in fetchGlobalServices:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getPreparationDisplay = (exam: GlobalExam) => {
-    // Verificar se há preparações no novo formato (exam_preparations)
-    if (exam.exam_preparations && exam.exam_preparations.length > 0) {
-      const primaryPreparation = exam.exam_preparations.find(ep => ep.is_primary);
+  const getPreparationDisplay = (service: GlobalService) => {
+    // Verificar se há preparações no novo formato (service_preparations)
+    if (service.service_preparations && service.service_preparations.length > 0) {
+      const primaryPreparation = service.service_preparations.find(ep => ep.is_primary);
       if (primaryPreparation) {
         return primaryPreparation.preparation.name;
       }
       // Se não há preparação primária, pegar a primeira
-      return exam.exam_preparations[0].preparation.name;
+      return service.service_preparations[0].preparation.name;
     }
     
     // Fallback para o formato antigo (preparation em texto livre)
-    if (exam.preparation && exam.preparation.trim()) {
-      return exam.preparation;
+    if (service.preparation && service.preparation.trim()) {
+      return service.preparation;
     }
     
     return 'Sem preparação especial';
   };
 
-  const handleAddExam = () => {
+  const handleAddService = () => {
     setShowAddModal(true);
   };
 
-  const handleViewExam = (exam: GlobalExam) => {
-    setSelectedExam(exam);
+  const handleViewService = (service: GlobalService) => {
+    setSelectedService(service);
     setShowViewModal(true);
   };
 
-  const handleEditExam = (exam: GlobalExam) => {
-    setSelectedExam(exam);
+  const handleEditService = (service: GlobalService) => {
+    setSelectedService(service);
     setShowEditModal(true);
   };
 
-  const handleDeleteExam = (exam: GlobalExam) => {
-    setSelectedExam(exam);
+  const handleDeleteService = (service: GlobalService) => {
+    setSelectedService(service);
     setShowDeleteModal(true);
   };
 
-  const handleExamAdded = () => {
-    fetchGlobalExams();
+  const handleServiceAdded = () => {
+    fetchGlobalServices();
   };
 
-  const handleExamUpdated = () => {
-    fetchGlobalExams();
+  const handleServiceUpdated = () => {
+    fetchGlobalServices();
   };
 
-  const handleExamDeleted = () => {
-    fetchGlobalExams();
+  const handleServiceDeleted = () => {
+    fetchGlobalServices();
   };
 
   if (loading) {
@@ -174,9 +174,9 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
               <TestTube className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl font-semibold text-foreground">Catálogo Global de Exames</CardTitle>
+              <CardTitle className="text-xl font-semibold text-foreground">Catálogo Global de Serviços</CardTitle>
               <CardDescription className="text-muted-foreground">
-                Carregando exames...
+                Carregando serviços...
               </CardDescription>
             </div>
           </div>
@@ -200,24 +200,24 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                 <TestTube className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl font-semibold text-foreground">Catálogo Global de Exames</CardTitle>
+                <CardTitle className="text-xl font-semibold text-foreground">Catálogo Global de Serviços</CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  Exames disponíveis para todas as empresas
+                  Serviços disponíveis para todas as empresas
                 </CardDescription>
               </div>
             </div>
             <HoverCard>
               <HoverCardTrigger asChild>
-                <Button onClick={handleAddExam} className="bg-primary hover:bg-primary/90">
+                <Button onClick={handleAddService} className="bg-primary hover:bg-primary/90">
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Exame
+                  Adicionar Serviço
                 </Button>
               </HoverCardTrigger>
               <HoverCardContent className="w-80">
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">Adicionar Novo Exame</h4>
+                  <h4 className="text-sm font-semibold">Adicionar Novo Serviço</h4>
                   <p className="text-sm text-muted-foreground">
-                    Cadastra um novo exame no catálogo global que ficará disponível para todas as empresas do sistema.
+                    Cadastra um novo serviço no catálogo global que ficará disponível para todas as empresas do sistema.
                   </p>
                 </div>
               </HoverCardContent>
@@ -225,13 +225,13 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
           </div>
         </CardHeader>
         <CardContent>
-          {exams.length === 0 ? (
+          {services.length === 0 ? (
             <div className="text-center py-12">
               <TestTube className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Nenhum exame cadastrado ainda</p>
-              <Button onClick={handleAddExam} className="mt-4 bg-primary hover:bg-primary/90">
+              <p className="text-muted-foreground">Nenhum serviço cadastrado ainda</p>
+              <Button onClick={handleAddService} className="mt-4 bg-primary hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-2" />
-                Adicionar Primeiro Exame
+                Adicionar Primeiro Serviço
               </Button>
             </div>
           ) : (
@@ -239,7 +239,7 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
               <Table>
                 <TableHeader>
                   <TableRow className="border-border bg-muted/30">
-                    <TableHead className="text-muted-foreground font-semibold py-4">Nome do Exame</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold py-4">Nome do Serviço</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Código</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Categoria</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Subcategorias</TableHead>
@@ -248,28 +248,28 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {exams.map((exam) => (
-                    <TableRow key={exam.id} className="border-border hover:bg-muted/20 transition-colors">
-                      <TableCell className="font-medium text-foreground py-4">{exam.name}</TableCell>
+                  {services.map((service) => (
+                    <TableRow key={service.id} className="border-border hover:bg-muted/20 transition-colors">
+                      <TableCell className="font-medium text-foreground py-4">{service.name}</TableCell>
                       <TableCell className="text-foreground font-mono text-sm bg-muted/20 rounded px-2 py-1 w-fit">
-                        {exam.code}
+                        {service.code}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
-                          {exam.category}
+                          {service.category}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {exam.subcategory_names && exam.subcategory_names.length > 0 ? (
+                        {service.subcategory_names && service.subcategory_names.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {exam.subcategory_names.slice(0, 2).map((name, index) => (
+                            {service.subcategory_names.slice(0, 2).map((name, index) => (
                               <Badge key={index} variant="outline" className="border-secondary/20 text-secondary bg-secondary/5 text-xs">
                                 {name}
                               </Badge>
                             ))}
-                            {exam.subcategory_names.length > 2 && (
+                            {service.subcategory_names.length > 2 && (
                               <Badge variant="outline" className="border-muted text-muted-foreground text-xs">
-                                +{exam.subcategory_names.length - 2}
+                                +{service.subcategory_names.length - 2}
                               </Badge>
                             )}
                           </div>
@@ -278,8 +278,8 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                         )}
                       </TableCell>
                       <TableCell className="text-foreground max-w-xs">
-                        <div className="truncate" title={getPreparationDisplay(exam)}>
-                          {getPreparationDisplay(exam)}
+                        <div className="truncate" title={getPreparationDisplay(service)}>
+                          {getPreparationDisplay(service)}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -290,16 +290,16 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                                 size="sm" 
                                 variant="outline" 
                                 className="border-border hover:bg-accent"
-                                onClick={() => handleViewExam(exam)}
+                                onClick={() => handleViewService(service)}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64">
                               <div className="space-y-1">
-                                <h4 className="text-sm font-semibold">Visualizar Exame</h4>
+                                <h4 className="text-sm font-semibold">Visualizar Serviço</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Ver todas as informações detalhadas do exame.
+                                  Ver todas as informações detalhadas do serviço.
                                 </p>
                               </div>
                             </HoverCardContent>
@@ -311,16 +311,16 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                                 size="sm" 
                                 variant="outline" 
                                 className="border-border hover:bg-accent"
-                                onClick={() => handleEditExam(exam)}
+                                onClick={() => handleEditService(service)}
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64">
                               <div className="space-y-1">
-                                <h4 className="text-sm font-semibold">Editar Exame</h4>
+                                <h4 className="text-sm font-semibold">Editar Serviço</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Modificar as informações do exame como nome, código, categoria e descrição.
+                                  Modificar as informações do serviço como nome, código, categoria e descrição.
                                 </p>
                               </div>
                             </HoverCardContent>
@@ -332,16 +332,16 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                                 size="sm" 
                                 variant="outline" 
                                 className="border-destructive/20 text-destructive hover:bg-destructive/10"
-                                onClick={() => handleDeleteExam(exam)}
+                                onClick={() => handleDeleteService(service)}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </HoverCardTrigger>
                             <HoverCardContent className="w-64">
                               <div className="space-y-1">
-                                <h4 className="text-sm font-semibold text-destructive">Excluir Exame</h4>
+                                <h4 className="text-sm font-semibold text-destructive">Excluir Serviço</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Remove permanentemente o exame do sistema. Só é possível se não estiver sendo usado por empresas.
+                                  Remove permanentemente o serviço do sistema. Só é possível se não estiver sendo usado por empresas.
                                 </p>
                               </div>
                             </HoverCardContent>
@@ -357,33 +357,33 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         </CardContent>
       </Card>
 
-      <AddExamModal
+      <AddServiceModal
         open={showAddModal}
         onOpenChange={setShowAddModal}
-        onSuccess={handleExamAdded}
+        onSuccess={handleServiceAdded}
       />
 
-      <ViewExamModal
+      <ViewServiceModal
         open={showViewModal}
         onOpenChange={setShowViewModal}
-        exam={selectedExam}
+        service={selectedService}
       />
 
-      <EditExamModal
+      <EditServiceModal
         open={showEditModal}
         onOpenChange={setShowEditModal}
-        exam={selectedExam}
-        onSuccess={handleExamUpdated}
+        service={selectedService}
+        onSuccess={handleServiceUpdated}
       />
 
-      <DeleteExamModal
+      <DeleteServiceModal
         open={showDeleteModal}
         onOpenChange={setShowDeleteModal}
-        exam={selectedExam}
-        onExamDeleted={handleExamDeleted}
+        service={selectedService}
+        onServiceDeleted={handleServiceDeleted}
       />
     </>
   );
 };
 
-export default ExamManagement;
+export default ServiceManagement;
