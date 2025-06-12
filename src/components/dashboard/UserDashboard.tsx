@@ -14,7 +14,9 @@ import {
   Plus,
   ArrowRight,
   User,
-  Activity
+  Activity,
+  Building2,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,42 +25,58 @@ const UserDashboard = () => {
   const navigate = useNavigate();
 
   // Mock data - seria substituído por dados reais
-  const recentBookings = [
+  const recentOrders = [
     {
       id: '1',
       service: 'Hemograma Completo',
       patient: 'João Silva',
-      location: 'Laboratório Central - Centro',
+      company: 'Laboratório Central',
+      location: 'São Paulo - Centro',
       date: '2024-01-20',
       time: '09:00',
-      status: 'confirmado'
+      status: 'agendado',
+      amount: 45.00
     },
     {
       id: '2',
       service: 'Consulta Cardiologia',
       patient: 'Maria Silva',
-      location: 'Clínica CardioVida - Itaim',
+      company: 'Clínica CardioVida',
+      location: 'São Paulo - Itaim',
       date: '2024-01-25',
       time: '14:30',
-      status: 'resultado_disponivel'
+      status: 'concluido',
+      amount: 180.00
+    },
+    {
+      id: '3',
+      service: 'Check-up Executivo',
+      patient: 'João Silva', 
+      company: 'Centro Médico Premium',
+      location: 'São Paulo - Faria Lima',
+      date: '2024-02-01',
+      time: '08:00',
+      status: 'em_andamento',
+      amount: 350.00
     }
   ];
 
   const quickStats = {
-    pendingPayments: 1,
-    confirmedBookings: 3,
-    availableResults: 2
+    totalOrders: 12,
+    pendingOrders: 2,
+    completedOrders: 8,
+    availableResults: 3
   };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pendente_pagamento: { label: 'Pendente Pagamento', variant: 'secondary' as const, icon: Clock },
-      confirmado: { label: 'Confirmado', variant: 'default' as const, icon: CheckCircle },
-      realizado: { label: 'Realizado', variant: 'outline' as const, icon: CheckCircle },
-      resultado_disponivel: { label: 'Resultado Disponível', variant: 'destructive' as const, icon: Download }
+      agendado: { label: 'Agendado', variant: 'default' as const, icon: Clock },
+      em_andamento: { label: 'Em Andamento', variant: 'secondary' as const, icon: Activity },
+      concluido: { label: 'Concluído', variant: 'outline' as const, icon: CheckCircle },
+      cancelado: { label: 'Cancelado', variant: 'destructive' as const, icon: AlertCircle }
     };
     
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.confirmado;
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.agendado;
     const IconComponent = config.icon;
     
     return (
@@ -76,12 +94,18 @@ const UserDashboard = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Olá, {user?.name}!</h1>
             <p className="text-sm text-muted-foreground">
-              Bem-vindo de volta à sua área pessoal
+              Bem-vindo à sua área pessoal
             </p>
           </div>
-          <Button variant="outline" onClick={logout}>
-            Sair
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/settings')}>
+              <Settings className="h-4 w-4 mr-2" />
+              Configurações
+            </Button>
+            <Button variant="outline" onClick={logout}>
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -102,67 +126,80 @@ const UserDashboard = () => {
                 className="flex items-center gap-2"
               >
                 <Plus className="h-5 w-5" />
-                Fazer Novo Agendamento
+                Fazer Novo Pedido
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-card-foreground">Pagamentos Pendentes</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-500" />
+              <CardTitle className="text-sm font-medium text-card-foreground">Total de Pedidos</CardTitle>
+              <FileText className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-card-foreground">{quickStats.pendingPayments}</div>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.totalOrders}</div>
               <p className="text-xs text-muted-foreground">
-                Finalize para confirmar
+                Histórico completo
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-card-foreground">Agendamentos Confirmados</CardTitle>
+              <CardTitle className="text-sm font-medium text-card-foreground">Pendentes</CardTitle>
+              <Clock className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.pendingOrders}</div>
+              <p className="text-xs text-muted-foreground">
+                Aguardando atendimento
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-card-foreground">Concluídos</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-card-foreground">{quickStats.confirmedBookings}</div>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.completedOrders}</div>
               <p className="text-xs text-muted-foreground">
-                Próximos exames
+                Exames realizados
               </p>
             </CardContent>
           </Card>
 
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-card-foreground">Resultados Disponíveis</CardTitle>
-              <Download className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-card-foreground">Resultados</CardTitle>
+              <Download className="h-4 w-4 text-purple-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-card-foreground">{quickStats.availableResults}</div>
               <p className="text-xs text-muted-foreground">
-                Prontos para download
+                Disponíveis para download
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Bookings */}
+        {/* Recent Orders */}
         <Card className="mb-8 bg-card border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-card-foreground">Próximos Agendamentos</CardTitle>
+                <CardTitle className="text-card-foreground">Últimos Pedidos</CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  Seus agendamentos mais recentes
+                  Seus pedidos mais recentes
                 </CardDescription>
               </div>
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/bookings')}
+                onClick={() => navigate('/orders')}
                 className="flex items-center gap-2"
               >
                 Ver Todos
@@ -171,12 +208,12 @@ const UserDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {recentBookings.length === 0 ? (
+            {recentOrders.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Nenhum agendamento encontrado</p>
+                <p className="text-muted-foreground">Nenhum pedido encontrado</p>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Faça seu primeiro agendamento
+                  Faça seu primeiro pedido
                 </p>
                 <Button onClick={() => navigate('/search')}>
                   Buscar Serviços
@@ -184,33 +221,37 @@ const UserDashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {recentBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
+                {recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Activity className="h-4 w-4 text-primary" />
-                        <h4 className="font-medium text-foreground">{booking.service}</h4>
-                        {getStatusBadge(booking.status)}
+                        <h4 className="font-medium text-foreground">{order.service}</h4>
+                        {getStatusBadge(order.status)}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                        <Building2 className="h-3 w-3" />
+                        <span>{order.company}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                         <User className="h-3 w-3" />
-                        Paciente: {booking.patient}
-                      </p>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {booking.location}
-                      </p>
+                        <span>Paciente: {order.patient}</span>
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span>
-                          {new Date(booking.date).toLocaleDateString('pt-BR')} às {booking.time}
+                          {new Date(order.date).toLocaleDateString('pt-BR')} às {order.time} - {order.location}
                         </span>
+                      </div>
+                      <div className="text-sm font-medium text-foreground mt-1">
+                        R$ {order.amount.toFixed(2)}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      {booking.status === 'resultado_disponivel' && (
+                      {order.status === 'concluido' && (
                         <Button size="sm" variant="outline">
                           <Download className="h-4 w-4 mr-2" />
-                          Baixar
+                          Resultado
                         </Button>
                       )}
                       <Button size="sm" variant="outline">
@@ -225,14 +266,14 @@ const UserDashboard = () => {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
                 <FileText className="h-8 w-8 text-blue-500 mb-2" />
                 <h3 className="font-medium mb-1 text-card-foreground">Meus Pedidos</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Histórico completo
+                  Histórico completo de exames
                 </p>
                 <Button variant="outline" onClick={() => navigate('/orders')}>
                   Acessar
@@ -244,43 +285,28 @@ const UserDashboard = () => {
           <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
-                <Calendar className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="font-medium mb-1 text-card-foreground">Agendamentos</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Próximos exames
-                </p>
-                <Button variant="outline" onClick={() => navigate('/bookings')}>
-                  Ver Agenda
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <Download className="h-8 w-8 text-purple-500 mb-2" />
-                <h3 className="font-medium mb-1 text-card-foreground">Resultados</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Laudos disponíveis
-                </p>
-                <Button variant="outline" onClick={() => navigate('/results')}>
-                  Ver Resultados
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <User className="h-8 w-8 text-orange-500 mb-2" />
-                <h3 className="font-medium mb-1 text-card-foreground">Pacientes</h3>
+                <User className="h-8 w-8 text-green-500 mb-2" />
+                <h3 className="font-medium mb-1 text-card-foreground">Meus Pacientes</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Gerir dependentes
                 </p>
                 <Button variant="outline" onClick={() => navigate('/patients')}>
                   Gerenciar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center text-center">
+                <Settings className="h-8 w-8 text-purple-500 mb-2" />
+                <h3 className="font-medium mb-1 text-card-foreground">Configurações</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Dados pessoais e conta
+                </p>
+                <Button variant="outline" onClick={() => navigate('/settings')}>
+                  Configurar
                 </Button>
               </div>
             </CardContent>

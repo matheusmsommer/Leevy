@@ -18,7 +18,9 @@ import {
   User,
   Clock,
   Building2,
-  Activity
+  Activity,
+  ArrowLeft,
+  Eye
 } from 'lucide-react';
 
 const OrderHistory = () => {
@@ -26,7 +28,7 @@ const OrderHistory = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
 
   // Mock data - seria substituído por dados reais
   const orders = [
@@ -36,10 +38,9 @@ const OrderHistory = () => {
       patient_name: 'João Silva',
       company_name: 'Laboratório Central',
       location_name: 'São Paulo - Centro',
-      type: 'laboratorial',
       scheduled_date: '2024-01-20',
       scheduled_time: '09:00',
-      status: 'confirmado',
+      status: 'agendado',
       payment_status: 'aprovado',
       amount: 45.00,
       created_at: '2024-01-15',
@@ -51,10 +52,9 @@ const OrderHistory = () => {
       patient_name: 'Maria Silva',
       company_name: 'Clínica CardioVida',
       location_name: 'São Paulo - Itaim',
-      type: 'consulta',
       scheduled_date: '2024-01-25',
       scheduled_time: '14:30',
-      status: 'realizado',
+      status: 'concluido',
       payment_status: 'aprovado',
       amount: 180.00,
       created_at: '2024-01-18',
@@ -66,13 +66,26 @@ const OrderHistory = () => {
       patient_name: 'João Silva',
       company_name: 'Centro Médico Premium',
       location_name: 'São Paulo - Faria Lima',
-      type: 'checkup',
       scheduled_date: '2024-02-01',
       scheduled_time: '08:00',
-      status: 'pendente_pagamento',
-      payment_status: 'pendente',
+      status: 'em_andamento',
+      payment_status: 'aprovado',
       amount: 350.00,
       created_at: '2024-01-20',
+      has_result: false
+    },
+    {
+      id: '4',
+      service_name: 'Ressonância Magnética',
+      patient_name: 'João Silva',
+      company_name: 'Instituto de Imagem',
+      location_name: 'São Paulo - Vila Olímpia',
+      scheduled_date: '2023-12-15',
+      scheduled_time: '16:00',
+      status: 'cancelado',
+      payment_status: 'estornado',
+      amount: 280.00,
+      created_at: '2023-12-10',
       has_result: false
     }
   ];
@@ -91,24 +104,13 @@ const OrderHistory = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pendente_pagamento: { label: 'Pendente Pagamento', variant: 'secondary' as const },
-      confirmado: { label: 'Confirmado', variant: 'default' as const },
-      realizado: { label: 'Realizado', variant: 'outline' as const },
+      agendado: { label: 'Agendado', variant: 'default' as const },
+      em_andamento: { label: 'Em Andamento', variant: 'secondary' as const },
+      concluido: { label: 'Concluído', variant: 'outline' as const },
       cancelado: { label: 'Cancelado', variant: 'destructive' as const }
     };
     
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.confirmado;
-  };
-
-  const getTypeIcon = (type: string) => {
-    const typeConfig = {
-      laboratorial: { icon: Activity, color: 'text-blue-600' },
-      imagem: { icon: FileText, color: 'text-purple-600' },
-      consulta: { icon: User, color: 'text-green-600' },
-      checkup: { icon: Building2, color: 'text-orange-600' }
-    };
-    
-    return typeConfig[type as keyof typeof typeConfig] || typeConfig.laboratorial;
+    return statusConfig[status as keyof typeof statusConfig] || statusConfig.agendado;
   };
 
   const filteredOrders = orders.filter(order => {
@@ -116,10 +118,33 @@ const OrderHistory = () => {
                          order.patient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          order.company_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    const matchesType = typeFilter === 'all' || order.type === typeFilter;
     
-    return matchesSearch && matchesStatus && matchesType;
+    let matchesDate = true;
+    if (dateFilter !== 'all') {
+      const orderDate = new Date(order.created_at);
+      const now = new Date();
+      const daysDiff = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      switch (dateFilter) {
+        case 'last7days':
+          matchesDate = daysDiff <= 7;
+          break;
+        case 'last30days':
+          matchesDate = daysDiff <= 30;
+          break;
+        case 'last90days':
+          matchesDate = daysDiff <= 90;
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
+
+  const handleViewDetails = (orderId: string) => {
+    // Implementar visualização de detalhes
+    console.log('Ver detalhes do pedido:', orderId);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,13 +157,56 @@ const OrderHistory = () => {
             </p>
           </div>
           <Button onClick={() => navigate('/dashboard')} variant="outline">
-            Voltar ao Dashboard
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
           </Button>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filters */}
+        {/* Estatísticas rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-card-foreground">{orders.length}</div>
+                <p className="text-sm text-muted-foreground">Total de Pedidos</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {orders.filter(o => o.status === 'concluido').length}
+                </div>
+                <p className="text-sm text-muted-foreground">Concluídos</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {orders.filter(o => o.status === 'agendado' || o.status === 'em_andamento').length}
+                </div>
+                <p className="text-sm text-muted-foreground">Em Andamento</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  R$ {orders.reduce((sum, order) => sum + order.amount, 0).toFixed(2)}
+                </div>
+                <p className="text-sm text-muted-foreground">Total Gasto</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filtros */}
         <Card className="mb-6 bg-card border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-card-foreground">
@@ -164,36 +232,35 @@ const OrderHistory = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
                   <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
-                  <SelectItem value="confirmado">Confirmado</SelectItem>
-                  <SelectItem value="realizado">Realizado</SelectItem>
+                  <SelectItem value="agendado">Agendado</SelectItem>
+                  <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                  <SelectItem value="concluido">Concluído</SelectItem>
                   <SelectItem value="cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <Select value={dateFilter} onValueChange={setDateFilter}>
                 <SelectTrigger className="bg-background border-input text-foreground">
-                  <SelectValue placeholder="Tipo" />
+                  <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  <SelectItem value="all">Todos os Tipos</SelectItem>
-                  <SelectItem value="laboratorial">Laboratorial</SelectItem>
-                  <SelectItem value="imagem">Imagem</SelectItem>
-                  <SelectItem value="consulta">Consulta</SelectItem>
-                  <SelectItem value="checkup">Check-up</SelectItem>
+                  <SelectItem value="all">Todos os Períodos</SelectItem>
+                  <SelectItem value="last7days">Últimos 7 dias</SelectItem>
+                  <SelectItem value="last30days">Últimos 30 dias</SelectItem>
+                  <SelectItem value="last90days">Últimos 90 dias</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Orders List */}
+        {/* Lista de Pedidos */}
         {filteredOrders.length === 0 ? (
           <Card className="bg-card border-border">
             <CardContent className="py-8 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
-                {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
+                {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' 
                   ? 'Nenhum pedido encontrado com os filtros aplicados'
                   : 'Nenhum pedido encontrado'
                 }
@@ -210,8 +277,6 @@ const OrderHistory = () => {
           <div className="space-y-4">
             {filteredOrders.map((order) => {
               const statusBadge = getStatusBadge(order.status);
-              const typeConfig = getTypeIcon(order.type);
-              const TypeIcon = typeConfig.icon;
               
               return (
                 <Card key={order.id} className="bg-card border-border">
@@ -221,12 +286,13 @@ const OrderHistory = () => {
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <TypeIcon className={`h-5 w-5 ${typeConfig.color}`} />
+                              <Activity className="h-5 w-5 text-primary" />
                               <h3 className="font-semibold text-lg text-card-foreground">{order.service_name}</h3>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {order.company_name}
-                            </p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Building2 className="h-4 w-4" />
+                              <span>{order.company_name}</span>
+                            </div>
                           </div>
                           <Badge variant={statusBadge.variant}>
                             {statusBadge.label}
@@ -274,19 +340,14 @@ const OrderHistory = () => {
                             Baixar Resultado
                           </Button>
                         )}
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewDetails(order.id)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
                           Ver Detalhes
                         </Button>
-                        {order.status === 'confirmado' && (
-                          <Button variant="outline" size="sm">
-                            Reagendar
-                          </Button>
-                        )}
-                        {order.status === 'pendente_pagamento' && (
-                          <Button size="sm">
-                            Finalizar Pagamento
-                          </Button>
-                        )}
                       </div>
                     </div>
                   </CardContent>
