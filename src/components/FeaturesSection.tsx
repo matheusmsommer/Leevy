@@ -54,13 +54,13 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-gradient-subtle">
+    <section className="py-24 bg-gray-50">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Recursos <span className="text-gradient">completos</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
+            Recursos <span className="text-blue-600">completos</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Tudo que seu laboratório precisa para vender online de forma profissional e segura
           </p>
         </div>
@@ -69,10 +69,10 @@ const FeaturesSection = () => {
           {features.map((feature, index) => (
             <Card 
               key={index} 
-              className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+              className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white border-gray-200 ${
                 feature.highlight 
-                  ? 'border-leevy-200 bg-gradient-to-br from-leevy-50 to-background' 
-                  : 'border-border hover:border-leevy-200'
+                  ? 'border-blue-200 bg-gradient-to-br from-blue-50 to-white' 
+                  : 'hover:border-blue-200'
               }`}
             >
               <CardHeader className="pb-3">
@@ -81,15 +81,15 @@ const FeaturesSection = () => {
                     {feature.icon}
                   </div>
                   {feature.highlight && (
-                    <div className="w-2 h-2 bg-leevy-500 rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                   )}
                 </div>
-                <CardTitle className="text-lg leading-tight">
+                <CardTitle className="text-lg leading-tight text-gray-900">
                   {feature.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-sm leading-relaxed">
+                <CardDescription className="text-sm leading-relaxed text-gray-600">
                   {feature.description}
                 </CardDescription>
               </CardContent>
@@ -98,14 +98,14 @@ const FeaturesSection = () => {
         </div>
 
         <div className="text-center mt-16">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 bg-leevy-50 border border-leevy-200 rounded-2xl px-8 py-6">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-4 bg-blue-50 border border-blue-200 rounded-2xl px-8 py-6">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🚀</span>
-              <span className="text-leevy-700 font-semibold">
+              <span className="text-blue-700 font-semibold">
                 Novos recursos em desenvolvimento
               </span>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-600">
               WhatsApp, IA, Telemedicina e muito mais
             </div>
           </div>

@@ -3,97 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
 @layer base {
-  :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
-
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-
-    --primary: 77 77 255;
-    --primary-foreground: 255 255 255;
-
-    --secondary: 248 250 252;
-    --secondary-foreground: 51 65 85;
-
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
-
-    --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
-
-    --destructive: 239 68 68;
-    --destructive-foreground: 255 255 255;
-
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 77 77 255;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42;
-    --sidebar-primary: 77 77 255;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 248 250 252;
-    --sidebar-accent-foreground: 15 23 42;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 77 77 255;
-  }
-
-  .dark {
-    --background: 15 23 42;
-    --foreground: 241 245 249;
-
-    --card: 30 41 59;
-    --card-foreground: 241 245 249;
-
-    --popover: 30 41 59;
-    --popover-foreground: 241 245 249;
-
-    --primary: 77 77 255;
-    --primary-foreground: 255 255 255;
-
-    --secondary: 51 65 85;
-    --secondary-foreground: 203 213 225;
-
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
-
-    --accent: 51 65 85;
-    --accent-foreground: 241 245 249;
-
-    --destructive: 220 38 38;
-    --destructive-foreground: 241 245 249;
-
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 77 77 255;
-
-    --sidebar-background: 15 23 42;
-    --sidebar-foreground: 241 245 249;
-    --sidebar-primary: 77 77 255;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 30 41 59;
-    --sidebar-accent-foreground: 241 245 249;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 77 77 255;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.6;
@@ -101,7 +13,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold text-foreground;
+    @apply font-bold text-gray-900;
     line-height: 1.2;
     letter-spacing: -0.02em;
   }
@@ -119,30 +31,12 @@
   }
 
   p {
-    @apply text-base text-foreground;
+    @apply text-base text-gray-700;
     line-height: 1.7;
   }
 
   .text-sm {
     line-height: 1.5;
-  }
-}
-
-@layer utilities {
-  .shadow-elevated {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
-  }
-
-  .shadow-soft {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px 0 rgb(0 0 0 / 0.06);
-  }
-
-  .focus-visible-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
-  }
-
-  .hover-lift {
-    @apply transition-all duration-200 hover:scale-105;
   }
 }
 
@@ -152,16 +46,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground));
+  background: #64748b;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+  background: #4d4dff;
 }
 
 /* Animation keyframes */
