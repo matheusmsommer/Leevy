@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -346,13 +347,6 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             <Separator />
 
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
-              <p className="text-sm text-muted-foreground mb-4">
-                Após criar o serviço, você poderá configurar preparações padronizadas específicas.
-              </p>
-            </div>
-
-            <div>
               <Label htmlFor="preparation">Observação</Label>
               <Textarea
                 id="preparation"
@@ -375,7 +369,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
         ) : (
           <div className="space-y-6">
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
               <ServicePreparationsManager serviceId={createdServiceId!} />
             </div>
             
