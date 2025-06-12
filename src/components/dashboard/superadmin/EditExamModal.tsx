@@ -38,6 +38,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
   useEffect(() => {
     if (exam && open) {
+      console.log('Loading exam data:', exam);
       setFormData({
         name: exam.name || '',
         code: exam.code || '',
@@ -50,7 +51,10 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         related_diseases: exam.related_diseases || '',
         preparation: exam.preparation || ''
       });
+      
       fetchCategories();
+      
+      // Se o exame tem category_id, buscar as subcategorias
       if (exam.category_id) {
         fetchSubcategories(exam.category_id);
       }
@@ -66,6 +70,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         .order('name');
 
       if (error) throw error;
+      console.log('Categories loaded:', data);
       setCategories(data || []);
     } catch (error: any) {
       console.error('Error fetching categories:', error);
@@ -73,7 +78,15 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   };
 
   const fetchSubcategories = async (categoryId: string) => {
+    // Verificar se categoryId é válido antes de fazer a query
+    if (!categoryId || categoryId.trim() === '') {
+      console.log('Category ID is empty, clearing subcategories');
+      setSubcategories([]);
+      return;
+    }
+
     try {
+      console.log('Fetching subcategories for category:', categoryId);
       const { data, error } = await supabase
         .from('exam_subcategories')
         .select('*')
@@ -82,22 +95,31 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         .order('name');
 
       if (error) throw error;
+      console.log('Subcategories loaded:', data);
       setSubcategories(data || []);
     } catch (error: any) {
       console.error('Error fetching subcategories:', error);
+      setSubcategories([]);
     }
   };
 
   const handleCategoryChange = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
+    console.log('Category changed to:', categoryId, category);
+    
     setFormData(prev => ({
       ...prev,
       category_id: categoryId,
       category: category?.name || '',
-      subcategory_id: ''
+      subcategory_id: '' // Limpar subcategoria quando categoria muda
     }));
-    fetchSubcategories(categoryId);
-    setSubcategories([]);
+    
+    // Buscar subcategorias para a nova categoria
+    if (categoryId) {
+      fetchSubcategories(categoryId);
+    } else {
+      setSubcategories([]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
