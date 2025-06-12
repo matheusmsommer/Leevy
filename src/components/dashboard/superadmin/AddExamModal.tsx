@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -310,7 +309,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
             <Separator />
 
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
               <div className="text-sm text-muted-foreground mb-3">
                 Após criar o exame, você poderá adicionar preparações específicas usando o gerenciador abaixo.
               </div>
@@ -339,7 +338,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
         ) : (
           <div className="space-y-6">
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
               <ExamPreparationsManager examId={createdExamId} />
             </div>
             
