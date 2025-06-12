@@ -29,17 +29,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header com botão de login */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-soft">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border shadow-soft">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-gradient">leevy</div>
-          <Button asChild className="shadow-soft hover:shadow-elevated transition-all duration-200">
+          <div className="text-2xl font-bold text-primary">leevy</div>
+          <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-soft">
             <a href="/login" className="font-semibold">Entrar</a>
           </Button>
         </div>
       </header>
 
-      {/* Adicionar padding-top para compensar o header fixo */}
       <div className="pt-20">
         <HeroSection />
         <BenefitsSection />

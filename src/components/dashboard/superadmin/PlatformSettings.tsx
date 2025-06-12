@@ -8,7 +8,7 @@ import { Settings, DollarSign, CreditCard, MessageSquare, UserPlus } from 'lucid
 
 const PlatformSettings = () => {
   return (
-    <Card className="border-border shadow-sm">
+    <Card className="border-border shadow-sm bg-card">
       <CardHeader className="pb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg">
@@ -24,7 +24,7 @@ const PlatformSettings = () => {
       </CardHeader>
       <CardContent className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-primary" />
@@ -57,13 +57,13 @@ const PlatformSettings = () => {
                   className="border-border focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                 Salvar Comissões
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-primary" />
@@ -78,7 +78,7 @@ const PlatformSettings = () => {
                   Ativado
                 </Button>
               </div>
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+              <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border">
                 <span className="text-foreground font-medium">Validação manual de CNPJ</span>
                 <Button variant="outline" size="sm" className="border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20">
                   Desativado
@@ -90,7 +90,7 @@ const PlatformSettings = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
@@ -107,7 +107,7 @@ const PlatformSettings = () => {
                   id="payment-provider"
                   defaultValue="Stripe" 
                   readOnly 
-                  className="border-border bg-muted/50"
+                  className="border-border bg-muted"
                 />
               </div>
               <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
@@ -122,7 +122,7 @@ const PlatformSettings = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-primary" />
@@ -142,7 +142,7 @@ const PlatformSettings = () => {
                   placeholder="Mensagem para exibir no topo do sistema..."
                 />
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                 Atualizar Mensagem
               </Button>
             </CardContent>

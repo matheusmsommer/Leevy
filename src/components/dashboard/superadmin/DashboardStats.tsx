@@ -23,7 +23,7 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+        <Card className="border-border hover:shadow-md transition-shadow bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total de Empresas
@@ -40,7 +40,7 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
           </CardContent>
         </Card>
 
-        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+        <Card className="border-border hover:shadow-md transition-shadow bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total de Pedidos
@@ -57,7 +57,7 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
           </CardContent>
         </Card>
 
-        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+        <Card className="border-border hover:shadow-md transition-shadow bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Receita Total
@@ -76,7 +76,7 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
           </CardContent>
         </Card>
 
-        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+        <Card className="border-border hover:shadow-md transition-shadow bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Comissões Pendentes
@@ -96,7 +96,7 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
         </Card>
       </div>
 
-      <Card className="border-border shadow-sm">
+      <Card className="border-border shadow-sm bg-card">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
             <Award className="h-5 w-5 text-primary" />
@@ -109,13 +109,11 @@ const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) =>
         <CardContent>
           <div className="space-y-3">
             {topCompanies.map((company, index) => (
-              <div key={company.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border border-border hover:bg-muted/50 transition-colors">
+              <div key={company.id} className="flex items-center justify-between p-4 bg-accent rounded-lg border border-border hover:bg-accent/80 transition-colors">
                 <div className="flex items-center space-x-4">
                   <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${
                     index === 0 ? 'bg-primary text-primary-foreground' :
-                    index === 1 ? 'bg-muted text-foreground' :
-                    index === 2 ? 'bg-muted text-foreground' :
-                    'bg-muted/50 text-muted-foreground'
+                    'bg-muted text-foreground'
                   }`}>
                     #{index + 1}
                   </div>

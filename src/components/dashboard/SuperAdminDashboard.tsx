@@ -131,7 +131,7 @@ const SuperAdminDashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen flex w-full bg-background">
         <SuperAdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1 overflow-auto">
           <div className="container max-w-7xl mx-auto p-6 space-y-8">

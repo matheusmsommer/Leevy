@@ -73,16 +73,14 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
   ];
 
   return (
-    <Sidebar className="border-r border-border/50 bg-gradient-to-b from-card to-card/80">
-      <SidebarHeader className="p-6 border-b border-border/50">
+    <Sidebar className="border-r border-border bg-card">
+      <SidebarHeader className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Leevy
-            </h2>
+            <h2 className="text-xl font-bold text-primary">Leevy</h2>
             <p className="text-sm text-primary font-medium">Super Admin</p>
           </div>
         </div>
@@ -100,10 +98,10 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
                   <SidebarMenuButton 
                     isActive={activeTab === item.id}
                     onClick={() => onTabChange(item.id)}
-                    className={`w-full justify-start h-11 rounded-xl transition-all duration-200 ${
+                    className={`w-full justify-start h-11 rounded-lg transition-all duration-200 ${
                       activeTab === item.id 
-                        ? 'bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg' 
-                        : 'hover:bg-muted/50 text-foreground hover:shadow-md'
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'hover:bg-accent text-foreground'
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
@@ -116,11 +114,11 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border/50">
+      <SidebarFooter className="p-4 border-t border-border">
         <Button 
           variant="outline" 
           onClick={signOut} 
-          className="w-full justify-start h-11 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all duration-200"
+          className="w-full justify-start h-11 border-border hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
         >
           <LogOut className="w-5 h-5 mr-3" />
           <span className="font-medium">Sair</span>
