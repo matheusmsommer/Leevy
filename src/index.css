@@ -129,18 +129,6 @@
 }
 
 @layer utilities {
-  .text-primary-brand {
-    color: #4d4dff;
-  }
-  
-  .bg-primary-brand {
-    background-color: #4d4dff;
-  }
-  
-  .border-primary-brand {
-    border-color: #4d4dff;
-  }
-
   .shadow-elevated {
     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
   }
