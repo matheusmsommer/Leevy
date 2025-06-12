@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-background overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center bg-white overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-50 rounded-full blur-3xl" />
       </div>
 
       <div className="container relative z-10 px-4 mx-auto text-center">
@@ -16,12 +16,12 @@ const HeroSection = () => {
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
               <span className="text-primary">leevy</span>
             </h1>
-            <p className="text-xl md:text-2xl lg:text-3xl text-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
               A plataforma que conecta <span className="text-primary font-semibold">laboratórios</span> e <span className="text-primary font-semibold">pacientes</span> de forma 100% digital
             </p>
           </div>
 
-          <p className="text-lg md:text-xl text-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             Do agendamento ao pagamento, modernize a venda de exames laboratoriais e ofereça uma experiência completa aos seus pacientes.
           </p>
 
@@ -45,15 +45,15 @@ const HeroSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-16 max-w-3xl mx-auto">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary">100%</div>
-              <div className="text-foreground">Digital</div>
+              <div className="text-gray-600">Digital</div>
             </div>
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-primary">0%</div>
-              <div className="text-foreground">Dependência de Convênios</div>
+              <div className="text-gray-600">Dependência de Convênios</div>
             </div>
             <div className="text-3xl md:text-4xl font-bold text-primary text-center">
               <div>24/7</div>
-              <div className="text-foreground text-base font-normal">Disponibilidade</div>
+              <div className="text-gray-600 text-base font-normal">Disponibilidade</div>
             </div>
           </div>
         </div>
