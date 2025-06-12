@@ -33,8 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        mapSupabaseUserToUser(session.user);
-        fetchUserProfile(session.user.id);
+        handleUserSession(session.user);
       }
       setLoading(false);
     });
@@ -46,8 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
         
         if (session?.user) {
-          mapSupabaseUserToUser(session.user);
-          fetchUserProfile(session.user.id);
+          handleUserSession(session.user);
         } else {
           setUser(null);
           setUserRole(null);
@@ -59,17 +57,87 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const mapSupabaseUserToUser = (supabaseUser: SupabaseUser) => {
+  const handleUserSession = async (supabaseUser: SupabaseUser) => {
+    console.log('Handling user session for:', supabaseUser.email);
+    
+    // Map supabase user to our user format
     const mappedUser: User = {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || '',
       full_name: supabaseUser.user_metadata?.full_name,
-      role: 'user', // Default role, will be updated from profile
+      role: 'user', // Default role, will be updated
       created_at: supabaseUser.created_at,
       updated_at: supabaseUser.updated_at || supabaseUser.created_at
     };
-    setUser(mappedUser);
+
+    // Check if it's a demo user and ensure profile exists
+    if (supabaseUser.email && supabaseUser.email in DEMO_USERS) {
+      const demoConfig = DEMO_USERS[supabaseUser.email as keyof typeof DEMO_USERS];
+      console.log('Demo user detected:', supabaseUser.email, 'Role:', demoConfig.role);
+      
+      // Ensure demo user profile exists
+      await ensureDemoUserProfile(supabaseUser.id, supabaseUser.email, demoConfig);
+      
+      // Set the user data immediately for demo users
+      const userWithRole = {
+        ...mappedUser,
+        role: demoConfig.role,
+        name: demoConfig.name,
+        full_name: demoConfig.name
+      };
+      
+      setUser(userWithRole);
+      setUserRole(demoConfig.role);
+    } else {
+      setUser(mappedUser);
+    }
+
+    // Fetch user profile from database
+    await fetchUserProfile(supabaseUser.id);
+  };
+
+  const ensureDemoUserProfile = async (userId: string, email: string, demoConfig: any) => {
+    try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (!existingProfile) {
+        console.log('Creating demo user profile for:', email);
+        // Create profile for demo user
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            email: email,
+            full_name: demoConfig.name,
+            role: demoConfig.role
+          });
+
+        if (error) {
+          console.error('Error creating demo user profile:', error);
+        } else {
+          console.log('Demo user profile created successfully');
+        }
+      } else if (existingProfile.role !== demoConfig.role) {
+        console.log('Updating demo user role from', existingProfile.role, 'to', demoConfig.role);
+        // Update role if it doesn't match
+        const { error } = await supabase
+          .from('profiles')
+          .update({ role: demoConfig.role, full_name: demoConfig.name })
+          .eq('id', userId);
+
+        if (error) {
+          console.error('Error updating demo user profile:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error ensuring demo user profile:', error);
+    }
   };
 
   const fetchUserProfile = async (userId: string) => {
@@ -86,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
+        console.log('Profile data fetched:', data);
         setUserRole(data.role as UserRole);
         setCompanyId(data.company_id);
         
@@ -104,9 +173,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
+    console.log('Login attempt for:', email);
+    
     // Check if it's a demo account
     if (email in DEMO_USERS) {
-      console.log('Attempting demo login for:', email);
+      console.log('Demo login for:', email);
       
       try {
         // First try to sign in directly
