@@ -277,7 +277,7 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
       <AddExamModal
         open={showAddModal}
         onOpenChange={setShowAddModal}
-        onExamAdded={handleExamAdded}
+        onSuccess={handleExamAdded}
       />
 
       <ViewExamModal
@@ -290,7 +290,7 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         open={showEditModal}
         onOpenChange={setShowEditModal}
         exam={selectedExam}
-        onExamUpdated={handleExamUpdated}
+        onSuccess={handleExamUpdated}
       />
 
       <DeleteExamModal
