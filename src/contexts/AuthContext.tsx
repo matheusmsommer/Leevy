@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthProvider - Initial session check:', session?.user?.email);
       setSession(session);
       if (session?.user) {
         handleUserSession(session.user);
@@ -41,12 +41,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('AuthProvider - Auth state change:', event, session?.user?.email);
         setSession(session);
         setLoading(false);
         
         if (session?.user) {
           handleUserSession(session.user);
         } else {
+          console.log('AuthProvider - Clearing user state');
           setUser(null);
           setUserRole(null);
           setCompanyId(null);
@@ -58,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const handleUserSession = async (supabaseUser: SupabaseUser) => {
-    console.log('Handling user session for:', supabaseUser.email);
+    console.log('AuthProvider - Handling user session for:', supabaseUser.email);
     
     // Map supabase user to our user format
     const mappedUser: User = {
@@ -71,10 +73,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updated_at: supabaseUser.updated_at || supabaseUser.created_at
     };
 
-    // Check if it's a demo user and ensure profile exists
-    if (supabaseUser.email && supabaseUser.email in DEMO_USERS) {
+    // Check if it's a demo user
+    const isDemoUser = supabaseUser.email && supabaseUser.email in DEMO_USERS;
+    console.log('AuthProvider - Is demo user?', isDemoUser, 'Email:', supabaseUser.email);
+
+    if (isDemoUser) {
       const demoConfig = DEMO_USERS[supabaseUser.email as keyof typeof DEMO_USERS];
-      console.log('Demo user detected:', supabaseUser.email, 'Role:', demoConfig.role);
+      console.log('AuthProvider - Demo config:', demoConfig);
       
       // Ensure demo user profile exists
       await ensureDemoUserProfile(supabaseUser.id, supabaseUser.email, demoConfig);
@@ -87,97 +92,125 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         full_name: demoConfig.name
       };
       
+      console.log('AuthProvider - Setting demo user with role:', userWithRole);
       setUser(userWithRole);
       setUserRole(demoConfig.role);
     } else {
+      console.log('AuthProvider - Setting regular user');
       setUser(mappedUser);
     }
 
-    // Fetch user profile from database
+    // Always fetch user profile from database to ensure consistency
     await fetchUserProfile(supabaseUser.id);
   };
 
   const ensureDemoUserProfile = async (userId: string, email: string, demoConfig: any) => {
     try {
+      console.log('AuthProvider - Checking if demo profile exists for:', email);
+      
       // Check if profile exists
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      console.log('AuthProvider - Existing profile:', existingProfile, 'Error:', fetchError);
+
       if (!existingProfile) {
-        console.log('Creating demo user profile for:', email);
-        // Create profile for demo user
-        const { error } = await supabase
+        console.log('AuthProvider - Creating demo user profile for:', email);
+        
+        const { data: insertData, error: insertError } = await supabase
           .from('profiles')
           .insert({
             id: userId,
             email: email,
             full_name: demoConfig.name,
             role: demoConfig.role
-          });
+          })
+          .select()
+          .single();
 
-        if (error) {
-          console.error('Error creating demo user profile:', error);
+        console.log('AuthProvider - Insert result:', insertData, 'Error:', insertError);
+
+        if (insertError) {
+          console.error('AuthProvider - Error creating demo user profile:', insertError);
         } else {
-          console.log('Demo user profile created successfully');
+          console.log('AuthProvider - Demo user profile created successfully');
         }
-      } else if (existingProfile.role !== demoConfig.role) {
-        console.log('Updating demo user role from', existingProfile.role, 'to', demoConfig.role);
-        // Update role if it doesn't match
-        const { error } = await supabase
-          .from('profiles')
-          .update({ role: demoConfig.role, full_name: demoConfig.name })
-          .eq('id', userId);
+      } else {
+        console.log('AuthProvider - Profile exists with role:', existingProfile.role);
+        
+        if (existingProfile.role !== demoConfig.role) {
+          console.log('AuthProvider - Updating demo user role from', existingProfile.role, 'to', demoConfig.role);
+          
+          const { data: updateData, error: updateError } = await supabase
+            .from('profiles')
+            .update({ role: demoConfig.role, full_name: demoConfig.name })
+            .eq('id', userId)
+            .select()
+            .single();
 
-        if (error) {
-          console.error('Error updating demo user profile:', error);
+          console.log('AuthProvider - Update result:', updateData, 'Error:', updateError);
+
+          if (updateError) {
+            console.error('AuthProvider - Error updating demo user profile:', updateError);
+          }
         }
       }
     } catch (error) {
-      console.error('Error ensuring demo user profile:', error);
+      console.error('AuthProvider - Error ensuring demo user profile:', error);
     }
   };
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('AuthProvider - Fetching profile for user:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('role, company_id, full_name')
         .eq('id', userId)
         .single();
 
+      console.log('AuthProvider - Profile fetch result:', data, 'Error:', error);
+
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching user profile:', error);
+        console.error('AuthProvider - Error fetching user profile:', error);
         return;
       }
 
       if (data) {
-        console.log('Profile data fetched:', data);
+        console.log('AuthProvider - Setting user role from profile:', data.role);
         setUserRole(data.role as UserRole);
         setCompanyId(data.company_id);
         
         // Update user with profile data
-        setUser(prev => prev ? {
-          ...prev,
-          role: data.role as UserRole,
-          company_id: data.company_id,
-          full_name: data.full_name || prev.full_name,
-          name: data.full_name || prev.name
-        } : null);
+        setUser(prev => {
+          const updatedUser = prev ? {
+            ...prev,
+            role: data.role as UserRole,
+            company_id: data.company_id,
+            full_name: data.full_name || prev.full_name,
+            name: data.full_name || prev.name
+          } : null;
+          console.log('AuthProvider - Updated user object:', updatedUser);
+          return updatedUser;
+        });
+      } else {
+        console.log('AuthProvider - No profile found for user');
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('AuthProvider - Error fetching user profile:', error);
     }
   };
 
   const login = async (email: string, password: string) => {
-    console.log('Login attempt for:', email);
+    console.log('AuthProvider - Login attempt for:', email);
     
     // Check if it's a demo account
     if (email in DEMO_USERS) {
-      console.log('Demo login for:', email);
+      console.log('AuthProvider - Demo login for:', email);
       
       try {
         // First try to sign in directly
@@ -186,9 +219,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           password,
         });
 
+        console.log('AuthProvider - Sign in result:', signInData, 'Error:', signInError);
+
         // If sign in fails, try to create the demo user
         if (signInError) {
-          console.log('Direct sign in failed, creating demo user:', signInError.message);
+          console.log('AuthProvider - Direct sign in failed, creating demo user:', signInError.message);
           
           const demoConfig = DEMO_USERS[email as keyof typeof DEMO_USERS];
           
@@ -204,13 +239,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           });
 
+          console.log('AuthProvider - Sign up result:', signUpData, 'Error:', signUpError);
+
           if (signUpError && !signUpError.message.includes('User already registered')) {
             throw signUpError;
           }
 
           // If user was created but needs confirmation, try admin sign in
           if (signUpData?.user && !signUpData.session) {
-            console.log('User created but not confirmed, trying sign in again...');
+            console.log('AuthProvider - User created but not confirmed, trying sign in again...');
             
             // Wait a moment and try again
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -226,7 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } catch (error: any) {
-        console.error('Demo login error:', error);
+        console.error('AuthProvider - Demo login error:', error);
         throw error;
       }
     } else {

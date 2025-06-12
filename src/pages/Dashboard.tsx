@@ -9,6 +9,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 const Dashboard = () => {
   const { user, userRole, isLoading } = useAuth();
 
+  console.log('Dashboard - Rendering with user:', user?.email, 'role:', userRole, 'user.role:', user?.role, 'loading:', isLoading);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -24,16 +26,23 @@ const Dashboard = () => {
     // Use userRole first, then fallback to user.role, then default to 'user'
     const currentRole = userRole || user?.role || 'user';
     
-    console.log('Dashboard - Current role:', currentRole, 'UserRole:', userRole, 'User.role:', user?.role);
+    console.log('Dashboard - Current role determined as:', currentRole);
+    console.log('Dashboard - UserRole:', userRole);
+    console.log('Dashboard - User.role:', user?.role);
+    console.log('Dashboard - User object:', user);
     
     switch (currentRole) {
       case 'superadmin':
+        console.log('Dashboard - Rendering SuperAdminDashboard');
         return <SuperAdminDashboard />;
       case 'admin':
+        console.log('Dashboard - Rendering AdminDashboard');
         return <AdminDashboard />;
       case 'user':
+        console.log('Dashboard - Rendering UserDashboard');
         return <UserDashboard />;
       default:
+        console.log('Dashboard - Unknown role, showing error');
         return (
           <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
@@ -43,6 +52,12 @@ const Dashboard = () => {
               </p>
               <p className="text-sm text-muted-foreground mt-1">
                 Email: {user?.email}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                UserRole: {userRole}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                User.role: {user?.role}
               </p>
             </div>
           </div>
