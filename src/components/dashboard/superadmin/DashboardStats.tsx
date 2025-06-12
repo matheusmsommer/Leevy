@@ -21,15 +21,16 @@ interface TopCompany {
   revenue: number;
 }
 
-interface DashboardStatsProps {
-  platformStats: PlatformStats;
-  topCompanies: TopCompany[];
-}
-
-const DashboardStats = ({ platformStats: initialStats, topCompanies: initialTopCompanies }: DashboardStatsProps) => {
+const DashboardStats = () => {
   const { toast } = useToast();
-  const [stats, setStats] = useState<PlatformStats>(initialStats);
-  const [topCompanies, setTopCompanies] = useState<TopCompany[]>(initialTopCompanies);
+  const [stats, setStats] = useState<PlatformStats>({
+    totalCompanies: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    commissionsReceived: 0,
+    commissionsPending: 0
+  });
+  const [topCompanies, setTopCompanies] = useState<TopCompany[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

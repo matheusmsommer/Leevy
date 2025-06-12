@@ -17,13 +17,9 @@ interface PlatformUser {
   ordersCount: number;
 }
 
-interface UserManagementProps {
-  platformUsers: PlatformUser[];
-}
-
-const UserManagement = ({ platformUsers: initialUsers }: UserManagementProps) => {
+const UserManagement = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<PlatformUser[]>(initialUsers);
+  const [users, setUsers] = useState<PlatformUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
