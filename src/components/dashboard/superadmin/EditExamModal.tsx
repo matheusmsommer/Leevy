@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,7 +20,9 @@ interface GlobalExam {
   preparation_id?: string;
   preparation?: string;
   description?: string;
+  patient_friendly_description?: string;
   synonyms?: string;
+  related_diseases?: string;
 }
 
 interface Category {
@@ -49,6 +52,8 @@ interface EditExamModalProps {
 const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModalProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [synonymInput, setSynonymInput] = useState('');
+  const [diseaseInput, setDiseaseInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [preparations, setPreparations] = useState<Preparation[]>([]);
@@ -60,7 +65,9 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
     subcategory_id: '',
     preparation_id: '',
     description: '',
-    synonyms: ''
+    patient_friendly_description: '',
+    synonyms: [] as string[],
+    related_diseases: [] as string[]
   });
 
   useEffect(() => {
@@ -73,6 +80,9 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
 
   useEffect(() => {
     if (exam) {
+      const synonymsList = exam.synonyms ? exam.synonyms.split(',').map(s => s.trim()) : [];
+      const diseasesList = exam.related_diseases ? exam.related_diseases.split(',').map(s => s.trim()) : [];
+      
       setFormData({
         name: exam.name || '',
         code: exam.code || '',
@@ -80,7 +90,9 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
         subcategory_id: exam.subcategory_id || '',
         preparation_id: exam.preparation_id || '',
         description: exam.description || '',
-        synonyms: exam.synonyms || ''
+        patient_friendly_description: exam.patient_friendly_description || '',
+        synonyms: synonymsList,
+        related_diseases: diseasesList
       });
     }
   }, [exam]);
@@ -155,6 +167,54 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
     }
   };
 
+  const handleAddSynonym = () => {
+    if (synonymInput.trim() && !formData.synonyms.includes(synonymInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        synonyms: [...prev.synonyms, synonymInput.trim()]
+      }));
+      setSynonymInput('');
+    }
+  };
+
+  const handleRemoveSynonym = (synonymToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      synonyms: prev.synonyms.filter(synonym => synonym !== synonymToRemove)
+    }));
+  };
+
+  const handleAddDisease = () => {
+    if (diseaseInput.trim() && !formData.related_diseases.includes(diseaseInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        related_diseases: [...prev.related_diseases, diseaseInput.trim()]
+      }));
+      setDiseaseInput('');
+    }
+  };
+
+  const handleRemoveDisease = (diseaseToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      related_diseases: prev.related_diseases.filter(disease => disease !== diseaseToRemove)
+    }));
+  };
+
+  const handleSynonymKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddSynonym();
+    }
+  };
+
+  const handleDiseaseKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddDisease();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!exam) return;
@@ -188,7 +248,9 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
           preparation_id: formData.preparation_id || null,
           preparation: selectedPreparation?.instructions || null, // Legacy field
           description: formData.description.trim() || null,
-          synonyms: formData.synonyms.trim() || null
+          patient_friendly_description: formData.patient_friendly_description.trim() || null,
+          synonyms: formData.synonyms.length > 0 ? formData.synonyms.join(',') : null,
+          related_diseases: formData.related_diseases.length > 0 ? formData.related_diseases.join(',') : null
         })
         .eq('id', exam.id);
 
@@ -323,7 +385,7 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Descrição</Label>
+            <Label htmlFor="edit-description">Descrição Técnica</Label>
             <Textarea
               id="edit-description"
               value={formData.description}
@@ -335,15 +397,89 @@ const EditExamModal = ({ open, onOpenChange, exam, onExamUpdated }: EditExamModa
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-synonyms">Sinônimos</Label>
+            <Label htmlFor="edit-patient-description">Descrição Amigável</Label>
             <Textarea
-              id="edit-synonyms"
-              value={formData.synonyms}
-              onChange={(e) => setFormData(prev => ({ ...prev, synonyms: e.target.value }))}
-              placeholder="Nomes alternativos ou sinônimos do exame..."
-              rows={2}
+              id="edit-patient-description"
+              value={formData.patient_friendly_description}
+              onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
+              placeholder="Descrição simplificada para o paciente..."
+              rows={3}
               disabled={loading}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-synonyms">Sinônimos</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="edit-synonyms"
+                  value={synonymInput}
+                  onChange={(e) => setSynonymInput(e.target.value)}
+                  onKeyPress={handleSynonymKeyPress}
+                  placeholder="Adicionar sinônimo..."
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddSynonym}
+                  disabled={!synonymInput.trim() || loading}
+                >
+                  Adicionar
+                </Button>
+              </div>
+              {formData.synonyms.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.synonyms.map((synonym, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      {synonym}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => handleRemoveSynonym(synonym)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-diseases">Doenças Relacionadas</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="edit-diseases"
+                  value={diseaseInput}
+                  onChange={(e) => setDiseaseInput(e.target.value)}
+                  onKeyPress={handleDiseaseKeyPress}
+                  placeholder="Adicionar doença relacionada..."
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddDisease}
+                  disabled={!diseaseInput.trim() || loading}
+                >
+                  Adicionar
+                </Button>
+              </div>
+              {formData.related_diseases.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.related_diseases.map((disease, index) => (
+                    <Badge key={index} variant="outline" className="flex items-center gap-1 border-red-200 text-red-800 bg-red-50">
+                      {disease}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => handleRemoveDisease(disease)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

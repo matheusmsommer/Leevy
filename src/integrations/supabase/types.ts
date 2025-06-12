@@ -72,28 +72,40 @@ export type Database = {
       company_services: {
         Row: {
           active: boolean | null
+          available_days: string[] | null
           company_id: string | null
           created_at: string
+          custom_preparation: string | null
+          delivery_days: number | null
           exam_id: string | null
           id: string
+          lab_notes: string | null
           price: number
           updated_at: string
         }
         Insert: {
           active?: boolean | null
+          available_days?: string[] | null
           company_id?: string | null
           created_at?: string
+          custom_preparation?: string | null
+          delivery_days?: number | null
           exam_id?: string | null
           id?: string
+          lab_notes?: string | null
           price: number
           updated_at?: string
         }
         Update: {
           active?: boolean | null
+          available_days?: string[] | null
           company_id?: string | null
           created_at?: string
+          custom_preparation?: string | null
+          delivery_days?: number | null
           exam_id?: string | null
           id?: string
+          lab_notes?: string | null
           price?: number
           updated_at?: string
         }
@@ -188,8 +200,10 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          patient_friendly_description: string | null
           preparation: string | null
           preparation_id: string | null
+          related_diseases: string | null
           subcategory_id: string | null
           synonyms: string | null
           updated_at: string
@@ -202,8 +216,10 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          patient_friendly_description?: string | null
           preparation?: string | null
           preparation_id?: string | null
+          related_diseases?: string | null
           subcategory_id?: string | null
           synonyms?: string | null
           updated_at?: string
@@ -216,8 +232,10 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          patient_friendly_description?: string | null
           preparation?: string | null
           preparation_id?: string | null
+          related_diseases?: string | null
           subcategory_id?: string | null
           synonyms?: string | null
           updated_at?: string

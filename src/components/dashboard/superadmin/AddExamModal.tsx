@@ -38,6 +38,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [synonymInput, setSynonymInput] = useState('');
+  const [diseaseInput, setDiseaseInput] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [preparations, setPreparations] = useState<Preparation[]>([]);
@@ -49,7 +50,9 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     subcategory_id: '',
     preparation_id: '',
     synonyms: [] as string[],
-    description: ''
+    description: '',
+    patient_friendly_description: '',
+    related_diseases: [] as string[]
   });
 
   useEffect(() => {
@@ -154,10 +157,34 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     }));
   };
 
+  const handleAddDisease = () => {
+    if (diseaseInput.trim() && !formData.related_diseases.includes(diseaseInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        related_diseases: [...prev.related_diseases, diseaseInput.trim()]
+      }));
+      setDiseaseInput('');
+    }
+  };
+
+  const handleRemoveDisease = (diseaseToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      related_diseases: prev.related_diseases.filter(disease => disease !== diseaseToRemove)
+    }));
+  };
+
   const handleSynonymKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddSynonym();
+    }
+  };
+
+  const handleDiseaseKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddDisease();
     }
   };
 
@@ -196,7 +223,9 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
             preparation_id: formData.preparation_id || null,
             preparation: selectedPreparation?.instructions || null, // Legacy field
             synonyms: formData.synonyms.length > 0 ? formData.synonyms.join(',') : null,
-            description: formData.description || null
+            description: formData.description || null,
+            patient_friendly_description: formData.patient_friendly_description || null,
+            related_diseases: formData.related_diseases.length > 0 ? formData.related_diseases.join(',') : null
           }
         ])
         .select()
@@ -226,9 +255,12 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
         subcategory_id: '',
         preparation_id: '',
         synonyms: [],
-        description: ''
+        description: '',
+        patient_friendly_description: '',
+        related_diseases: []
       });
       setSynonymInput('');
+      setDiseaseInput('');
 
       onExamAdded();
       onOpenChange(false);
@@ -246,7 +278,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Exame</DialogTitle>
           <DialogDescription>
@@ -254,7 +286,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome do Exame *</Label>
@@ -343,6 +375,30 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="description">Descrição Técnica</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Descrição detalhada do que o exame avalia (técnica)"
+              rows={3}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="patient_friendly_description">Descrição Amigável</Label>
+            <Textarea
+              id="patient_friendly_description"
+              value={formData.patient_friendly_description}
+              onChange={(e) => handleInputChange('patient_friendly_description', e.target.value)}
+              placeholder="Descrição simplificada para o paciente entender facilmente"
+              rows={3}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="synonyms">Sinônimos / Nomes Alternativos</Label>
             <div className="space-y-2">
               <div className="flex gap-2">
@@ -376,22 +432,47 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
                   ))}
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
-                Adicione nomes alternativos para facilitar a busca (ex: CBC para Hemograma Completo)
-              </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição do Exame</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Descrição detalhada do que o exame avalia"
-              rows={3}
-              disabled={isLoading}
-            />
+            <Label htmlFor="related_diseases">Doenças Relacionadas</Label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  id="related_diseases"
+                  value={diseaseInput}
+                  onChange={(e) => setDiseaseInput(e.target.value)}
+                  onKeyPress={handleDiseaseKeyPress}
+                  placeholder="Ex: Anemia, Leucemia, Trombocitopenia"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddDisease}
+                  disabled={!diseaseInput.trim() || isLoading}
+                >
+                  Adicionar
+                </Button>
+              </div>
+              {formData.related_diseases.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.related_diseases.map((disease, index) => (
+                    <Badge key={index} variant="outline" className="flex items-center gap-1 border-red-200 text-red-800 bg-red-50">
+                      {disease}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => handleRemoveDisease(disease)}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Doenças que este exame pode diagnosticar ou acompanhar (ajuda na busca)
+              </p>
+            </div>
           </div>
 
           <DialogFooter>

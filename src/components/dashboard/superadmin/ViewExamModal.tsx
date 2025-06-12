@@ -15,7 +15,9 @@ interface GlobalExam {
   preparation_id?: string;
   preparation?: string;
   description?: string;
+  patient_friendly_description?: string;
   synonyms?: string;
+  related_diseases?: string;
 }
 
 interface ExamDetails {
@@ -98,6 +100,9 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
 
   if (!exam) return null;
 
+  const synonymsList = exam.synonyms ? exam.synonyms.split(',').map(s => s.trim()) : [];
+  const diseasesList = exam.related_diseases ? exam.related_diseases.split(',').map(s => s.trim()) : [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -151,14 +156,23 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
 
           {exam.description && (
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Descrição</label>
+              <label className="text-sm font-medium text-muted-foreground">Descrição Técnica</label>
               <p className="text-foreground mt-1 leading-relaxed">{exam.description}</p>
+            </div>
+          )}
+
+          {exam.patient_friendly_description && (
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Descrição Amigável</label>
+              <p className="text-foreground mt-1 leading-relaxed bg-blue-50 p-3 rounded-lg border border-blue-200">
+                {exam.patient_friendly_description}
+              </p>
             </div>
           )}
 
           {(examDetails.preparation_name || exam.preparation) && (
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Preparação</label>
+              <label className="text-sm font-medium text-muted-foreground">Preparação Padrão</label>
               {examDetails.preparation_name && (
                 <div className="mt-1 mb-2">
                   <Badge variant="outline" className="border-orange-200 text-orange-800 bg-orange-50">
@@ -172,10 +186,29 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
             </div>
           )}
 
-          {exam.synonyms && (
+          {synonymsList.length > 0 && (
             <div>
               <label className="text-sm font-medium text-muted-foreground">Sinônimos</label>
-              <p className="text-foreground mt-1 leading-relaxed">{exam.synonyms}</p>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {synonymsList.map((synonym, index) => (
+                  <Badge key={index} variant="secondary">
+                    {synonym}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {diseasesList.length > 0 && (
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Doenças Relacionadas</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {diseasesList.map((disease, index) => (
+                  <Badge key={index} variant="outline" className="border-red-200 text-red-800 bg-red-50">
+                    {disease}
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
 

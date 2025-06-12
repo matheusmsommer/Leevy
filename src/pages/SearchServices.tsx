@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, MapPin, Clock, DollarSign } from 'lucide-react';
+import { Search, MapPin, Clock, DollarSign, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +12,10 @@ interface ServiceWithCompany {
   id: string;
   price: number;
   active: boolean;
+  delivery_days?: number;
+  available_days?: string[];
+  custom_preparation?: string;
+  lab_notes?: string;
   company: {
     id: string;
     name: string;
@@ -21,8 +24,10 @@ interface ServiceWithCompany {
     id: string;
     name: string;
     description?: string;
+    patient_friendly_description?: string;
     category: string;
     synonyms?: string;
+    related_diseases?: string;
     exam_categories?: {
       name: string;
     };
@@ -59,6 +64,10 @@ const SearchServices = () => {
           id,
           price,
           active,
+          delivery_days,
+          available_days,
+          custom_preparation,
+          lab_notes,
           company:companies!inner(
             id,
             name
@@ -67,8 +76,10 @@ const SearchServices = () => {
             id,
             name,
             description,
+            patient_friendly_description,
             category,
             synonyms,
+            related_diseases,
             exam_categories(
               name
             ),
@@ -106,18 +117,37 @@ const SearchServices = () => {
   const filteredServices = services.filter(service => {
     const searchLower = searchTerm.toLowerCase();
     const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    const diseasesList = service.exam.related_diseases ? service.exam.related_diseases.split(',').map(s => s.trim().toLowerCase()) : [];
     const categoryName = service.exam.exam_categories?.name || service.exam.category;
     const subcategoryName = service.exam.exam_subcategories?.name || '';
     const preparationName = service.exam.standard_preparations?.name || '';
     
     return service.exam.name.toLowerCase().includes(searchLower) ||
            service.exam.description?.toLowerCase().includes(searchLower) ||
+           service.exam.patient_friendly_description?.toLowerCase().includes(searchLower) ||
            service.company.name.toLowerCase().includes(searchLower) ||
            categoryName.toLowerCase().includes(searchLower) ||
            subcategoryName.toLowerCase().includes(searchLower) ||
            preparationName.toLowerCase().includes(searchLower) ||
-           synonymsList.some(synonym => synonym.includes(searchLower));
+           synonymsList.some(synonym => synonym.includes(searchLower)) ||
+           diseasesList.some(disease => disease.includes(searchLower));
   });
+
+  const formatAvailableDays = (days?: string[]) => {
+    if (!days || days.length === 0) return 'Consultar laboratório';
+    
+    const dayNames: { [key: string]: string } = {
+      'monday': 'Seg',
+      'tuesday': 'Ter', 
+      'wednesday': 'Qua',
+      'thursday': 'Qui',
+      'friday': 'Sex',
+      'saturday': 'Sáb',
+      'sunday': 'Dom'
+    };
+    
+    return days.map(day => dayNames[day] || day).join(', ');
+  };
 
   if (isLoading || loading) {
     return (
@@ -151,7 +181,7 @@ const SearchServices = () => {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por exame, categoria ou empresa..."
+                placeholder="Buscar por exame, categoria, empresa ou doença..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -184,7 +214,7 @@ const SearchServices = () => {
               <Card key={service.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex-1">
                       <CardTitle className="text-lg">{service.exam.name}</CardTitle>
                       <p className="text-sm text-muted-foreground font-medium">
                         {service.company.name}
@@ -210,31 +240,77 @@ const SearchServices = () => {
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="text-right ml-4">
                       <p className="text-2xl font-bold text-primary">
                         R$ {service.price.toFixed(2)}
                       </p>
+                      {service.delivery_days && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{service.delivery_days} dias</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {service.exam.description && (
+                  {/* Descrição amigável prioritária */}
+                  {service.exam.patient_friendly_description ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-blue-800">{service.exam.patient_friendly_description}</p>
+                    </div>
+                  ) : service.exam.description && (
                     <p className="text-muted-foreground mb-4">{service.exam.description}</p>
                   )}
                   
-                  {service.exam.standard_preparations?.instructions && (
+                  {/* Preparação (personalizada ou padrão) */}
+                  {(service.custom_preparation || service.exam.standard_preparations?.instructions) && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                       <p className="text-sm font-medium text-orange-800 mb-1">Preparação:</p>
-                      <p className="text-sm text-orange-700">{service.exam.standard_preparations.instructions}</p>
+                      <p className="text-sm text-orange-700">
+                        {service.custom_preparation || service.exam.standard_preparations?.instructions}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Observações do laboratório */}
+                  {service.lab_notes && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm font-medium text-yellow-800 mb-1">Observações do laboratório:</p>
+                      <p className="text-sm text-yellow-700">{service.lab_notes}</p>
                     </div>
                   )}
                   
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 text-sm">
+                    <div className="flex items-center gap-2">
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      <span>Preço: R$ {service.price.toFixed(2)}</span>
+                      <span>R$ {service.price.toFixed(2)}</span>
+                    </div>
+                    {service.delivery_days && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>Entrega: {service.delivery_days} dias</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>{formatAvailableDays(service.available_days)}</span>
                     </div>
                   </div>
+
+                  {/* Doenças relacionadas */}
+                  {service.exam.related_diseases && (
+                    <div className="mb-4">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Doenças relacionadas:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {service.exam.related_diseases.split(',').map((disease, index) => (
+                          <span key={index} className="inline-block px-2 py-1 bg-red-50 text-red-700 text-xs rounded border border-red-200">
+                            {disease.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <Button 
                     onClick={() => handleBookService(service.id)}
