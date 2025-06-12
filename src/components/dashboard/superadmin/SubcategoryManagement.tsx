@@ -20,7 +20,7 @@ interface Subcategory {
   active: boolean;
   created_at: string;
   updated_at: string;
-  exam_categories?: {
+  service_categories?: {
     name: string;
   };
 }
@@ -42,10 +42,10 @@ const SubcategoryManagement = () => {
   const fetchSubcategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .select(`
           *,
-          exam_categories (
+          service_categories (
             name
           )
         `)
@@ -96,7 +96,7 @@ const SubcategoryManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Subcategorias de Exames</h3>
+          <h3 className="text-lg font-semibold">Subcategorias de Serviços</h3>
           <p className="text-sm text-muted-foreground">
             Gerencie as subcategorias para uma classificação mais detalhada
           </p>
@@ -130,7 +130,7 @@ const SubcategoryManagement = () => {
                   <TableCell className="font-medium">{subcategory.name}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {subcategory.exam_categories?.name || 'N/A'}
+                      {subcategory.service_categories?.name || 'N/A'}
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-xs truncate">

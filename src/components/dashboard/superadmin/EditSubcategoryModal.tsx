@@ -56,7 +56,7 @@ const EditSubcategoryModal = ({ open, onOpenChange, subcategory, onSuccess }: Ed
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .select('id, name')
         .eq('active', true)
         .order('name', { ascending: true });
@@ -83,7 +83,7 @@ const EditSubcategoryModal = ({ open, onOpenChange, subcategory, onSuccess }: Ed
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .update({
           name: formData.name,
           description: formData.description || null,

@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 interface Subcategory {
   id: string;
   name: string;
-  exam_categories?: {
+  service_categories?: {
     name: string;
   };
 }
@@ -30,25 +30,25 @@ const DeleteSubcategoryModal = ({ open, onOpenChange, subcategory, onSuccess }: 
 
     setLoading(true);
     try {
-      // Verificar se há exames usando esta subcategoria
-      const { data: exams, error: examError } = await supabase
-        .from('exams')
+      // Verificar se há serviços usando esta subcategoria
+      const { data: services, error: servicesError } = await supabase
+        .from('services')
         .select('id')
         .eq('subcategory_id', subcategory.id);
 
-      if (examError) throw examError;
+      if (servicesError) throw servicesError;
 
-      if (exams && exams.length > 0) {
+      if (services && services.length > 0) {
         toast({
           title: "Não é possível excluir",
-          description: `Esta subcategoria está sendo usada por ${exams.length} exame(s). Remova ou altere os exames primeiro.`,
+          description: `Esta subcategoria está sendo usada por ${services.length} serviço(s). Remova ou altere os serviços primeiro.`,
           variant: "destructive",
         });
         return;
       }
 
       const { error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .delete()
         .eq('id', subcategory.id);
 
@@ -94,7 +94,7 @@ const DeleteSubcategoryModal = ({ open, onOpenChange, subcategory, onSuccess }: 
               <strong>Subcategoria:</strong> {subcategory.name}
             </p>
             <p className="text-sm text-muted-foreground">
-              <strong>Categoria:</strong> {subcategory.exam_categories?.name || 'N/A'}
+              <strong>Categoria:</strong> {subcategory.service_categories?.name || 'N/A'}
             </p>
           </div>
 

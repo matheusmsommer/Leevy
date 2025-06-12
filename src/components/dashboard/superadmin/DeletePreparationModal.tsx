@@ -27,18 +27,18 @@ const DeletePreparationModal = ({ open, onOpenChange, preparation, onSuccess }: 
 
     setLoading(true);
     try {
-      // Verificar se há exames usando esta preparação
-      const { data: exams, error: examError } = await supabase
-        .from('exams')
+      // Verificar se há serviços usando esta preparação
+      const { data: services, error: servicesError } = await supabase
+        .from('services')
         .select('id')
         .eq('preparation_id', preparation.id);
 
-      if (examError) throw examError;
+      if (servicesError) throw servicesError;
 
-      if (exams && exams.length > 0) {
+      if (services && services.length > 0) {
         toast({
           title: "Não é possível excluir",
-          description: `Esta preparação está sendo usada por ${exams.length} exame(s). Remova ou altere os exames primeiro.`,
+          description: `Esta preparação está sendo usada por ${services.length} serviço(s). Remova ou altere os serviços primeiro.`,
           variant: "destructive",
         });
         return;

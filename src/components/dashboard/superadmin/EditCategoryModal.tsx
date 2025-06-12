@@ -61,7 +61,7 @@ const EditCategoryModal = ({ open, onOpenChange, category, onCategoryUpdated }: 
 
     try {
       const { error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .update({
           name: formData.name.trim(),
           description: formData.description.trim() || null,

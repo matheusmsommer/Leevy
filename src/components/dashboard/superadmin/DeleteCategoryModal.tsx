@@ -31,14 +31,14 @@ const DeleteCategoryModal = ({ open, onOpenChange, category, onCategoryDeleted }
 
     try {
       // Check if category is being used
-      const { data: exams, error: examError } = await supabase
-        .from('exams')
+      const { data: services, error: servicesError } = await supabase
+        .from('services')
         .select('id')
         .eq('category_id', category.id)
         .limit(1);
 
-      if (examError) {
-        console.error('Error checking exams:', examError);
+      if (servicesError) {
+        console.error('Error checking services:', servicesError);
         toast({
           title: "Erro ao verificar dependências",
           description: "Não foi possível verificar se a categoria está sendo usada.",
@@ -47,17 +47,17 @@ const DeleteCategoryModal = ({ open, onOpenChange, category, onCategoryDeleted }
         return;
       }
 
-      if (exams && exams.length > 0) {
+      if (services && services.length > 0) {
         toast({
           title: "Não é possível excluir",
-          description: "Esta categoria está sendo usada por exames. Remova dos exames antes de excluir.",
+          description: "Esta categoria está sendo usada por serviços. Remova dos serviços antes de excluir.",
           variant: "destructive",
         });
         return;
       }
 
       const { error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .delete()
         .eq('id', category.id);
 
