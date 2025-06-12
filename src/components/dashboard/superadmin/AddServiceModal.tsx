@@ -163,7 +163,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
 
       toast({
         title: "Sucesso",
-        description: "Serviço criado com sucesso. Agora você pode configurar as preparações.",
+        description: "Serviço criado com sucesso.",
       });
 
       setCreatedServiceId(data.id);
@@ -228,7 +228,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
           </DialogTitle>
           <DialogDescription>
             {showPreparations 
-              ? 'Serviço criado! Agora você pode adicionar preparações específicas.' 
+              ? 'Serviço criado! Configure as preparações padronizadas.' 
               : 'Preencha as informações do novo serviço'
             }
           </DialogDescription>
@@ -347,7 +347,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             <Separator />
 
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
               <p className="text-sm text-muted-foreground mb-4">
                 Após criar o serviço, você poderá configurar preparações padronizadas específicas.
               </p>
