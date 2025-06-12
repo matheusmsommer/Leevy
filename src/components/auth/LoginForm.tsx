@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Sparkles, AlertCircle } from 'lucide-react';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -30,11 +30,16 @@ const LoginForm = () => {
       console.error('Login error:', error);
       
       let errorMessage = "Verifique suas credenciais e tente novamente.";
+      let showEmailConfirmationHelp = false;
       
       if (error.message?.includes('Invalid login credentials')) {
         errorMessage = "E-mail ou senha incorretos. Verifique suas credenciais.";
       } else if (error.message?.includes('Email not confirmed')) {
         errorMessage = "Confirme seu e-mail antes de fazer login.";
+        showEmailConfirmationHelp = true;
+      } else if (error.message?.includes('confirme o email') || error.message?.includes('confirmação de email')) {
+        errorMessage = "Para usar as contas de demonstração, desabilite a confirmação de email nas configurações do Supabase.";
+        showEmailConfirmationHelp = true;
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -44,6 +49,16 @@ const LoginForm = () => {
         description: errorMessage,
         variant: "destructive",
       });
+
+      // Show additional help for email confirmation issues
+      if (showEmailConfirmationHelp) {
+        setTimeout(() => {
+          toast({
+            title: "💡 Dica para desenvolvimento",
+            description: "Vá em Authentication > Settings no Supabase e desabilite 'Enable email confirmations' para usar as contas demo sem confirmação.",
+          });
+        }, 3000);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -160,6 +175,16 @@ const LoginForm = () => {
                 <p className="text-center text-muted-foreground mt-3">
                   <em>Clique em uma conta para fazer login automaticamente</em>
                 </p>
+              </div>
+              
+              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-amber-700 dark:text-amber-300">
+                    <p className="font-medium mb-1">Para desenvolvedores:</p>
+                    <p>Se aparecer erro de confirmação de email, desabilite "Enable email confirmations" nas configurações de Authentication do Supabase.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>

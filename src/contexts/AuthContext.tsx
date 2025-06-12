@@ -103,61 +103,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const createDemoUser = async (email: string, password: string) => {
-    const demoConfig = DEMO_USERS[email as keyof typeof DEMO_USERS];
-    if (!demoConfig) {
-      throw new Error('Email não é uma conta de demonstração válida');
-    }
-
-    try {
-      // Try to sign up the demo user
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: demoConfig.name,
-            role: demoConfig.role
-          }
-        }
-      });
-
-      if (error && error.message !== 'User already registered') {
-        throw error;
-      }
-
-      // If user already exists or was just created, try to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        throw signInError;
-      }
-
-    } catch (error) {
-      console.error('Error creating/signing in demo user:', error);
-      throw error;
-    }
-  };
-
   const login = async (email: string, password: string) => {
     // Check if it's a demo account
     if (email in DEMO_USERS) {
-      await createDemoUser(email, password);
-      return;
-    }
+      console.log('Attempting demo login for:', email);
+      
+      try {
+        // First try to sign in directly
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-    // Regular login for non-demo accounts
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) {
-      throw error;
+        // If sign in fails, try to create the demo user
+        if (signInError) {
+          console.log('Direct sign in failed, creating demo user:', signInError.message);
+          
+          const demoConfig = DEMO_USERS[email as keyof typeof DEMO_USERS];
+          
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`,
+              data: {
+                full_name: demoConfig.name,
+                role: demoConfig.role
+              }
+            }
+          });
+
+          if (signUpError && !signUpError.message.includes('User already registered')) {
+            throw signUpError;
+          }
+
+          // If user was created but needs confirmation, try admin sign in
+          if (signUpData?.user && !signUpData.session) {
+            console.log('User created but not confirmed, trying sign in again...');
+            
+            // Wait a moment and try again
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const { error: retryError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+
+            if (retryError) {
+              throw new Error('Conta de demonstração criada. Por favor, confirme o email ou desabilite a confirmação de email nas configurações do Supabase para usar as contas demo.');
+            }
+          }
+        }
+      } catch (error: any) {
+        console.error('Demo login error:', error);
+        throw error;
+      }
+    } else {
+      // Regular login for non-demo accounts
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        throw error;
+      }
     }
   };
 
