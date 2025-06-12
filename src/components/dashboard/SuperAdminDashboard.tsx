@@ -1,33 +1,18 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Building2, 
-  FileText, 
-  Users, 
-  DollarSign, 
-  Activity, 
-  Shield, 
-  Settings,
-  TrendingUp,
-  Eye,
-  Lock,
-  Trash2,
-  Plus,
-  Download,
-  Search,
-  Filter
-} from 'lucide-react';
+import DashboardStats from './superadmin/DashboardStats';
+import ExamManagement from './superadmin/ExamManagement';
+import CompanyManagement from './superadmin/CompanyManagement';
+import OrderManagement from './superadmin/OrderManagement';
+import UserManagement from './superadmin/UserManagement';
+import AuditLogs from './superadmin/AuditLogs';
+import PlatformSettings from './superadmin/PlatformSettings';
 
 const SuperAdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { logout } = useAuth();
 
   // Mock data - seria substituído por dados reais do Supabase
   const platformStats = {
@@ -164,17 +149,6 @@ const SuperAdminDashboard = () => {
     }
   ];
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      ativo: { label: 'Ativo', variant: 'default' as const },
-      pendente: { label: 'Pendente', variant: 'secondary' as const },
-      bloqueado: { label: 'Bloqueado', variant: 'destructive' as const }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.ativo;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
   const handleViewCompany = (companyId: string) => {
     console.log('Ver detalhes da empresa:', companyId);
   };
@@ -227,463 +201,47 @@ const SuperAdminDashboard = () => {
             <TabsTrigger value="settings">Config</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="space-y-6">
-            {/* Platform Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Empresas</CardTitle>
-                  <Building2 className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{platformStats.totalCompanies}</div>
-                  <p className="text-xs text-muted-foreground">Cadastradas</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Pedidos</CardTitle>
-                  <FileText className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{platformStats.totalOrders}</div>
-                  <p className="text-xs text-muted-foreground">Total realizados</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">R$ {platformStats.totalRevenue.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">Bruta da plataforma</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Comissões Recebidas</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-purple-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">R$ {platformStats.commissionsReceived.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">Já coletadas</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">A Receber</CardTitle>
-                  <Activity className="h-4 w-4 text-orange-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">R$ {platformStats.commissionsPending.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">Pendentes</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Top Companies */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ranking de Empresas</CardTitle>
-                <CardDescription>Laboratórios com mais vendas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {topCompanies.map((company, index) => (
-                    <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-primary font-bold">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium">{company.name}</p>
-                          <p className="text-sm text-muted-foreground">{company.orders} pedidos</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">R$ {company.revenue.toFixed(2)}</p>
-                        <p className="text-sm text-muted-foreground">Receita</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="dashboard">
+            <DashboardStats 
+              platformStats={platformStats} 
+              topCompanies={topCompanies} 
+            />
           </TabsContent>
 
-          <TabsContent value="exams" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Exames Globais</CardTitle>
-                    <CardDescription>Base de exames da plataforma Leevy</CardDescription>
-                  </div>
-                  <Button onClick={handleAddExam}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Exame
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Buscar exames..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Button variant="outline">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filtros
-                  </Button>
-                </div>
-
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Preparo</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {globalExams.map((exam) => (
-                      <TableRow key={exam.id}>
-                        <TableCell className="font-medium">{exam.name}</TableCell>
-                        <TableCell>{exam.code}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="capitalize">
-                            {exam.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">{exam.preparation}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              Editar
-                            </Button>
-                            <Button size="sm" variant="destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="exams">
+            <ExamManagement 
+              globalExams={globalExams} 
+              onAddExam={handleAddExam} 
+            />
           </TabsContent>
 
-          <TabsContent value="companies" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestão de Empresas</CardTitle>
-                <CardDescription>Laboratórios e clínicas cadastradas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>CNPJ</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Locais</TableHead>
-                      <TableHead>Pedidos</TableHead>
-                      <TableHead>Cadastro</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {companies.map((company) => (
-                      <TableRow key={company.id}>
-                        <TableCell className="font-medium">{company.name}</TableCell>
-                        <TableCell>{company.cnpj}</TableCell>
-                        <TableCell>{getStatusBadge(company.status)}</TableCell>
-                        <TableCell>{company.locations}</TableCell>
-                        <TableCell>{company.orders}</TableCell>
-                        <TableCell>
-                          {new Date(company.created_at).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleViewCompany(company.id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleImpersonateCompany(company.id)}
-                            >
-                              <Shield className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => handleBlockCompany(company.id)}
-                            >
-                              <Lock className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="companies">
+            <CompanyManagement 
+              companies={companies}
+              onViewCompany={handleViewCompany}
+              onImpersonateCompany={handleImpersonateCompany}
+              onBlockCompany={handleBlockCompany}
+            />
           </TabsContent>
 
-          <TabsContent value="orders" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Gestão de Vendas</CardTitle>
-                    <CardDescription>Todos os pedidos da plataforma</CardDescription>
-                  </div>
-                  <Button onClick={handleExportOrders}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Exportar CSV
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Empresa</TableHead>
-                      <TableHead>Paciente</TableHead>
-                      <TableHead>Serviço</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Comissão</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {allOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">{order.company}</TableCell>
-                        <TableCell>{order.patient}</TableCell>
-                        <TableCell>{order.service}</TableCell>
-                        <TableCell>R$ {order.amount.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            R$ {order.commission.toFixed(2)}
-                            {order.commissionPaid && (
-                              <Badge variant="outline" className="text-green-600">
-                                Paga
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(order.date).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="capitalize">
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {!order.commissionPaid && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleMarkCommissionPaid(order.id)}
-                              >
-                                Marcar Pago
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="orders">
+            <OrderManagement 
+              allOrders={allOrders}
+              onExportOrders={handleExportOrders}
+              onMarkCommissionPaid={handleMarkCommissionPaid}
+            />
           </TabsContent>
 
-          <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestão de Usuários</CardTitle>
-                <CardDescription>Clientes da plataforma</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>E-mail</TableHead>
-                      <TableHead>Total Gasto</TableHead>
-                      <TableHead>Pedidos</TableHead>
-                      <TableHead>Último Acesso</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {platformUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>R$ {user.totalSpent.toFixed(2)}</TableCell>
-                        <TableCell>{user.ordersCount}</TableCell>
-                        <TableCell>
-                          {new Date(user.lastAccess).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
-                              <Shield className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Lock className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="users">
+            <UserManagement platformUsers={platformUsers} />
           </TabsContent>
 
-          <TabsContent value="audit" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Auditoria e Logs</CardTitle>
-                <CardDescription>Histórico de ações administrativas</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ação</TableHead>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Alvo</TableHead>
-                      <TableHead>Data/Hora</TableHead>
-                      <TableHead>Detalhes</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {auditLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell className="font-medium">{log.action}</TableCell>
-                        <TableCell>{log.user}</TableCell>
-                        <TableCell>{log.target}</TableCell>
-                        <TableCell>{log.timestamp}</TableCell>
-                        <TableCell>{log.details}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+          <TabsContent value="audit">
+            <AuditLogs auditLogs={auditLogs} />
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações da Plataforma</CardTitle>
-                <CardDescription>Configurações globais do sistema</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Comissões</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Taxa Fixa (R$)</label>
-                        <Input type="number" defaultValue="5.00" step="0.01" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Percentual (%)</label>
-                        <Input type="number" defaultValue="10" step="0.1" />
-                      </div>
-                      <Button>Salvar Comissões</Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Cadastros</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span>Cadastro automático de empresas</span>
-                        <Button variant="outline" size="sm">Ativado</Button>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Validação manual de CNPJ</span>
-                        <Button variant="outline" size="sm">Desativado</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Pagamentos</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Provedor Principal</label>
-                        <Input defaultValue="Stripe" readOnly />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">PIX Ativo</label>
-                        <Button variant="outline" size="sm">Sim</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Mensagens Globais</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <textarea 
-                        className="w-full p-2 border rounded" 
-                        rows={3}
-                        placeholder="Mensagem para exibir no topo do sistema..."
-                      />
-                      <Button>Atualizar Mensagem</Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="settings">
+            <PlatformSettings />
           </TabsContent>
         </Tabs>
       </div>
