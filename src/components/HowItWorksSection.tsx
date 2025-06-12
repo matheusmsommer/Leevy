@@ -28,10 +28,10 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-24 bg-gray-50">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
             Como <span className="text-gradient">funciona</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -45,11 +45,11 @@ const HowItWorksSection = () => {
               <div key={index} className="relative">
                 {/* Connecting line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-leevy-300 to-leevy-200 z-0" />
+                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-primary/30 to-primary/10 z-0" />
                 )}
                 
-                <div className="relative bg-card border border-leevy-100 rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-leevy text-white rounded-full text-2xl font-bold mb-6">
+                <div className="relative bg-white border-2 border-gray-100 rounded-2xl p-8 text-center hover:shadow-elevated transition-all duration-300 hover:-translate-y-2 z-10 hover:border-primary/20">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-leevy text-white rounded-full text-xl font-bold mb-6 shadow-soft">
                     {step.number}
                   </div>
                   
@@ -59,7 +59,7 @@ const HowItWorksSection = () => {
                     {step.title}
                   </h3>
                   
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     {step.description}
                   </p>
                 </div>
@@ -69,9 +69,9 @@ const HowItWorksSection = () => {
         </div>
 
         <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-2 bg-leevy-50 border border-leevy-200 rounded-full px-6 py-3">
-            <div className="w-2 h-2 bg-leevy-500 rounded-full animate-pulse" />
-            <span className="text-leevy-700 font-medium">
+          <div className="inline-flex items-center gap-3 bg-white border-2 border-primary/20 rounded-full px-6 py-3 shadow-soft">
+            <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            <span className="text-secondary font-semibold">
               Processo 100% automatizado
             </span>
           </div>
