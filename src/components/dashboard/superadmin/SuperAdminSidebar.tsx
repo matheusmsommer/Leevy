@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Sidebar, 
@@ -38,7 +37,7 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'companies', label: 'Empresas', icon: Building2 },
-    { id: 'exams', label: 'Catálogo de Exames', icon: TestTube },
+    { id: 'exams', label: 'Serviços', icon: TestTube },
     { id: 'configurations', label: 'Configurações', icon: Cog },
     { id: 'orders', label: 'Pedidos', icon: ShoppingCart },
     { id: 'users', label: 'Usuários', icon: Users },
