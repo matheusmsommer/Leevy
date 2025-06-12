@@ -5,13 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, User, MapPin, Calendar, CreditCard, CheckCircle } from 'lucide-react';
+import { User, MapPin, Calendar, CreditCard } from 'lucide-react';
 import ServiceSelection from '@/components/booking/ServiceSelection';
 import PatientSelection from '@/components/booking/PatientSelection';
 import LocationSelection from '@/components/booking/LocationSelection';
 import SchedulingStep from '@/components/booking/SchedulingStep';
 import PaymentStep from '@/components/booking/PaymentStep';
-import ConfirmationStep from '@/components/booking/ConfirmationStep';
 
 const BookingFlow = () => {
   const { serviceId } = useParams();
@@ -31,17 +30,20 @@ const BookingFlow = () => {
   });
 
   const steps = [
-    { number: 1, title: 'Serviços', icon: Search },
-    { number: 2, title: 'Paciente', icon: User },
-    { number: 3, title: 'Local', icon: MapPin },
-    { number: 4, title: 'Agendamento', icon: Calendar },
-    { number: 5, title: 'Pagamento', icon: CreditCard },
-    { number: 6, title: 'Confirmação', icon: CheckCircle }
+    { number: 1, title: 'Exames', icon: User },
+    { number: 2, title: 'Local', icon: MapPin },
+    { number: 3, title: 'Data', icon: Calendar },
+    { number: 4, title: 'Pagamento', icon: CreditCard }
   ];
 
   const handleNext = () => {
-    if (currentStep < 6) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
+    } else {
+      // Finalizar pedido
+      const orderNumber = `LEE${Date.now()}`;
+      setBookingData(prev => ({ ...prev, orderNumber }));
+      navigate('/booking-success');
     }
   };
 
@@ -62,15 +64,11 @@ const BookingFlow = () => {
       case 1:
         return bookingData.services.length > 0;
       case 2:
-        return bookingData.patientId !== '';
-      case 3:
         return bookingData.locationId !== '';
+      case 3:
+        return bookingData.scheduledDate !== undefined;
       case 4:
-        return true; // Some services may not require scheduling
-      case 5:
         return bookingData.totalAmount > 0;
-      case 6:
-        return bookingData.orderNumber !== '';
       default:
         return false;
     }
@@ -88,20 +86,13 @@ const BookingFlow = () => {
         );
       case 2:
         return (
-          <PatientSelection
-            selectedPatientId={bookingData.patientId}
-            onPatientChange={(patientId) => updateBookingData({ patientId })}
-          />
-        );
-      case 3:
-        return (
           <LocationSelection
             selectedLocationId={bookingData.locationId}
             onLocationChange={(locationId) => updateBookingData({ locationId })}
             services={bookingData.services}
           />
         );
-      case 4:
+      case 3:
         return (
           <SchedulingStep
             selectedDate={bookingData.scheduledDate}
@@ -111,20 +102,14 @@ const BookingFlow = () => {
             locationId={bookingData.locationId}
           />
         );
-      case 5:
+      case 4:
         return (
           <PaymentStep
             bookingData={bookingData}
             onPaymentComplete={(orderNumber) => {
               updateBookingData({ orderNumber });
-              setCurrentStep(6);
+              navigate('/booking-success');
             }}
-          />
-        );
-      case 6:
-        return (
-          <ConfirmationStep
-            bookingData={bookingData}
           />
         );
       default:
@@ -136,44 +121,41 @@ const BookingFlow = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gradient">Agendar Serviços</h1>
-          <p className="text-sm text-muted-foreground">
-            {currentStep === 6 ? 'Pedido confirmado!' : 'Complete as etapas para finalizar seu agendamento'}
-          </p>
+          <h1 className="text-xl font-bold">Agendar Exames</h1>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Progress indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4 py-6 max-w-3xl">
+        {/* Progress simplificado */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
             {steps.map((step) => {
               const IconComponent = step.icon;
               return (
                 <div key={step.number} className="flex flex-col items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                       currentStep >= step.number
-                        ? 'bg-primary text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-500'
                     }`}
                   >
-                    <IconComponent className="h-5 w-5" />
+                    <IconComponent className="h-4 w-4" />
                   </div>
-                  <span className="text-xs mt-2 text-center">{step.title}</span>
+                  <span className="text-xs mt-1">{step.title}</span>
                 </div>
               );
             })}
           </div>
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 rounded-full h-1">
             <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 6) * 100}%` }}
+              className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / 4) * 100}%` }}
             />
           </div>
         </div>
 
-        {/* Step content */}
+        {/* Conteúdo da etapa */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -186,29 +168,15 @@ const BookingFlow = () => {
           </CardContent>
         </Card>
 
-        {/* Navigation buttons */}
-        {currentStep < 6 && (
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={handlePrevious}>
-              {currentStep === 1 ? 'Voltar à Busca' : 'Anterior'}
-            </Button>
-            <Button onClick={handleNext} disabled={!canProceed()}>
-              {currentStep === 5 ? 'Finalizar Pedido' : 'Próximo'}
-            </Button>
-          </div>
-        )}
-
-        {/* Confirmation step navigation */}
-        {currentStep === 6 && (
-          <div className="flex justify-center gap-4">
-            <Button onClick={() => navigate('/orders')}>
-              Ver Meus Pedidos
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/dashboard')}>
-              Voltar ao Início
-            </Button>
-          </div>
-        )}
+        {/* Navegação simplificada */}
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={handlePrevious}>
+            {currentStep === 1 ? 'Voltar' : 'Anterior'}
+          </Button>
+          <Button onClick={handleNext} disabled={!canProceed()}>
+            {currentStep === 4 ? 'Finalizar' : 'Próximo'}
+          </Button>
+        </div>
       </div>
     </div>
   );
