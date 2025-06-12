@@ -126,10 +126,10 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.code.trim() || !formData.category.trim()) {
+    if (!formData.name.trim() || !formData.code.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Nome, código e categoria são obrigatórios.",
+        description: "Nome e código são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -137,9 +137,22 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
 
     setLoading(true);
     try {
+      // Preparar dados para criação (igual ao EditServiceModal)
+      const createData = {
+        name: formData.name.trim(),
+        code: formData.code.trim(),
+        category: formData.category.trim() || 'Sem categoria',
+        category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id.trim() : null,
+        description: formData.description && formData.description.trim() !== '' ? formData.description.trim() : null,
+        synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
+        related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
+        preparation: formData.preparation && formData.preparation.trim() !== '' ? formData.preparation.trim() : null,
+        patient_friendly_description: formData.patient_friendly_description && formData.patient_friendly_description.trim() !== '' ? formData.patient_friendly_description.trim() : null
+      };
+
       const { data, error } = await supabase
         .from('services')
-        .insert([formData])
+        .insert([createData])
         .select()
         .single();
 
@@ -248,7 +261,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             </div>
 
             <div>
-              <Label>Categoria *</Label>
+              <Label>Categoria</Label>
               <div className="mt-2">
                 <CategorySelector
                   categories={categories}
@@ -290,12 +303,12 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             )}
 
             <div>
-              <Label htmlFor="description">Descrição Técnica</Label>
+              <Label htmlFor="description">Descrição</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição técnica do serviço"
+                placeholder="Descrição do serviço"
                 rows={3}
               />
             </div>
@@ -334,17 +347,21 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             <Separator />
 
             <div>
-              <Label htmlFor="preparation">Preparação (Opcional)</Label>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <p className="text-sm text-muted-foreground mb-4">
+                Após criar o serviço, você poderá configurar preparações padronizadas específicas.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="preparation">Preparação</Label>
               <Textarea
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Instruções de preparo para o serviço (opcional - você pode configurar preparações padronizadas depois)"
+                placeholder="Instruções de preparo para o serviço"
                 rows={4}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Após criar o serviço, você poderá adicionar preparações padronizadas específicas.
-              </p>
             </div>
 
             <div className="flex gap-2 pt-4">
