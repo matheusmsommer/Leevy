@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { TestTube, Scan, Stethoscope, Scissors, UserCheck, HardHat, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -37,7 +36,7 @@ const getIconComponent = (iconName?: string) => {
 
 const CategorySelector = ({ categories, selectedCategoryId, onCategorySelect, className }: CategorySelectorProps) => {
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3", className)}>
+    <div className={cn("grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2", className)}>
       {categories.map((category) => {
         const IconComponent = getIconComponent(category.icon);
         const isSelected = selectedCategoryId === category.id;
@@ -46,41 +45,29 @@ const CategorySelector = ({ categories, selectedCategoryId, onCategorySelect, cl
           <Card
             key={category.id}
             className={cn(
-              "cursor-pointer transition-all duration-200 hover:shadow-md border-2",
+              "cursor-pointer transition-all duration-200 hover:shadow-md border-2 h-20",
               isSelected 
                 ? "border-primary bg-primary/5 shadow-md" 
                 : "border-border hover:border-primary/50"
             )}
             onClick={() => onCategorySelect(category.id)}
           >
-            <CardContent className="p-4 text-center">
+            <CardContent className="p-2 text-center h-full flex flex-col justify-center items-center">
               <div className={cn(
-                "mx-auto mb-3 p-3 rounded-full w-fit transition-colors",
+                "mb-1 p-1.5 rounded-full w-fit transition-colors",
                 isSelected 
                   ? "bg-primary text-primary-foreground" 
                   : "bg-muted text-muted-foreground"
               )}>
-                <IconComponent className="h-6 w-6" />
+                <IconComponent className="h-4 w-4" />
               </div>
               
               <h3 className={cn(
-                "font-medium text-sm mb-1 transition-colors",
+                "font-medium text-xs transition-colors line-clamp-2",
                 isSelected ? "text-primary" : "text-foreground"
               )}>
                 {category.name}
               </h3>
-              
-              {category.description && (
-                <p className="text-xs text-muted-foreground line-clamp-2">
-                  {category.description}
-                </p>
-              )}
-              
-              {isSelected && (
-                <Badge variant="default" className="mt-2 text-xs">
-                  Selecionada
-                </Badge>
-              )}
             </CardContent>
           </Card>
         );

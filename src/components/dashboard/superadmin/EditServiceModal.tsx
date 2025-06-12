@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -29,11 +28,11 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
   const [formData, setFormData] = useState({
     name: '',
     code: '',
+    synonyms: '',
+    related_diseases: '',
     category: '',
     category_id: '',
     description: '',
-    synonyms: '',
-    related_diseases: '',
     preparation: ''
   });
 
@@ -45,11 +44,11 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
       const serviceData = {
         name: service.name || '',
         code: service.code || '',
+        synonyms: service.synonyms || '',
+        related_diseases: service.related_diseases || '',
         category: service.category || '',
         category_id: service.category_id || '',
         description: service.description || '',
-        synonyms: service.synonyms || '',
-        related_diseases: service.related_diseases || '',
         preparation: service.preparation || ''
       };
       
@@ -229,11 +228,11 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
       const updateData = {
         name: formData.name.trim(),
         code: formData.code.trim(),
+        synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
+        related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
         category: formData.category.trim() || 'Sem categoria',
         category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id.trim() : null,
         description: formData.description && formData.description.trim() !== '' ? formData.description.trim() : null,
-        synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
-        related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
         preparation: formData.preparation && formData.preparation.trim() !== '' ? formData.preparation.trim() : null
       };
 
@@ -316,6 +315,26 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
           </div>
 
           <div>
+            <Label htmlFor="synonyms">Sinônimos</Label>
+            <Input
+              id="synonyms"
+              value={formData.synonyms}
+              onChange={(e) => setFormData(prev => ({ ...prev, synonyms: e.target.value }))}
+              placeholder="Sinônimos separados por vírgula"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="related_diseases">Doenças Relacionadas</Label>
+            <Input
+              id="related_diseases"
+              value={formData.related_diseases}
+              onChange={(e) => setFormData(prev => ({ ...prev, related_diseases: e.target.value }))}
+              placeholder="Doenças relacionadas separadas por vírgula"
+            />
+          </div>
+
+          <div>
             <Label>Categoria</Label>
             <div className="mt-2">
               <CategorySelector
@@ -365,26 +384,6 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Descrição do serviço"
               rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="synonyms">Sinônimos</Label>
-            <Input
-              id="synonyms"
-              value={formData.synonyms}
-              onChange={(e) => setFormData(prev => ({ ...prev, synonyms: e.target.value }))}
-              placeholder="Sinônimos separados por vírgula"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="related_diseases">Doenças Relacionadas</Label>
-            <Input
-              id="related_diseases"
-              value={formData.related_diseases}
-              onChange={(e) => setFormData(prev => ({ ...prev, related_diseases: e.target.value }))}
-              placeholder="Doenças relacionadas separadas por vírgula"
             />
           </div>
 

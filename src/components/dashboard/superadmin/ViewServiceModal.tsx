@@ -74,6 +74,20 @@ const ViewServiceModal = ({ open, onOpenChange, service }: ViewServiceModalProps
             </div>
           </div>
 
+          {service.synonyms && (
+            <div>
+              <h4 className="font-medium text-sm text-muted-foreground mb-1">Sinônimos</h4>
+              <p className="text-foreground">{service.synonyms}</p>
+            </div>
+          )}
+
+          {service.related_diseases && (
+            <div>
+              <h4 className="font-medium text-sm text-muted-foreground mb-1">Doenças Relacionadas</h4>
+              <p className="text-foreground">{service.related_diseases}</p>
+            </div>
+          )}
+
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-2">Categoria</h4>
             <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
@@ -86,7 +100,7 @@ const ViewServiceModal = ({ open, onOpenChange, service }: ViewServiceModalProps
               <h4 className="font-medium text-sm text-muted-foreground mb-2">Subcategorias</h4>
               <div className="flex flex-wrap gap-2">
                 {service.subcategory_names.map((name, index) => (
-                  <Badge key={index} variant="outline" className="border-secondary/20 text-secondary bg-secondary/5">
+                  <Badge key={index} variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
                     {name}
                   </Badge>
                 ))}
@@ -98,20 +112,6 @@ const ViewServiceModal = ({ open, onOpenChange, service }: ViewServiceModalProps
             <div>
               <h4 className="font-medium text-sm text-muted-foreground mb-1">Descrição</h4>
               <p className="text-foreground">{service.description}</p>
-            </div>
-          )}
-
-          {service.synonyms && (
-            <div>
-              <h4 className="font-medium text-sm text-muted-foreground mb-1">Sinônimos</h4>
-              <p className="text-foreground">{service.synonyms}</p>
-            </div>
-          )}
-
-          {service.related_diseases && (
-            <div>
-              <h4 className="font-medium text-sm text-muted-foreground mb-1">Doenças Relacionadas</h4>
-              <p className="text-foreground">{service.related_diseases}</p>
             </div>
           )}
 

@@ -471,7 +471,6 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          patient_friendly_description: string | null
           preparation: string | null
           preparation_id: string | null
           related_diseases: string | null
@@ -487,7 +486,6 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          patient_friendly_description?: string | null
           preparation?: string | null
           preparation_id?: string | null
           related_diseases?: string | null
@@ -503,7 +501,6 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          patient_friendly_description?: string | null
           preparation?: string | null
           preparation_id?: string | null
           related_diseases?: string | null
