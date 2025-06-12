@@ -6,9 +6,9 @@ import {
   TestTube, 
   ShoppingCart, 
   Users, 
-  Shield, 
   Settings,
   LogOut,
+  Activity,
   Sparkles
 } from 'lucide-react';
 import {
@@ -32,7 +32,7 @@ interface SuperAdminSidebarProps {
 }
 
 const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) => {
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
 
   const menuItems = [
     {
@@ -41,14 +41,14 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
       icon: BarChart3,
     },
     {
-      id: 'exams',
-      title: 'Exames',
-      icon: TestTube,
-    },
-    {
       id: 'companies',
       title: 'Empresas',
       icon: Building2,
+    },
+    {
+      id: 'exams',
+      title: 'Exames Globais',
+      icon: TestTube,
     },
     {
       id: 'orders',
@@ -61,14 +61,14 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
       icon: Users,
     },
     {
-      id: 'audit',
-      title: 'Auditoria',
-      icon: Shield,
-    },
-    {
       id: 'settings',
       title: 'Configurações',
       icon: Settings,
+    },
+    {
+      id: 'logs',
+      title: 'Logs de Auditoria',
+      icon: Activity,
     },
   ];
 
@@ -76,11 +76,13 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
     <Sidebar className="border-r border-border/50 bg-gradient-to-b from-card to-card/80">
       <SidebarHeader className="p-6 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-leevy rounded-xl flex items-center justify-center shadow-soft">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gradient">Leevy</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Leevy
+            </h2>
             <p className="text-sm text-primary font-medium">Super Admin</p>
           </div>
         </div>
@@ -89,7 +91,7 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
       <SidebarContent className="p-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-muted-foreground font-semibold mb-3">
-            Menu Principal
+            Gestão da Plataforma
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
@@ -100,8 +102,8 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
                     onClick={() => onTabChange(item.id)}
                     className={`w-full justify-start h-11 rounded-xl transition-all duration-200 ${
                       activeTab === item.id 
-                        ? 'bg-gradient-leevy text-white shadow-soft' 
-                        : 'hover:bg-muted/50 text-foreground hover:shadow-soft'
+                        ? 'bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg' 
+                        : 'hover:bg-muted/50 text-foreground hover:shadow-md'
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
@@ -117,7 +119,7 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
       <SidebarFooter className="p-4 border-t border-border/50">
         <Button 
           variant="outline" 
-          onClick={logout} 
+          onClick={signOut} 
           className="w-full justify-start h-11 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all duration-200"
         >
           <LogOut className="w-5 h-5 mr-3" />
