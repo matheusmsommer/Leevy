@@ -13,7 +13,8 @@ import {
   MapPin,
   User,
   Phone,
-  MessageSquare
+  MessageSquare,
+  AlertTriangle
 } from 'lucide-react';
 
 interface BookingData {
@@ -203,7 +204,10 @@ const ConfirmationStep = ({ bookingData }: ConfirmationStepProps) => {
       {/* Próximos passos */}
       <Card className="bg-blue-50 border-blue-200">
         <CardHeader>
-          <CardTitle className="text-base text-blue-800">📋 Próximos Passos</CardTitle>
+          <CardTitle className="text-base text-blue-800 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Próximos Passos
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 text-sm">
@@ -248,7 +252,10 @@ const ConfirmationStep = ({ bookingData }: ConfirmationStepProps) => {
       {hasSpecialInstructions && (
         <Card className="bg-amber-50 border-amber-200">
           <CardHeader>
-            <CardTitle className="text-base text-amber-800">⚠️ Instruções de Preparo</CardTitle>
+            <CardTitle className="text-base text-amber-800 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Instruções de Preparo
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -266,7 +273,10 @@ const ConfirmationStep = ({ bookingData }: ConfirmationStepProps) => {
       {/* Contato do local */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">📞 Contato do Local</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            Contato do Local
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
