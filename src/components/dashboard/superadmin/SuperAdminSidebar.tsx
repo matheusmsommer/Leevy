@@ -22,8 +22,7 @@ import {
   FileText,
   Shield,
   Cog,
-  LogOut,
-  Sparkles
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -48,15 +47,15 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
   ];
 
   return (
-    <Sidebar className="border-r border-border/50 bg-gradient-to-b from-card to-card/80">
+    <Sidebar className="border-r border-border/50">
       <SidebarHeader className="p-6 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-leevy rounded-xl flex items-center justify-center shadow-soft">
+          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
             <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gradient">Leevy</h2>
-            <p className="text-sm text-primary font-medium">Super Admin</p>
+            <h2 className="text-xl font-bold">Leevy</h2>
+            <p className="text-sm text-blue-600 font-medium">Super Admin</p>
           </div>
         </div>
       </SidebarHeader>
@@ -75,8 +74,8 @@ const SuperAdminSidebar = ({ activeTab, onTabChange }: SuperAdminSidebarProps) =
                     onClick={() => onTabChange(item.id)}
                     className={`w-full justify-start h-11 rounded-xl transition-all duration-200 ${
                       activeTab === item.id 
-                        ? 'bg-gradient-leevy text-white shadow-soft' 
-                        : 'hover:bg-muted/50 text-foreground hover:shadow-soft'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        : 'hover:bg-muted/50 text-foreground'
                     }`}
                   >
                     <item.icon className="w-5 h-5" />
