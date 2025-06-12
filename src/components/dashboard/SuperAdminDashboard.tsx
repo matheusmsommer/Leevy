@@ -33,24 +33,6 @@ const SuperAdminDashboard = () => {
     }
   ];
 
-  // Mock data for platform stats - will be replaced with real data later
-  const mockPlatformStats = {
-    totalCompanies: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    commissionsReceived: 0,
-    commissionsPending: 0
-  };
-
-  // Mock data for top companies - will be replaced with real data later
-  const mockTopCompanies: Array<{ id: string; name: string; orders: number; revenue: number }> = [];
-
-  // Mock data for global exams - will be replaced with real data later
-  const mockGlobalExams: Array<{ id: string; name: string; code: string; category: string; preparation: string; description: string }> = [];
-
-  // Mock data for platform users - will be replaced with real data later
-  const mockPlatformUsers: Array<{ id: string; name: string; email: string; totalSpent: number; lastAccess: string; ordersCount: number }> = [];
-
   const handleViewCompany = (companyId: string) => {
     console.log('Viewing company:', companyId);
   };
@@ -78,7 +60,7 @@ const SuperAdminDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardStats platformStats={mockPlatformStats} topCompanies={mockTopCompanies} />;
+        return <DashboardStats />;
       case 'companies':
         return <CompanyManagement 
           onViewCompany={handleViewCompany}
@@ -86,20 +68,20 @@ const SuperAdminDashboard = () => {
           onBlockCompany={handleBlockCompany}
         />;
       case 'exams':
-        return <ExamManagement globalExams={mockGlobalExams} onAddExam={handleAddExam} />;
+        return <ExamManagement globalExams={[]} onAddExam={handleAddExam} />;
       case 'orders':
         return <OrderManagement 
           onExportOrders={handleExportOrders}
           onMarkCommissionPaid={handleMarkCommissionPaid}
         />;
       case 'users':
-        return <UserManagement platformUsers={mockPlatformUsers} />;
+        return <UserManagement />;
       case 'settings':
         return <PlatformSettings />;
       case 'logs':
         return <AuditLogs auditLogs={mockAuditLogs} />;
       default:
-        return <DashboardStats platformStats={mockPlatformStats} topCompanies={mockTopCompanies} />;
+        return <DashboardStats />;
     }
   };
 
