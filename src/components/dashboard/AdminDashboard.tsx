@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Settings, Users, Calendar, File, Building, MapPin, DollarSign, Trending
 import CompanyManagement from './CompanyManagement';
 import ServiceManagement from './ServiceManagement';
 import AdminOnboarding from './AdminOnboarding';
+import OrderManagement from './OrderManagement';
 import { Company } from '@/types/business';
 
 const AdminDashboard = () => {
@@ -90,14 +90,15 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Dashboard</TabsTrigger>
+            <TabsTrigger value="orders">Pedidos</TabsTrigger>
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
             <TabsTrigger value="patients">Pacientes</TabsTrigger>
             <TabsTrigger value="services">Serviços</TabsTrigger>
-            <TabsTrigger value="orders">Pedidos</TabsTrigger>
             <TabsTrigger value="financial">Financeiro</TabsTrigger>
             <TabsTrigger value="team">Equipe</TabsTrigger>
+            <TabsTrigger value="settings">Config</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -229,6 +230,10 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="orders">
+            <OrderManagement />
+          </TabsContent>
+
           <TabsContent value="agenda">
             <Card>
               <CardHeader>
@@ -269,25 +274,6 @@ const AdminDashboard = () => {
 
           <TabsContent value="services">
             <ServiceManagement companyId={company?.id || null} />
-          </TabsContent>
-
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <File className="h-5 w-5" />
-                  Pedidos e Vendas
-                </CardTitle>
-                <CardDescription>
-                  Acompanhe todas as vendas e status de pagamento
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Lista de pedidos será implementada na próxima etapa.
-                </p>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="financial">
