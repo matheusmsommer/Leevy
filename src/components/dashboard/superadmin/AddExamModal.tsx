@@ -309,13 +309,6 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
             <Separator />
 
             <div>
-              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
-              <div className="text-sm text-muted-foreground mb-3">
-                Após criar o exame, você poderá adicionar preparações específicas usando o gerenciador abaixo.
-              </div>
-            </div>
-
-            <div>
               <Label htmlFor="preparation">Preparação</Label>
               <Textarea
                 id="preparation"
