@@ -4,14 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Settings, Users, Calendar, File, Building, MapPin } from 'lucide-react';
+import { Settings, Users, Calendar, File, Building, MapPin, DollarSign, TrendingUp, UserCheck } from 'lucide-react';
 import CompanyManagement from './CompanyManagement';
 import ServiceManagement from './ServiceManagement';
+import AdminOnboarding from './AdminOnboarding';
 import { Company } from '@/types/business';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const [company, setCompany] = useState<Company | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Mock company data - em produção virá do Supabase
   React.useEffect(() => {
@@ -29,6 +31,49 @@ const AdminDashboard = () => {
     setCompany(mockCompany);
   }, [user]);
 
+  // Mock KPIs data
+  const kpis = {
+    monthlyBookings: 45,
+    totalSales: 8750.00,
+    commissionPaid: 875.00,
+    patientsServed: 32
+  };
+
+  // Mock recent bookings
+  const recentBookings = [
+    {
+      id: '1',
+      patient_name: 'João Silva',
+      service_name: 'Hemograma Completo',
+      location: 'Centro',
+      date: '2024-01-15',
+      time: '09:00',
+      status: 'confirmado',
+      amount: 45.00
+    },
+    {
+      id: '2',
+      patient_name: 'Maria Santos',
+      service_name: 'Check-up Básico',
+      location: 'Vila Madalena',
+      date: '2024-01-15',
+      time: '14:30',
+      status: 'realizado',
+      amount: 180.00
+    }
+  ];
+
+  if (showOnboarding) {
+    return (
+      <AdminOnboarding
+        onComplete={(data) => {
+          console.log('Onboarding completed:', data);
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-white">
@@ -45,27 +90,30 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="company">Empresa</TabsTrigger>
-            <TabsTrigger value="services">Serviços</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="overview">Dashboard</TabsTrigger>
             <TabsTrigger value="agenda">Agenda</TabsTrigger>
-            <TabsTrigger value="settings">Configurações</TabsTrigger>
+            <TabsTrigger value="patients">Pacientes</TabsTrigger>
+            <TabsTrigger value="services">Serviços</TabsTrigger>
+            <TabsTrigger value="orders">Pedidos</TabsTrigger>
+            <TabsTrigger value="financial">Financeiro</TabsTrigger>
+            <TabsTrigger value="team">Equipe</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Pedidos Hoje
+                    Agendamentos do Mês
                   </CardTitle>
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-2xl font-bold">{kpis.monthlyBookings}</div>
                   <p className="text-xs text-muted-foreground">
-                    +2 desde ontem
+                    +12% desde o mês passado
                   </p>
                 </CardContent>
               </Card>
@@ -73,14 +121,14 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Receita do Mês
+                    Vendas Totais
                   </CardTitle>
-                  <File className="h-4 w-4 text-muted-foreground" />
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">R$ 3.240</div>
+                  <div className="text-2xl font-bold">R$ {kpis.totalSales.toFixed(2)}</div>
                   <p className="text-xs text-muted-foreground">
-                    +15% desde o mês passado
+                    +8% desde o mês passado
                   </p>
                 </CardContent>
               </Card>
@@ -88,14 +136,14 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Serviços Ativos
+                    Comissão Leevy
                   </CardTitle>
-                  <File className="h-4 w-4 text-muted-foreground" />
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">24</div>
+                  <div className="text-2xl font-bold">R$ {kpis.commissionPaid.toFixed(2)}</div>
                   <p className="text-xs text-muted-foreground">
-                    Exames e consultas
+                    10% das vendas
                   </p>
                 </CardContent>
               </Card>
@@ -103,20 +151,55 @@ const AdminDashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Unidades
+                    Pacientes Atendidos
                   </CardTitle>
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <UserCheck className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">3</div>
+                  <div className="text-2xl font-bold">{kpis.patientsServed}</div>
                   <p className="text-xs text-muted-foreground">
-                    Locais de atendimento
+                    Únicos este mês
                   </p>
                 </CardContent>
               </Card>
             </div>
 
+            {/* Recent Activity */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Agendamentos Recentes</CardTitle>
+                  <CardDescription>
+                    Últimos agendamentos realizados
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentBookings.map((booking) => (
+                      <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{booking.patient_name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.service_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {booking.date} às {booking.time} - {booking.location}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">R$ {booking.amount.toFixed(2)}</p>
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            booking.status === 'confirmado' ? 'bg-blue-100 text-blue-800' :
+                            booking.status === 'realizado' ? 'bg-green-100 text-green-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Ações Rápidas</CardTitle>
@@ -127,7 +210,7 @@ const AdminDashboard = () => {
                 <CardContent className="space-y-4">
                   <Button className="w-full justify-start">
                     <File className="h-4 w-4 mr-2" />
-                    Adicionar Novo Exame
+                    Adicionar Novo Serviço
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <Calendar className="h-4 w-4 mr-2" />
@@ -135,38 +218,15 @@ const AdminDashboard = () => {
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <MapPin className="h-4 w-4 mr-2" />
-                    Gerenciar Unidades
+                    Gerenciar Locais
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setShowOnboarding(true)}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Reconfigurar Empresa
                   </Button>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Link de Venda Direta</CardTitle>
-                  <CardDescription>
-                    Gere links personalizados para venda de exames
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Crie links diretos para que pacientes possam comprar exames sem precisar navegar pelo catálogo.
-                    </p>
-                    <Button variant="outline">
-                      Gerar Link de Pagamento
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="company">
-            <CompanyManagement company={company} />
-          </TabsContent>
-
-          <TabsContent value="services">
-            <ServiceManagement companyId={company?.id || null} />
           </TabsContent>
 
           <TabsContent value="agenda">
@@ -174,34 +234,95 @@ const AdminDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Agenda e Pedidos
+                  Agenda de Agendamentos
                 </CardTitle>
                 <CardDescription>
-                  Visualize agendamentos e gerencie pedidos
+                  Visualize e gerencie todos os agendamentos
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Funcionalidade de agenda será implementada na próxima etapa.
+                  Interface de agenda será implementada na próxima etapa.
                 </p>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="settings">
+          <TabsContent value="patients">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Configurações
+                  <Users className="h-5 w-5" />
+                  Pacientes Cadastrados
                 </CardTitle>
                 <CardDescription>
-                  Configure sua empresa e preferências
+                  Visualize pacientes que já compraram serviços
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Configurações serão implementadas na próxima etapa.
+                  Lista de pacientes será implementada na próxima etapa.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="services">
+            <ServiceManagement companyId={company?.id || null} />
+          </TabsContent>
+
+          <TabsContent value="orders">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <File className="h-5 w-5" />
+                  Pedidos e Vendas
+                </CardTitle>
+                <CardDescription>
+                  Acompanhe todas as vendas e status de pagamento
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Lista de pedidos será implementada na próxima etapa.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="financial">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Relatórios Financeiros
+                </CardTitle>
+                <CardDescription>
+                  Acompanhe repasses e comissões
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Relatórios financeiros serão implementados na próxima etapa.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Gerenciar Equipe
+                </CardTitle>
+                <CardDescription>
+                  Convide usuários e gerencie permissões
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Gerenciamento de equipe será implementado na próxima etapa.
                 </p>
               </CardContent>
             </Card>
