@@ -4,22 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TrendingUp, Building2, ShoppingCart, DollarSign, Award } from 'lucide-react';
 
 interface DashboardStatsProps {
-  stats: {
+  platformStats: {
     totalCompanies: number;
     totalOrders: number;
-    grossRevenue: number;
-    netRevenue: number;
-    pendingCommissions: number;
+    totalRevenue: number;
+    commissionsReceived: number;
+    commissionsPending: number;
   };
-  topLabs: Array<{
+  topCompanies: Array<{
     id: string;
     name: string;
-    sales: number;
+    orders: number;
     revenue: number;
   }>;
 }
 
-const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
+const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -31,7 +31,7 @@ const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
             <Building2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalCompanies}</div>
+            <div className="text-2xl font-bold text-foreground">{platformStats.totalCompanies}</div>
             <p className="text-xs text-muted-foreground">
               Laboratórios e clínicas ativas
             </p>
@@ -46,7 +46,7 @@ const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
             <ShoppingCart className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalOrders.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-foreground">{platformStats.totalOrders.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               Exames vendidos na plataforma
             </p>
@@ -56,13 +56,13 @@ const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Receita Bruta
+              Receita Total
             </CardTitle>
             <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {platformStats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
               Total faturado
@@ -79,7 +79,7 @@ const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              R$ {stats.pendingCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {platformStats.commissionsPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             <p className="text-xs text-muted-foreground">
               A receber
@@ -90,27 +90,27 @@ const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
 
       <Card className="border-border">
         <CardHeader>
-          <CardTitle className="text-foreground">Ranking de Laboratórios</CardTitle>
+          <CardTitle className="text-foreground">Ranking de Empresas</CardTitle>
           <CardDescription className="text-muted-foreground">
-            Laboratórios com mais vendas este mês
+            Empresas com mais vendas este mês
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topLabs.map((lab, index) => (
-              <div key={lab.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
+            {topCompanies.map((company, index) => (
+              <div key={company.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
                     <span className="text-sm font-bold text-primary">#{index + 1}</span>
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{lab.name}</p>
-                    <p className="text-sm text-muted-foreground">{lab.sales} vendas</p>
+                    <p className="font-medium text-foreground">{company.name}</p>
+                    <p className="text-sm text-muted-foreground">{company.orders} vendas</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-foreground">
-                    R$ {lab.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {company.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                   <p className="text-sm text-muted-foreground">faturado</p>
                 </div>
