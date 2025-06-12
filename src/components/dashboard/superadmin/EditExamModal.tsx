@@ -23,6 +23,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -37,6 +38,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
   useEffect(() => {
     if (exam && open) {
+      setIsInitializing(true);
       console.log('Loading exam data:', exam);
       console.log('Exam category_id:', exam.category_id);
       console.log('Exam subcategory_id:', exam.subcategory_id);
@@ -61,10 +63,13 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         console.log('Categories loaded, now checking for subcategories...');
         if (exam.category_id && exam.category_id.trim() !== '') {
           console.log('Fetching subcategories for category_id:', exam.category_id);
-          fetchSubcategories(exam.category_id);
+          fetchSubcategories(exam.category_id).then(() => {
+            setIsInitializing(false);
+          });
         } else {
           console.log('No category_id found, clearing subcategories');
           setSubcategories([]);
+          setIsInitializing(false);
         }
       });
     }
@@ -115,6 +120,12 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   };
 
   const handleCategoryChange = (categoryId: string) => {
+    // Evita alterações durante a inicialização
+    if (isInitializing) {
+      console.log('Skipping category change during initialization');
+      return;
+    }
+
     const category = categories.find(c => c.id === categoryId);
     console.log('Category changed to:', categoryId, category);
     
@@ -131,6 +142,17 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     } else {
       setSubcategories([]);
     }
+  };
+
+  const handleSubcategoryChange = (subcategoryId: string) => {
+    // Evita alterações durante a inicialização
+    if (isInitializing) {
+      console.log('Skipping subcategory change during initialization');
+      return;
+    }
+
+    console.log('Subcategory changed to:', subcategoryId);
+    setFormData(prev => ({ ...prev, subcategory_id: subcategoryId }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -258,10 +280,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
               <Label htmlFor="subcategory">Subcategoria</Label>
               <Select 
                 value={formData.subcategory_id} 
-                onValueChange={(value) => {
-                  console.log('Subcategory changed to:', value);
-                  setFormData(prev => ({ ...prev, subcategory_id: value }));
-                }}
+                onValueChange={handleSubcategoryChange}
                 disabled={!formData.category_id || subcategories.length === 0}
               >
                 <SelectTrigger>
