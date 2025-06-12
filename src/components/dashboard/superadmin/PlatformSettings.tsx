@@ -4,21 +4,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Settings, DollarSign, CreditCard, MessageSquare, UserPlus } from 'lucide-react';
 
 const PlatformSettings = () => {
   return (
-    <Card className="border-border">
-      <CardHeader>
-        <CardTitle className="text-foreground">Configurações da Plataforma</CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Configurações globais do sistema
-        </CardDescription>
+    <Card className="border-border shadow-sm">
+      <CardHeader className="pb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Settings className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-xl font-semibold text-foreground">Configurações da Plataforma</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Configurações globais do sistema
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground">Comissões</CardTitle>
+      <CardContent className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Comissões
+              </CardTitle>
+              <CardDescription>Configure as taxas da plataforma</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -30,7 +42,7 @@ const PlatformSettings = () => {
                   type="number" 
                   defaultValue="5.00" 
                   step="0.01" 
-                  className="border-border focus:ring-2 focus:ring-primary"
+                  className="border-border focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
@@ -42,38 +54,49 @@ const PlatformSettings = () => {
                   type="number" 
                   defaultValue="10" 
                   step="0.1" 
-                  className="border-border focus:ring-2 focus:ring-primary"
+                  className="border-border focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                 Salvar Comissões
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground">Cadastros</CardTitle>
+          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-primary" />
+                Cadastros
+              </CardTitle>
+              <CardDescription>Controle de novos cadastros</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
-                <span className="text-foreground">Cadastro automático de empresas</span>
-                <Button variant="outline" size="sm" className="border-border bg-green-50 text-green-700 hover:bg-green-100">
+              <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
+                <span className="text-foreground font-medium">Cadastro automático de empresas</span>
+                <Button variant="outline" size="sm" className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20">
                   Ativado
                 </Button>
               </div>
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
-                <span className="text-foreground">Validação manual de CNPJ</span>
-                <Button variant="outline" size="sm" className="border-border bg-red-50 text-red-700 hover:bg-red-100">
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+                <span className="text-foreground font-medium">Validação manual de CNPJ</span>
+                <Button variant="outline" size="sm" className="border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20">
                   Desativado
                 </Button>
               </div>
+              <Button className="w-full" variant="outline">
+                Atualizar Configurações
+              </Button>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground">Pagamentos</CardTitle>
+          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Pagamentos
+              </CardTitle>
+              <CardDescription>Configurações de pagamento</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -87,18 +110,25 @@ const PlatformSettings = () => {
                   className="border-border bg-muted/50"
                 />
               </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-foreground">PIX Ativo</Label>
-                <Button variant="outline" size="sm" className="border-border bg-green-50 text-green-700 hover:bg-green-100">
+              <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
+                <Label className="text-foreground font-medium">PIX Ativo</Label>
+                <Button variant="outline" size="sm" className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20">
                   Sim
                 </Button>
               </div>
+              <Button className="w-full" variant="outline">
+                Configurar Pagamentos
+              </Button>
             </CardContent>
           </Card>
 
-          <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="text-lg text-foreground">Mensagens Globais</CardTitle>
+          <Card className="border-border bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                Mensagens Globais
+              </CardTitle>
+              <CardDescription>Comunicados do sistema</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -107,12 +137,12 @@ const PlatformSettings = () => {
                 </Label>
                 <textarea 
                   id="global-message"
-                  className="w-full p-3 border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground" 
+                  className="w-full p-3 border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 bg-background text-foreground min-h-[80px]" 
                   rows={3}
                   placeholder="Mensagem para exibir no topo do sistema..."
                 />
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                 Atualizar Mensagem
               </Button>
             </CardContent>

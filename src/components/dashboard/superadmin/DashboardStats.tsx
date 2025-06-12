@@ -21,95 +21,111 @@ interface DashboardStatsProps {
 
 const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total de Empresas
             </CardTitle>
-            <Building2 className="h-4 w-4 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{platformStats.totalCompanies}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pt-0">
+            <div className="text-3xl font-bold text-foreground mb-1">{platformStats.totalCompanies}</div>
+            <p className="text-sm text-muted-foreground">
               Laboratórios e clínicas ativas
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total de Pedidos
             </CardTitle>
-            <ShoppingCart className="h-4 w-4 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{platformStats.totalOrders.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pt-0">
+            <div className="text-3xl font-bold text-foreground mb-1">{platformStats.totalOrders.toLocaleString()}</div>
+            <p className="text-sm text-muted-foreground">
               Exames vendidos na plataforma
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Receita Total
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <DollarSign className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
+          <CardContent className="pt-0">
+            <div className="text-3xl font-bold text-foreground mb-1">
               R$ {platformStats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Total faturado
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="border-border hover:shadow-md transition-shadow bg-gradient-to-br from-background to-muted/30">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Comissões Pendentes
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
+          <CardContent className="pt-0">
+            <div className="text-3xl font-bold text-foreground mb-1">
               R$ {platformStats.commissionsPending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               A receber
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle className="text-foreground">Ranking de Empresas</CardTitle>
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <Award className="h-5 w-5 text-primary" />
+            Ranking de Empresas
+          </CardTitle>
           <CardDescription className="text-muted-foreground">
             Empresas com mais vendas este mês
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {topCompanies.map((company, index) => (
-              <div key={company.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
+              <div key={company.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border border-border hover:bg-muted/50 transition-colors">
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
-                    <span className="text-sm font-bold text-primary">#{index + 1}</span>
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm ${
+                    index === 0 ? 'bg-primary text-primary-foreground' :
+                    index === 1 ? 'bg-muted text-foreground' :
+                    index === 2 ? 'bg-muted text-foreground' :
+                    'bg-muted/50 text-muted-foreground'
+                  }`}>
+                    #{index + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{company.name}</p>
-                    <p className="text-sm text-muted-foreground">{company.orders} vendas</p>
+                    <p className="font-semibold text-foreground">{company.name}</p>
+                    <p className="text-sm text-muted-foreground">{company.orders} vendas realizadas</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-foreground">
+                  <p className="font-bold text-lg text-foreground">
                     R$ {company.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                   <p className="text-sm text-muted-foreground">faturado</p>
