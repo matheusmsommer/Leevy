@@ -2,103 +2,93 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Eye, Shield, Lock } from 'lucide-react';
+import { Eye, UserCheck, Lock, RotateCcw } from 'lucide-react';
 
 interface Company {
   id: string;
   name: string;
   cnpj: string;
-  status: string;
-  locations: number;
-  orders: number;
-  created_at: string;
+  status: 'active' | 'pending' | 'blocked';
+  collectPoints: number;
+  ordersCount: number;
 }
 
 interface CompanyManagementProps {
   companies: Company[];
-  onViewCompany: (companyId: string) => void;
-  onImpersonateCompany: (companyId: string) => void;
-  onBlockCompany: (companyId: string) => void;
 }
 
-const CompanyManagement = ({ 
-  companies, 
-  onViewCompany, 
-  onImpersonateCompany, 
-  onBlockCompany 
-}: CompanyManagementProps) => {
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      ativo: { label: 'Ativo', variant: 'default' as const },
-      pendente: { label: 'Pendente', variant: 'secondary' as const },
-      bloqueado: { label: 'Bloqueado', variant: 'destructive' as const }
+const CompanyManagement = ({ companies }: CompanyManagementProps) => {
+  const getStatusBadge = (status: Company['status']) => {
+    const styles = {
+      active: 'bg-green-100 text-green-800 border-green-200',
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      blocked: 'bg-red-100 text-red-800 border-red-200'
     };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.ativo;
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+
+    const labels = {
+      active: 'Ativo',
+      pending: 'Pendente',
+      blocked: 'Bloqueado'
+    };
+
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs border ${styles[status]}`}>
+        {labels[status]}
+      </span>
+    );
   };
 
   return (
-    <Card>
+    <Card className="border-border">
       <CardHeader>
-        <CardTitle>Gestão de Empresas</CardTitle>
-        <CardDescription>Laboratórios e clínicas cadastradas</CardDescription>
+        <CardTitle className="text-foreground">Gestão de Empresas</CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Laboratórios e clínicas da plataforma
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Empresa</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Locais</TableHead>
-              <TableHead>Pedidos</TableHead>
-              <TableHead>Cadastro</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {companies.map((company) => (
-              <TableRow key={company.id}>
-                <TableCell className="font-medium">{company.name}</TableCell>
-                <TableCell>{company.cnpj}</TableCell>
-                <TableCell>{getStatusBadge(company.status)}</TableCell>
-                <TableCell>{company.locations}</TableCell>
-                <TableCell>{company.orders}</TableCell>
-                <TableCell>
-                  {new Date(company.created_at).toLocaleDateString('pt-BR')}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => onViewCompany(company.id)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => onImpersonateCompany(company.id)}
-                    >
-                      <Shield className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => onBlockCompany(company.id)}
-                    >
-                      <Lock className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="border border-border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border">
+                <TableHead className="text-muted-foreground">Empresa</TableHead>
+                <TableHead className="text-muted-foreground">CNPJ</TableHead>
+                <TableHead className="text-muted-foreground">Status</TableHead>
+                <TableHead className="text-muted-foreground">Pontos de Coleta</TableHead>
+                <TableHead className="text-muted-foreground">Pedidos</TableHead>
+                <TableHead className="text-muted-foreground">Ações</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {companies.map((company) => (
+                <TableRow key={company.id} className="border-border hover:bg-muted/50">
+                  <TableCell className="font-medium text-foreground">{company.name}</TableCell>
+                  <TableCell className="text-foreground font-mono">{company.cnpj}</TableCell>
+                  <TableCell>{getStatusBadge(company.status)}</TableCell>
+                  <TableCell className="text-foreground">{company.collectPoints}</TableCell>
+                  <TableCell className="text-foreground">{company.ordersCount}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="border-border hover:bg-accent">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border hover:bg-accent">
+                        <UserCheck className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border hover:bg-accent">
+                        <Lock className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border hover:bg-accent">
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

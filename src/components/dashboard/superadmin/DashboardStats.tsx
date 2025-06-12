@@ -1,117 +1,118 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Building2, 
-  FileText, 
-  DollarSign, 
-  Activity,
-  TrendingUp
-} from 'lucide-react';
-
-interface PlatformStats {
-  totalCompanies: number;
-  totalOrders: number;
-  totalRevenue: number;
-  commissionsReceived: number;
-  commissionsPending: number;
-}
-
-interface TopCompany {
-  id: string;
-  name: string;
-  orders: number;
-  revenue: number;
-}
+import { TrendingUp, Building2, ShoppingCart, DollarSign, Award } from 'lucide-react';
 
 interface DashboardStatsProps {
-  platformStats: PlatformStats;
-  topCompanies: TopCompany[];
+  stats: {
+    totalCompanies: number;
+    totalOrders: number;
+    grossRevenue: number;
+    netRevenue: number;
+    pendingCommissions: number;
+  };
+  topLabs: Array<{
+    id: string;
+    name: string;
+    sales: number;
+    revenue: number;
+  }>;
 }
 
-const DashboardStats = ({ platformStats, topCompanies }: DashboardStatsProps) => {
+const DashboardStats = ({ stats, topLabs }: DashboardStatsProps) => {
   return (
     <div className="space-y-6">
-      {/* Platform Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Empresas</CardTitle>
-            <Building2 className="h-4 w-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total de Empresas
+            </CardTitle>
+            <Building2 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{platformStats.totalCompanies}</div>
-            <p className="text-xs text-muted-foreground">Cadastradas</p>
+            <div className="text-2xl font-bold text-foreground">{stats.totalCompanies}</div>
+            <p className="text-xs text-muted-foreground">
+              Laboratórios e clínicas ativas
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pedidos</CardTitle>
-            <FileText className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total de Pedidos
+            </CardTitle>
+            <ShoppingCart className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{platformStats.totalOrders}</div>
-            <p className="text-xs text-muted-foreground">Total realizados</p>
+            <div className="text-2xl font-bold text-foreground">{stats.totalOrders.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              Exames vendidos na plataforma
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Receita Bruta
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {platformStats.totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Bruta da plataforma</p>
+            <div className="text-2xl font-bold text-foreground">
+              R$ {stats.grossRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Total faturado
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Comissões Recebidas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-purple-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Comissões Pendentes
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {platformStats.commissionsReceived.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Já coletadas</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">A Receber</CardTitle>
-            <Activity className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ {platformStats.commissionsPending.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Pendentes</p>
+            <div className="text-2xl font-bold text-foreground">
+              R$ {stats.pendingCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              A receber
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Top Companies */}
-      <Card>
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle>Ranking de Empresas</CardTitle>
-          <CardDescription>Laboratórios com mais vendas</CardDescription>
+          <CardTitle className="text-foreground">Ranking de Laboratórios</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Laboratórios com mais vendas este mês
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topCompanies.map((company, index) => (
-              <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full text-primary font-bold">
-                    {index + 1}
+            {topLabs.map((lab, index) => (
+              <div key={lab.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
+                    <span className="text-sm font-bold text-primary">#{index + 1}</span>
                   </div>
                   <div>
-                    <p className="font-medium">{company.name}</p>
-                    <p className="text-sm text-muted-foreground">{company.orders} pedidos</p>
+                    <p className="font-medium text-foreground">{lab.name}</p>
+                    <p className="text-sm text-muted-foreground">{lab.sales} vendas</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold">R$ {company.revenue.toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">Receita</p>
+                  <p className="font-semibold text-foreground">
+                    R$ {lab.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">faturado</p>
                 </div>
               </div>
             ))}
