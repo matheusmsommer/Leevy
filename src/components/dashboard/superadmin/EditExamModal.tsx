@@ -31,7 +31,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     category: '',
     category_id: '',
     description: '',
-    patient_friendly_description: '',
     synonyms: '',
     related_diseases: '',
     preparation: ''
@@ -48,7 +47,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         category: exam.category || '',
         category_id: exam.category_id || '',
         description: exam.description || '',
-        patient_friendly_description: exam.patient_friendly_description || '',
         synonyms: exam.synonyms || '',
         related_diseases: exam.related_diseases || '',
         preparation: exam.preparation || ''
@@ -233,7 +231,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         category: formData.category.trim() || 'Sem categoria',
         category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id.trim() : null,
         description: formData.description && formData.description.trim() !== '' ? formData.description.trim() : null,
-        patient_friendly_description: formData.patient_friendly_description && formData.patient_friendly_description.trim() !== '' ? formData.patient_friendly_description.trim() : null,
         synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
         related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
         preparation: formData.preparation && formData.preparation.trim() !== '' ? formData.preparation.trim() : null
@@ -360,23 +357,12 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
           )}
 
           <div>
-            <Label htmlFor="description">Descrição Técnica</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Descrição técnica do exame"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="patient_friendly_description">Descrição Amigável para o Paciente</Label>
-            <Textarea
-              id="patient_friendly_description"
-              value={formData.patient_friendly_description}
-              onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
-              placeholder="Descrição simplificada para o paciente entender"
+              placeholder="Descrição do exame"
               rows={3}
             />
           </div>
@@ -409,12 +395,12 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
           </div>
 
           <div>
-            <Label htmlFor="preparation">Observação (Texto Livre)</Label>
+            <Label htmlFor="preparation">Preparação</Label>
             <Textarea
               id="preparation"
               value={formData.preparation}
               onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-              placeholder="Observações ou instruções específicas em texto livre"
+              placeholder="Instruções de preparo para o exame"
               rows={4}
             />
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,6 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
     category: '',
     category_id: '',
     description: '',
-    patient_friendly_description: '',
     synonyms: '',
     related_diseases: '',
     preparation: ''
@@ -158,7 +156,6 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
         category: '',
         category_id: '',
         description: '',
-        patient_friendly_description: '',
         synonyms: '',
         related_diseases: '',
         preparation: ''
@@ -187,7 +184,6 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
       category: '',
       category_id: '',
       description: '',
-      patient_friendly_description: '',
       synonyms: '',
       related_diseases: '',
       preparation: ''
@@ -280,23 +276,12 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
             )}
 
             <div>
-              <Label htmlFor="description">Descrição Técnica</Label>
+              <Label htmlFor="description">Descrição</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição técnica do exame"
-                rows={3}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="patient_friendly_description">Descrição Amigável para o Paciente</Label>
-              <Textarea
-                id="patient_friendly_description"
-                value={formData.patient_friendly_description}
-                onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
-                placeholder="Descrição simplificada para o paciente entender"
+                placeholder="Descrição do exame"
                 rows={3}
               />
             </div>
@@ -322,12 +307,12 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="preparation">Observação (Texto Livre)</Label>
+              <Label htmlFor="preparation">Preparação</Label>
               <Textarea
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Observações ou instruções específicas em texto livre"
+                placeholder="Instruções de preparo para o exame"
                 rows={4}
               />
             </div>
