@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Link, Download, X } from 'lucide-react';
+import { Upload, Link, Download, X, User, MapPin, Calendar, CreditCard, FileText, Settings } from 'lucide-react';
 import { Order } from '@/types/order';
 
 interface OrderDetailsModalProps {
@@ -116,11 +117,11 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center justify-between text-foreground">
             Detalhes do Pedido: {order.order_number}
             {getStatusBadge(order.status)}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Visualize e gerencie os detalhes completos do pedido
           </DialogDescription>
         </DialogHeader>
@@ -128,41 +129,47 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
         <div className="space-y-6">
           {/* Informações do Paciente */}
           <div>
-            <h3 className="font-semibold mb-3">Dados do Paciente</h3>
+            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Dados do Paciente
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <Label className="text-sm font-medium">Nome do Paciente</Label>
-                <p className="text-sm">{order.patient_name}</p>
+                <Label className="text-sm font-medium text-foreground">Nome do Paciente</Label>
+                <p className="text-sm text-foreground">{order.patient_name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Responsável pela Compra</Label>
-                <p className="text-sm">{order.customer_name}</p>
+                <Label className="text-sm font-medium text-foreground">Responsável pela Compra</Label>
+                <p className="text-sm text-foreground">{order.customer_name}</p>
               </div>
             </div>
           </div>
 
           {/* Informações do Atendimento */}
           <div>
-            <h3 className="font-semibold mb-3">Dados do Atendimento</h3>
+            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Dados do Atendimento
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <Label className="text-sm font-medium">Exames Solicitados</Label>
-                <p className="text-sm">{order.service_names.join(', ')}</p>
+                <Label className="text-sm font-medium text-foreground">Exames Solicitados</Label>
+                <p className="text-sm text-foreground">{order.service_names.join(', ')}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Local</Label>
-                <p className="text-sm">{order.location_name}</p>
+                <Label className="text-sm font-medium text-foreground">Local</Label>
+                <p className="text-sm text-foreground">{order.location_name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Tipo de Atendimento</Label>
-                <p className="text-sm">
+                <Label className="text-sm font-medium text-foreground">Tipo de Atendimento</Label>
+                <p className="text-sm text-foreground">
                   {order.attendance_type === 'presencial' ? 'Presencial' : 
                    order.attendance_type === 'domiciliar' ? 'Domiciliar' : 'Comparecimento Livre'}
                 </p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Data e Hora</Label>
-                <p className="text-sm">
+                <Label className="text-sm font-medium text-foreground">Data e Hora</Label>
+                <p className="text-sm text-foreground">
                   {order.scheduled_date && order.scheduled_time 
                     ? `${new Date(order.scheduled_date).toLocaleDateString('pt-BR')} às ${order.scheduled_time}`
                     : 'Comparecimento livre'
@@ -171,8 +178,8 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
               </div>
               {order.observations && (
                 <div className="md:col-span-2">
-                  <Label className="text-sm font-medium">Observações</Label>
-                  <p className="text-sm">{order.observations}</p>
+                  <Label className="text-sm font-medium text-foreground">Observações</Label>
+                  <p className="text-sm text-foreground">{order.observations}</p>
                 </div>
               )}
             </div>
@@ -180,14 +187,17 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
 
           {/* Informações de Pagamento */}
           <div>
-            <h3 className="font-semibold mb-3">Dados do Pagamento</h3>
+            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Dados do Pagamento
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <Label className="text-sm font-medium">Valor Total</Label>
-                <p className="text-sm font-bold">R$ {order.total_amount.toFixed(2)}</p>
+                <Label className="text-sm font-medium text-foreground">Valor Total</Label>
+                <p className="text-sm font-bold text-foreground">R$ {order.total_amount.toFixed(2)}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Status do Pagamento</Label>
+                <Label className="text-sm font-medium text-foreground">Status do Pagamento</Label>
                 <Badge variant={order.payment_status === 'aprovado' ? 'default' : 'destructive'}>
                   {order.payment_status === 'aprovado' ? 'Aprovado' : 
                    order.payment_status === 'pendente' ? 'Pendente' : 'Rejeitado'}
@@ -200,10 +210,13 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
 
           {/* Atualização de Status */}
           <div>
-            <h3 className="font-semibold mb-3">Atualizar Status</h3>
+            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Atualizar Status
+            </h3>
             <div className="flex items-end gap-4">
               <div className="flex-1">
-                <Label htmlFor="status">Novo Status</Label>
+                <Label htmlFor="status" className="text-foreground">Novo Status</Label>
                 <Select value={status} onValueChange={handleStatusChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -226,12 +239,15 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
           {/* Envio de Resultados - só aparece se status for "concluído" */}
           {(status === 'concluido' || order.status === 'concluido') && (
             <div>
-              <h3 className="font-semibold mb-3">Resultados</h3>
+              <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Resultados
+              </h3>
               
               {/* Upload de Arquivos */}
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="file-upload">Upload de Arquivo PDF</Label>
+                  <Label htmlFor="file-upload" className="text-foreground">Upload de Arquivo PDF</Label>
                   <div className="mt-2">
                     <Input
                       id="file-upload"
@@ -246,10 +262,10 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
                 {/* Arquivos enviados */}
                 {resultFiles.length > 0 && (
                   <div className="space-y-2">
-                    <Label>Arquivos Enviados</Label>
+                    <Label className="text-foreground">Arquivos Enviados</Label>
                     {resultFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-2 border rounded">
-                        <span className="text-sm">{file.filename}</span>
+                      <div key={file.id} className="flex items-center justify-between p-2 border rounded bg-card">
+                        <span className="text-sm text-foreground">{file.filename}</span>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" asChild>
                             <a href={file.url} download target="_blank" rel="noopener noreferrer">
@@ -269,7 +285,7 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
 
                 {/* Link Externo */}
                 <div>
-                  <Label htmlFor="result-link">Link Externo para Resultado</Label>
+                  <Label htmlFor="result-link" className="text-foreground">Link Externo para Resultado</Label>
                   <div className="flex gap-2 mt-2">
                     <Input
                       id="result-link"

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Search, Filter } from 'lucide-react';
+import { Eye, Search, Filter, Package, Calendar, DollarSign } from 'lucide-react';
 import { Order, OrderFilter } from '@/types/order';
 import OrderDetailsModal from './OrderDetailsModal';
 
@@ -100,11 +100,11 @@ const OrderManagement = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-card-foreground">
+            <Package className="h-5 w-5" />
             Gestão de Pedidos
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Visualize e gerencie todos os pedidos realizados pelos clientes
           </CardDescription>
         </CardHeader>
@@ -112,7 +112,7 @@ const OrderManagement = () => {
           {/* Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div>
-              <label className="text-sm font-medium mb-2 block">Status</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Status</label>
               <Select value={filters.status || ''} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value || undefined }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os status" />
@@ -129,7 +129,7 @@ const OrderManagement = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Nome do Paciente</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Nome do Paciente</label>
               <Input
                 placeholder="Buscar por nome..."
                 value={filters.patientName || ''}
@@ -138,7 +138,7 @@ const OrderManagement = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Data Inicial</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Data Inicial</label>
               <Input
                 type="date"
                 value={filters.dateFrom || ''}
@@ -147,7 +147,7 @@ const OrderManagement = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Data Final</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Data Final</label>
               <Input
                 type="date"
                 value={filters.dateTo || ''}
@@ -159,28 +159,37 @@ const OrderManagement = () => {
           {/* Lista de Pedidos */}
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <div key={order.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+              <div key={order.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors bg-card">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-2">
-                      <h3 className="font-semibold">{order.order_number}</h3>
+                      <h3 className="font-semibold text-card-foreground">{order.order_number}</h3>
                       {getStatusBadge(order.status)}
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                       <div>
-                        <span className="font-medium">Paciente:</span>
-                        <p>{order.patient_name}</p>
+                        <span className="font-medium text-foreground flex items-center gap-1">
+                          <Search className="h-3 w-3" />
+                          Paciente:
+                        </span>
+                        <p className="text-foreground">{order.patient_name}</p>
                       </div>
                       
                       <div>
-                        <span className="font-medium">Exames:</span>
-                        <p>{order.service_names.join(', ')}</p>
+                        <span className="font-medium text-foreground flex items-center gap-1">
+                          <Package className="h-3 w-3" />
+                          Exames:
+                        </span>
+                        <p className="text-foreground">{order.service_names.join(', ')}</p>
                       </div>
                       
                       <div>
-                        <span className="font-medium">Data/Hora:</span>
-                        <p>
+                        <span className="font-medium text-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Data/Hora:
+                        </span>
+                        <p className="text-foreground">
                           {order.scheduled_date && order.scheduled_time 
                             ? `${new Date(order.scheduled_date).toLocaleDateString('pt-BR')} às ${order.scheduled_time}`
                             : 'Comparecimento livre'
@@ -189,8 +198,11 @@ const OrderManagement = () => {
                       </div>
                       
                       <div>
-                        <span className="font-medium">Valor:</span>
-                        <p>R$ {order.total_amount.toFixed(2)}</p>
+                        <span className="font-medium text-foreground flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          Valor:
+                        </span>
+                        <p className="text-foreground">R$ {order.total_amount.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>
