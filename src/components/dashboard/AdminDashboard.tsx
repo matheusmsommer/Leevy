@@ -8,6 +8,7 @@ import CompanyManagement from './CompanyManagement';
 import ServiceManagement from './ServiceManagement';
 import AdminOnboarding from './AdminOnboarding';
 import OrderManagement from './OrderManagement';
+import CompanySettings from './CompanySettings';
 import { Company } from '@/types/business';
 
 const AdminDashboard = () => {
@@ -312,6 +313,10 @@ const AdminDashboard = () => {
                 </p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <CompanySettings company={company} />
           </TabsContent>
         </Tabs>
       </div>
