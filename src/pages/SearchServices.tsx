@@ -23,6 +23,16 @@ interface ServiceWithCompany {
     description?: string;
     category: string;
     synonyms?: string;
+    exam_categories?: {
+      name: string;
+    };
+    exam_subcategories?: {
+      name: string;
+    };
+    standard_preparations?: {
+      name: string;
+      instructions: string;
+    };
   };
 }
 
@@ -58,7 +68,17 @@ const SearchServices = () => {
             name,
             description,
             category,
-            synonyms
+            synonyms,
+            exam_categories(
+              name
+            ),
+            exam_subcategories(
+              name
+            ),
+            standard_preparations(
+              name,
+              instructions
+            )
           )
         `)
         .eq('active', true)
@@ -86,11 +106,16 @@ const SearchServices = () => {
   const filteredServices = services.filter(service => {
     const searchLower = searchTerm.toLowerCase();
     const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    const categoryName = service.exam.exam_categories?.name || service.exam.category;
+    const subcategoryName = service.exam.exam_subcategories?.name || '';
+    const preparationName = service.exam.standard_preparations?.name || '';
     
     return service.exam.name.toLowerCase().includes(searchLower) ||
            service.exam.description?.toLowerCase().includes(searchLower) ||
            service.company.name.toLowerCase().includes(searchLower) ||
-           service.exam.category.toLowerCase().includes(searchLower) ||
+           categoryName.toLowerCase().includes(searchLower) ||
+           subcategoryName.toLowerCase().includes(searchLower) ||
+           preparationName.toLowerCase().includes(searchLower) ||
            synonymsList.some(synonym => synonym.includes(searchLower));
   });
 
@@ -164,6 +189,21 @@ const SearchServices = () => {
                       <p className="text-sm text-muted-foreground font-medium">
                         {service.company.name}
                       </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                          {service.exam.exam_categories?.name || service.exam.category}
+                        </span>
+                        {service.exam.exam_subcategories?.name && (
+                          <span className="inline-block px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full">
+                            {service.exam.exam_subcategories.name}
+                          </span>
+                        )}
+                        {service.exam.standard_preparations?.name && (
+                          <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                            {service.exam.standard_preparations.name}
+                          </span>
+                        )}
+                      </div>
                       {service.exam.synonyms && (
                         <p className="text-xs text-muted-foreground mt-1">
                           Também conhecido como: {service.exam.synonyms}
@@ -174,15 +214,19 @@ const SearchServices = () => {
                       <p className="text-2xl font-bold text-primary">
                         R$ {service.price.toFixed(2)}
                       </p>
-                      <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-                        {service.exam.category}
-                      </span>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {service.exam.description && (
                     <p className="text-muted-foreground mb-4">{service.exam.description}</p>
+                  )}
+                  
+                  {service.exam.standard_preparations?.instructions && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm font-medium text-orange-800 mb-1">Preparação:</p>
+                      <p className="text-sm text-orange-700">{service.exam.standard_preparations.instructions}</p>
+                    </div>
                   )}
                   
                   <div className="space-y-2 mb-4">

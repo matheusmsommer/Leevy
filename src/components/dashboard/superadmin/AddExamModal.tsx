@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Subcategory {
+  id: string;
+  name: string;
+  category_id: string;
+}
+
+interface Preparation {
+  id: string;
+  name: string;
+  instructions: string;
+}
 
 interface AddExamModalProps {
   open: boolean;
@@ -21,54 +38,99 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [synonymInput, setSynonymInput] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [preparations, setPreparations] = useState<Preparation[]>([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
-    category: '',
+    category_id: '',
+    subcategory_id: '',
+    preparation_id: '',
     synonyms: [] as string[],
-    preparation: '',
-    description: '',
-    fastingHours: '',
-    medicationRestrictions: false,
-    hydrationNeeded: false,
-    physicalActivityRestriction: false,
-    collectionTime: '',
-    resultDeliveryDays: '',
-    specialInstructions: ''
+    description: ''
   });
 
-  const categories = [
-    'sangue',
-    'urina',
-    'fezes',
-    'imagem',
-    'cardiologia',
-    'neurologia',
-    'endocrinologia',
-    'ginecologia',
-    'urologia',
-    'dermatologia',
-    'oftalmologia',
-    'otorrinolaringologia',
-    'outros'
-  ];
+  useEffect(() => {
+    if (open) {
+      fetchCategories();
+      fetchSubcategories();
+      fetchPreparations();
+    }
+  }, [open]);
 
-  const fastingOptions = [
-    { value: '0', label: 'Sem jejum' },
-    { value: '4', label: '4 horas' },
-    { value: '8', label: '8 horas' },
-    { value: '12', label: '12 horas' },
-    { value: '24', label: '24 horas' }
-  ];
+  useEffect(() => {
+    if (formData.category_id) {
+      const filtered = subcategories.filter(sub => sub.category_id === formData.category_id);
+      setFilteredSubcategories(filtered);
+      // Reset subcategory if it doesn't belong to the selected category
+      if (formData.subcategory_id && !filtered.find(sub => sub.id === formData.subcategory_id)) {
+        setFormData(prev => ({ ...prev, subcategory_id: '' }));
+      }
+    } else {
+      setFilteredSubcategories([]);
+    }
+  }, [formData.category_id, subcategories]);
 
-  const collectionTimes = [
-    { value: 'any', label: 'Qualquer horário' },
-    { value: 'morning', label: 'Manhã (7h às 10h)' },
-    { value: 'first_urine', label: 'Primeira urina da manhã' },
-    { value: 'specific', label: 'Horário específico' }
-  ];
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exam_categories')
+        .select('id, name')
+        .eq('active', true)
+        .order('name');
 
-  const handleInputChange = (field: string, value: string | boolean | string[]) => {
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return;
+      }
+
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error in fetchCategories:', error);
+    }
+  };
+
+  const fetchSubcategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exam_subcategories')
+        .select('id, name, category_id')
+        .eq('active', true)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching subcategories:', error);
+        return;
+      }
+
+      setSubcategories(data || []);
+    } catch (error) {
+      console.error('Error in fetchSubcategories:', error);
+    }
+  };
+
+  const fetchPreparations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('standard_preparations')
+        .select('id, name, instructions')
+        .eq('active', true)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching preparations:', error);
+        return;
+      }
+
+      setPreparations(data || []);
+    } catch (error) {
+      console.error('Error in fetchPreparations:', error);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -99,42 +161,10 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     }
   };
 
-  const generatePreparation = () => {
-    const preparations = [];
-    
-    if (formData.fastingHours && formData.fastingHours !== '0') {
-      preparations.push(`Jejum de ${formData.fastingHours} horas`);
-    }
-    
-    if (formData.medicationRestrictions) {
-      preparations.push('Suspender medicamentos conforme orientação médica');
-    }
-    
-    if (formData.hydrationNeeded) {
-      preparations.push('Manter boa hidratação');
-    }
-    
-    if (formData.physicalActivityRestriction) {
-      preparations.push('Evitar exercícios físicos intensos 24h antes');
-    }
-    
-    if (formData.collectionTime === 'morning') {
-      preparations.push('Coleta preferencialmente pela manhã');
-    } else if (formData.collectionTime === 'first_urine') {
-      preparations.push('Primeira urina da manhã');
-    }
-    
-    if (formData.specialInstructions) {
-      preparations.push(formData.specialInstructions);
-    }
-    
-    return preparations.join('; ');
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.code || !formData.category) {
+    if (!formData.name || !formData.code || !formData.category_id) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha nome, código e categoria.",
@@ -148,7 +178,11 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     try {
       console.log('Adding new exam:', formData);
 
-      const finalPreparation = generatePreparation();
+      // Get the selected category name for the legacy category field
+      const selectedCategory = categories.find(cat => cat.id === formData.category_id);
+      
+      // Get preparation instructions if a preparation is selected
+      const selectedPreparation = preparations.find(prep => prep.id === formData.preparation_id);
 
       const { data, error } = await supabase
         .from('exams')
@@ -156,9 +190,12 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
           {
             name: formData.name,
             code: formData.code.toUpperCase(),
-            category: formData.category,
+            category: selectedCategory?.name || '', // Legacy field
+            category_id: formData.category_id,
+            subcategory_id: formData.subcategory_id || null,
+            preparation_id: formData.preparation_id || null,
+            preparation: selectedPreparation?.instructions || null, // Legacy field
             synonyms: formData.synonyms.length > 0 ? formData.synonyms.join(',') : null,
-            preparation: finalPreparation || null,
             description: formData.description || null
           }
         ])
@@ -185,17 +222,11 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
       setFormData({
         name: '',
         code: '',
-        category: '',
+        category_id: '',
+        subcategory_id: '',
+        preparation_id: '',
         synonyms: [],
-        preparation: '',
-        description: '',
-        fastingHours: '',
-        medicationRestrictions: false,
-        hydrationNeeded: false,
-        physicalActivityRestriction: false,
-        collectionTime: '',
-        resultDeliveryDays: '',
-        specialInstructions: ''
+        description: ''
       });
       setSynonymInput('');
 
@@ -233,6 +264,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Ex: Hemograma Completo"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -243,20 +275,67 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
                 onChange={(e) => handleInputChange('code', e.target.value)}
                 placeholder="Ex: HEM001"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="category">Categoria *</Label>
-            <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+            <Select 
+              value={formData.category_id} 
+              onValueChange={(value) => handleInputChange('category_id', value)}
+              disabled={isLoading}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.category_id && filteredSubcategories.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="subcategory">Subcategoria</Label>
+              <Select 
+                value={formData.subcategory_id} 
+                onValueChange={(value) => handleInputChange('subcategory_id', value)}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma subcategoria (opcional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredSubcategories.map((subcategory) => (
+                    <SelectItem key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="preparation">Preparação Padrão</Label>
+            <Select 
+              value={formData.preparation_id} 
+              onValueChange={(value) => handleInputChange('preparation_id', value)}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma preparação (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {preparations.map((preparation) => (
+                  <SelectItem key={preparation.id} value={preparation.id}>
+                    {preparation.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -273,12 +352,13 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
                   onChange={(e) => setSynonymInput(e.target.value)}
                   onKeyPress={handleSynonymKeyPress}
                   placeholder="Ex: CBC, Hemograma simples"
+                  disabled={isLoading}
                 />
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleAddSynonym}
-                  disabled={!synonymInput.trim()}
+                  disabled={!synonymInput.trim() || isLoading}
                 >
                   Adicionar
                 </Button>
@@ -302,90 +382,6 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
             </div>
           </div>
 
-          <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
-            <Label className="text-sm font-semibold">Preparações Padronizadas</Label>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="fastingHours">Jejum</Label>
-                <Select value={formData.fastingHours} onValueChange={(value) => handleInputChange('fastingHours', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o jejum" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fastingOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="collectionTime">Horário de Coleta</Label>
-                <Select value={formData.collectionTime} onValueChange={(value) => handleInputChange('collectionTime', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o horário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {collectionTimes.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="medicationRestrictions"
-                  checked={formData.medicationRestrictions}
-                  onCheckedChange={(checked) => handleInputChange('medicationRestrictions', checked as boolean)}
-                />
-                <Label htmlFor="medicationRestrictions" className="text-sm">
-                  Restrições de medicamentos
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="hydrationNeeded"
-                  checked={formData.hydrationNeeded}
-                  onCheckedChange={(checked) => handleInputChange('hydrationNeeded', checked as boolean)}
-                />
-                <Label htmlFor="hydrationNeeded" className="text-sm">
-                  Manter boa hidratação
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="physicalActivityRestriction"
-                  checked={formData.physicalActivityRestriction}
-                  onCheckedChange={(checked) => handleInputChange('physicalActivityRestriction', checked as boolean)}
-                />
-                <Label htmlFor="physicalActivityRestriction" className="text-sm">
-                  Evitar exercícios físicos intensos
-                </Label>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="specialInstructions">Instruções Especiais</Label>
-              <Textarea
-                id="specialInstructions"
-                value={formData.specialInstructions}
-                onChange={(e) => handleInputChange('specialInstructions', e.target.value)}
-                placeholder="Ex: Bexiga cheia, evitar álcool 48h antes"
-                rows={2}
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="description">Descrição do Exame</Label>
             <Textarea
@@ -394,6 +390,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Descrição detalhada do que o exame avalia"
               rows={3}
+              disabled={isLoading}
             />
           </div>
 
