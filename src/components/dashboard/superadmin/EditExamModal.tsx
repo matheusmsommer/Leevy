@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,13 +24,13 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [isInitializing, setIsInitializing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     category: '',
     category_id: '',
-    subcategory_id: '',
     description: '',
     synonyms: '',
     related_diseases: '',
@@ -40,15 +41,12 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     if (exam && open) {
       setIsInitializing(true);
       console.log('Loading exam data:', exam);
-      console.log('Exam category_id:', exam.category_id);
-      console.log('Exam subcategory_id:', exam.subcategory_id);
       
       const examData = {
         name: exam.name || '',
         code: exam.code || '',
         category: exam.category || '',
         category_id: exam.category_id || '',
-        subcategory_id: exam.subcategory_id || '',
         description: exam.description || '',
         synonyms: exam.synonyms || '',
         related_diseases: exam.related_diseases || '',
@@ -58,17 +56,21 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
       console.log('Setting form data:', examData);
       setFormData(examData);
       
-      // Primeiro carregar categorias, depois subcategorias
+      // Carregar categorias e depois subcategorias
       fetchCategories().then(() => {
         console.log('Categories loaded, now checking for subcategories...');
         if (exam.category_id && exam.category_id.trim() !== '') {
           console.log('Fetching subcategories for category_id:', exam.category_id);
           fetchSubcategories(exam.category_id).then(() => {
-            setIsInitializing(false);
+            // Carregar subcategorias associadas ao exame
+            fetchExamSubcategories(exam.id).then(() => {
+              setIsInitializing(false);
+            });
           });
         } else {
           console.log('No category_id found, clearing subcategories');
           setSubcategories([]);
+          setSelectedSubcategories([]);
           setIsInitializing(false);
         }
       });
@@ -119,8 +121,26 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }
   };
 
+  const fetchExamSubcategories = async (examId: string) => {
+    try {
+      console.log('Fetching exam subcategories for exam:', examId);
+      const { data, error } = await supabase
+        .from('exam_subcategory_associations')
+        .select('subcategory_id')
+        .eq('exam_id', examId);
+
+      if (error) throw error;
+      
+      const subcategoryIds = data?.map(item => item.subcategory_id) || [];
+      console.log('Current exam subcategories:', subcategoryIds);
+      setSelectedSubcategories(subcategoryIds);
+    } catch (error: any) {
+      console.error('Error fetching exam subcategories:', error);
+      setSelectedSubcategories([]);
+    }
+  };
+
   const handleCategoryChange = (categoryId: string) => {
-    // Evita alterações durante a inicialização
     if (isInitializing) {
       console.log('Skipping category change during initialization');
       return;
@@ -132,9 +152,11 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     setFormData(prev => ({
       ...prev,
       category_id: categoryId,
-      category: category?.name || '',
-      subcategory_id: '' // Limpar subcategoria quando categoria muda
+      category: category?.name || ''
     }));
+    
+    // Limpar subcategorias selecionadas quando categoria muda
+    setSelectedSubcategories([]);
     
     // Buscar subcategorias para a nova categoria
     if (categoryId && categoryId.trim() !== '') {
@@ -144,15 +166,49 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }
   };
 
-  const handleSubcategoryChange = (subcategoryId: string) => {
-    // Evita alterações durante a inicialização
+  const handleSubcategoryToggle = (subcategoryId: string) => {
     if (isInitializing) {
       console.log('Skipping subcategory change during initialization');
       return;
     }
 
-    console.log('Subcategory changed to:', subcategoryId);
-    setFormData(prev => ({ ...prev, subcategory_id: subcategoryId }));
+    setSelectedSubcategories(prev => {
+      const newSelection = prev.includes(subcategoryId)
+        ? prev.filter(id => id !== subcategoryId)
+        : [...prev, subcategoryId];
+      
+      console.log('Subcategories selection changed to:', newSelection);
+      return newSelection;
+    });
+  };
+
+  const updateExamSubcategories = async (examId: string, subcategoryIds: string[]) => {
+    try {
+      // Remover associações existentes
+      await supabase
+        .from('exam_subcategory_associations')
+        .delete()
+        .eq('exam_id', examId);
+
+      // Adicionar novas associações
+      if (subcategoryIds.length > 0) {
+        const associations = subcategoryIds.map(subcategoryId => ({
+          exam_id: examId,
+          subcategory_id: subcategoryId
+        }));
+
+        const { error } = await supabase
+          .from('exam_subcategory_associations')
+          .insert(associations);
+
+        if (error) throw error;
+      }
+
+      console.log('Exam subcategories updated successfully');
+    } catch (error: any) {
+      console.error('Error updating exam subcategories:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,7 +231,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         code: formData.code.trim(),
         category: formData.category.trim() || 'Sem categoria',
         category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id.trim() : null,
-        subcategory_id: formData.subcategory_id && formData.subcategory_id.trim() !== '' ? formData.subcategory_id.trim() : null,
         description: formData.description && formData.description.trim() !== '' ? formData.description.trim() : null,
         synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
         related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
@@ -184,8 +239,9 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
       console.log('Form data before update:', formData);
       console.log('Update data being sent:', updateData);
-      console.log('Exam ID:', exam.id);
+      console.log('Selected subcategories:', selectedSubcategories);
 
+      // Atualizar dados do exame
       const { data: updatedData, error } = await supabase
         .from('exams')
         .update(updateData)
@@ -197,6 +253,9 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         console.error('Update error:', error);
         throw error;
       }
+
+      // Atualizar associações de subcategorias
+      await updateExamSubcategories(exam.id, selectedSubcategories);
 
       console.log('Update successful, returned data:', updatedData);
 
@@ -256,49 +315,50 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="category">Categoria</Label>
-              <Select value={formData.category_id} onValueChange={handleCategoryChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-1">
-                Atual: {formData.category_id || 'Nenhuma'}
-              </p>
-            </div>
-
-            <div>
-              <Label htmlFor="subcategory">Subcategoria</Label>
-              <Select 
-                value={formData.subcategory_id} 
-                onValueChange={handleSubcategoryChange}
-                disabled={!formData.category_id || subcategories.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma subcategoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subcategories.map((subcategory) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground mt-1">
-                Atual: {formData.subcategory_id || 'Nenhuma'} | Disponíveis: {subcategories.length}
-              </p>
-            </div>
+          <div>
+            <Label htmlFor="category">Categoria</Label>
+            <Select value={formData.category_id} onValueChange={handleCategoryChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Atual: {formData.category_id || 'Nenhuma'}
+            </p>
           </div>
+
+          {formData.category_id && subcategories.length > 0 && (
+            <div>
+              <Label>Subcategorias</Label>
+              <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                {subcategories.map((subcategory) => (
+                  <div key={subcategory.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`subcategory-${subcategory.id}`}
+                      checked={selectedSubcategories.includes(subcategory.id)}
+                      onCheckedChange={() => handleSubcategoryToggle(subcategory.id)}
+                    />
+                    <Label
+                      htmlFor={`subcategory-${subcategory.id}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {subcategory.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Selecionadas: {selectedSubcategories.length} de {subcategories.length}
+              </p>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="description">Descrição</Label>

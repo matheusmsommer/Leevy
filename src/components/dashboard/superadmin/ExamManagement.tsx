@@ -32,6 +32,7 @@ interface GlobalExam {
   description?: string;
   synonyms?: string;
   exam_preparations?: ExamPreparation[];
+  subcategory_names?: string[];
 }
 
 interface ExamManagementProps {
@@ -55,7 +56,7 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
 
   const fetchGlobalExams = async () => {
     try {
-      console.log('Fetching global exams with preparations...');
+      console.log('Fetching global exams with preparations and subcategories...');
       
       // Buscar exames com suas preparações associadas
       const { data: examsData, error: examsError } = await supabase
@@ -84,8 +85,29 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         return;
       }
 
-      console.log('Global exams loaded with preparations:', examsData);
-      setExams(examsData || []);
+      // Buscar subcategorias para cada exame
+      const examsWithSubcategories = await Promise.all(
+        (examsData || []).map(async (exam) => {
+          const { data: subcategoryData } = await supabase
+            .from('exam_subcategory_associations')
+            .select(`
+              exam_subcategories(name)
+            `)
+            .eq('exam_id', exam.id);
+
+          const subcategory_names = subcategoryData
+            ?.map(item => (item as any).exam_subcategories?.name)
+            .filter(name => name) || [];
+
+          return {
+            ...exam,
+            subcategory_names
+          };
+        })
+      );
+
+      console.log('Global exams loaded with preparations and subcategories:', examsWithSubcategories);
+      setExams(examsWithSubcategories);
     } catch (error) {
       console.error('Error in fetchGlobalExams:', error);
     } finally {
@@ -220,6 +242,7 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                     <TableHead className="text-muted-foreground font-semibold py-4">Nome do Exame</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Código</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Categoria</TableHead>
+                    <TableHead className="text-muted-foreground font-semibold">Subcategorias</TableHead>
                     <TableHead className="text-muted-foreground font-semibold">Preparação</TableHead>
                     <TableHead className="text-muted-foreground font-semibold text-center">Ações</TableHead>
                   </TableRow>
@@ -235,6 +258,24 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                         <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
                           {exam.category}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {exam.subcategory_names && exam.subcategory_names.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {exam.subcategory_names.slice(0, 2).map((name, index) => (
+                              <Badge key={index} variant="outline" className="border-secondary/20 text-secondary bg-secondary/5 text-xs">
+                                {name}
+                              </Badge>
+                            ))}
+                            {exam.subcategory_names.length > 2 && (
+                              <Badge variant="outline" className="border-muted text-muted-foreground text-xs">
+                                +{exam.subcategory_names.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Nenhuma</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-foreground max-w-xs">
                         <div className="truncate" title={getPreparationDisplay(exam)}>

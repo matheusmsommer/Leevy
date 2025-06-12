@@ -23,7 +23,7 @@ interface GlobalExam {
 
 interface ExamDetails {
   category_name?: string;
-  subcategory_name?: string;
+  subcategory_names?: string[];
   preparation_name?: string;
   preparation_instructions?: string;
   exam_preparations?: Array<{
@@ -73,17 +73,19 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
         }
       }
 
-      // Fetch subcategory name
-      if (exam.subcategory_id) {
-        const { data: subcategoryData } = await supabase
-          .from('exam_subcategories')
-          .select('name')
-          .eq('id', exam.subcategory_id)
-          .single();
-        
-        if (subcategoryData) {
-          details.subcategory_name = subcategoryData.name;
-        }
+      // Fetch subcategory names from associations
+      const { data: subcategoryAssociations } = await supabase
+        .from('exam_subcategory_associations')
+        .select(`
+          subcategory_id,
+          exam_subcategories(name)
+        `)
+        .eq('exam_id', exam.id);
+
+      if (subcategoryAssociations && subcategoryAssociations.length > 0) {
+        details.subcategory_names = subcategoryAssociations
+          .map(assoc => (assoc as any).exam_subcategories?.name)
+          .filter(name => name);
       }
 
       // Fetch exam preparations (multiple)
@@ -160,7 +162,7 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Categoria</label>
               <div className="mt-1">
@@ -170,13 +172,15 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
               </div>
             </div>
 
-            {examDetails.subcategory_name && (
+            {examDetails.subcategory_names && examDetails.subcategory_names.length > 0 && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Subcategoria</label>
-                <div className="mt-1">
-                  <Badge variant="outline" className="border-secondary/20 text-secondary bg-secondary/5">
-                    {examDetails.subcategory_name}
-                  </Badge>
+                <label className="text-sm font-medium text-muted-foreground">Subcategorias</label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {examDetails.subcategory_names.map((name, index) => (
+                    <Badge key={index} variant="outline" className="border-secondary/20 text-secondary bg-secondary/5">
+                      {name}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             )}

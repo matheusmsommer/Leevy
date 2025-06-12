@@ -230,6 +230,42 @@ export type Database = {
           },
         ]
       }
+      exam_subcategory_associations: {
+        Row: {
+          created_at: string
+          exam_id: string
+          id: string
+          subcategory_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          id?: string
+          subcategory_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          id?: string
+          subcategory_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subcategory_associations_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_subcategory_associations_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           category: string

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,13 +22,13 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [createdExamId, setCreatedExamId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
     category: '',
     category_id: '',
-    subcategory_id: '',
     description: '',
     patient_friendly_description: '',
     synonyms: '',
@@ -40,6 +40,7 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
     if (open) {
       fetchCategories();
       setCreatedExamId(null);
+      setSelectedSubcategories([]);
     }
   }, [open]);
 
@@ -79,11 +80,44 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
     setFormData(prev => ({
       ...prev,
       category_id: categoryId,
-      category: category?.name || '',
-      subcategory_id: ''
+      category: category?.name || ''
     }));
+    setSelectedSubcategories([]);
     fetchSubcategories(categoryId);
     setSubcategories([]);
+  };
+
+  const handleSubcategoryToggle = (subcategoryId: string) => {
+    setSelectedSubcategories(prev => {
+      const newSelection = prev.includes(subcategoryId)
+        ? prev.filter(id => id !== subcategoryId)
+        : [...prev, subcategoryId];
+      
+      console.log('Subcategories selection changed to:', newSelection);
+      return newSelection;
+    });
+  };
+
+  const createExamSubcategories = async (examId: string, subcategoryIds: string[]) => {
+    try {
+      if (subcategoryIds.length > 0) {
+        const associations = subcategoryIds.map(subcategoryId => ({
+          exam_id: examId,
+          subcategory_id: subcategoryId
+        }));
+
+        const { error } = await supabase
+          .from('exam_subcategory_associations')
+          .insert(associations);
+
+        if (error) throw error;
+      }
+
+      console.log('Exam subcategories created successfully');
+    } catch (error: any) {
+      console.error('Error creating exam subcategories:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,6 +142,9 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
 
       if (error) throw error;
 
+      // Criar associações de subcategorias
+      await createExamSubcategories(data.id, selectedSubcategories);
+
       toast({
         title: "Sucesso",
         description: "Exame criado com sucesso. Agora você pode adicionar preparações.",
@@ -119,13 +156,13 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
         code: '',
         category: '',
         category_id: '',
-        subcategory_id: '',
         description: '',
         patient_friendly_description: '',
         synonyms: '',
         related_diseases: '',
         preparation: ''
       });
+      setSelectedSubcategories([]);
     } catch (error: any) {
       console.error('Error creating exam:', error);
       toast({
@@ -148,13 +185,13 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
       code: '',
       category: '',
       category_id: '',
-      subcategory_id: '',
       description: '',
       patient_friendly_description: '',
       synonyms: '',
       related_diseases: '',
       preparation: ''
     });
+    setSelectedSubcategories([]);
     onOpenChange(false);
   };
 
@@ -199,39 +236,47 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="category">Categoria *</Label>
-                <Select value={formData.category_id} onValueChange={handleCategoryChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="subcategory">Subcategoria</Label>
-                <Select value={formData.subcategory_id} onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma subcategoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subcategories.map((subcategory) => (
-                      <SelectItem key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="category">Categoria *</Label>
+              <Select value={formData.category_id} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {formData.category_id && subcategories.length > 0 && (
+              <div>
+                <Label>Subcategorias</Label>
+                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                  {subcategories.map((subcategory) => (
+                    <div key={subcategory.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`subcategory-${subcategory.id}`}
+                        checked={selectedSubcategories.includes(subcategory.id)}
+                        onCheckedChange={() => handleSubcategoryToggle(subcategory.id)}
+                      />
+                      <Label
+                        htmlFor={`subcategory-${subcategory.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {subcategory.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Selecionadas: {selectedSubcategories.length} de {subcategories.length}
+                </p>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="description">Descrição Técnica</Label>
