@@ -30,7 +30,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     category_id: '',
     subcategory_id: '',
     description: '',
-    patient_friendly_description: '',
     synonyms: '',
     related_diseases: '',
     preparation: ''
@@ -46,7 +45,6 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         category_id: exam.category_id || '',
         subcategory_id: exam.subcategory_id || '',
         description: exam.description || '',
-        patient_friendly_description: exam.patient_friendly_description || '',
         synonyms: exam.synonyms || '',
         related_diseases: exam.related_diseases || '',
         preparation: exam.preparation || ''
@@ -138,9 +136,15 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     try {
       // Preparar dados para atualização, convertendo strings vazias para null nos campos UUID
       const updateData = {
-        ...formData,
+        name: formData.name,
+        code: formData.code,
+        category: formData.category,
         category_id: formData.category_id || null,
-        subcategory_id: formData.subcategory_id || null
+        subcategory_id: formData.subcategory_id || null,
+        description: formData.description,
+        synonyms: formData.synonyms,
+        related_diseases: formData.related_diseases,
+        preparation: formData.preparation
       };
 
       console.log('Updating exam with data:', updateData);
@@ -246,24 +250,13 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
           </div>
 
           <div>
-            <Label htmlFor="description">Descrição Técnica</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Descrição técnica do exame"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="patient_friendly_description">Descrição Amigável para o Paciente</Label>
-            <Textarea
-              id="patient_friendly_description"
-              value={formData.patient_friendly_description}
-              onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
-              placeholder="Descrição simplificada para o paciente entender"
-              rows={3}
+              placeholder="Descrição do exame"
+              rows={4}
             />
           </div>
 
