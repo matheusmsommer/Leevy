@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Eye, UserCheck, Lock, RotateCcw, Building2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Company {
   id: string;
@@ -16,26 +18,89 @@ interface Company {
 }
 
 interface CompanyManagementProps {
-  companies: Company[];
   onViewCompany: (companyId: string) => void;
   onImpersonateCompany: (companyId: string) => void;
   onBlockCompany: (companyId: string) => void;
 }
 
-const CompanyManagement = ({ companies, onViewCompany, onImpersonateCompany, onBlockCompany }: CompanyManagementProps) => {
+const CompanyManagement = ({ onViewCompany, onImpersonateCompany, onBlockCompany }: CompanyManagementProps) => {
+  const { toast } = useToast();
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+    try {
+      console.log('Fetching companies...');
+      
+      const { data: companiesData, error: companiesError } = await supabase
+        .from('companies')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (companiesError) {
+        console.error('Error fetching companies:', companiesError);
+        toast({
+          title: "Erro ao carregar empresas",
+          description: "Não foi possível carregar as empresas.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Companies loaded:', companiesData);
+
+      // Para cada empresa, buscar número de locais e pedidos
+      const enrichedCompanies = await Promise.all(
+        (companiesData || []).map(async (company) => {
+          // Buscar número de locais
+          const { count: locationsCount } = await supabase
+            .from('locations')
+            .select('*', { count: 'exact', head: true })
+            .eq('company_id', company.id);
+
+          // Buscar número de pedidos
+          const { count: ordersCount } = await supabase
+            .from('orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('company_id', company.id);
+
+          return {
+            id: company.id,
+            name: company.name,
+            cnpj: company.cnpj || 'N/A',
+            status: company.status || 'pending',
+            locations: locationsCount || 0,
+            orders: ordersCount || 0,
+            created_at: company.created_at
+          };
+        })
+      );
+
+      setCompanies(enrichedCompanies);
+    } catch (error) {
+      console.error('Error in fetchCompanies:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const normalizedStatus = status.toLowerCase();
     
-    if (normalizedStatus === 'ativo') {
+    if (normalizedStatus === 'ativo' || normalizedStatus === 'active') {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-          {status}
+          Ativo
         </span>
       );
-    } else if (normalizedStatus === 'pendente') {
+    } else if (normalizedStatus === 'pendente' || normalizedStatus === 'pending') {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
-          {status}
+          Pendente
         </span>
       );
     } else {
@@ -46,6 +111,31 @@ const CompanyManagement = ({ companies, onViewCompany, onImpersonateCompany, onB
       );
     }
   };
+
+  if (loading) {
+    return (
+      <Card className="border-border shadow-sm">
+        <CardHeader className="pb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-semibold text-foreground">Gestão de Empresas</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Carregando empresas...
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-border shadow-sm">

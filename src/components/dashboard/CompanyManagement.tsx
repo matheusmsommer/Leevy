@@ -6,7 +6,19 @@ import { Building, MapPin, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Company, Location } from '@/types/business';
+import { Company } from '@/types/business';
+
+interface DatabaseLocation {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  phone: string | null;
+  email: string | null;
+  active: boolean | null;
+}
 
 interface CompanyManagementProps {
   company: Company | null;
@@ -15,7 +27,7 @@ interface CompanyManagementProps {
 const CompanyManagement: React.FC<CompanyManagementProps> = ({ company }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [locations, setLocations] = useState<Location[]>([]);
+  const [locations, setLocations] = useState<DatabaseLocation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +63,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ company }) => {
       console.log('Locations loaded:', data);
       
       // Transformar os dados para o formato esperado
-      const transformedLocations: Location[] = (data || []).map(location => ({
+      const transformedLocations: DatabaseLocation[] = (data || []).map(location => ({
         id: location.id,
         name: location.name,
         address: location.address,
@@ -60,7 +72,7 @@ const CompanyManagement: React.FC<CompanyManagementProps> = ({ company }) => {
         zip_code: location.zip_code,
         phone: location.phone || '',
         email: location.email || '',
-        active: location.active
+        active: location.active || false
       }));
 
       setLocations(transformedLocations);

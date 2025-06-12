@@ -9,16 +9,45 @@ import { Eye, Search, Filter, Package, Calendar, DollarSign, Settings, Wrench } 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Order, OrderFilter } from '@/types/order';
+import { OrderFilter } from '@/types/order';
 import OrderDetailsModal from './OrderDetailsModal';
+
+interface DatabaseOrder {
+  id: string;
+  order_number: string;
+  patient_name: string;
+  patient_id: string;
+  customer_name: string;
+  customer_id: string;
+  services: string[];
+  service_names: string[];
+  location_id: string;
+  location_name: string;
+  scheduled_date?: string;
+  scheduled_time?: string;
+  attendance_type: 'presencial' | 'domiciliar' | 'livre';
+  status: string;
+  payment_status: 'pendente' | 'aprovado' | 'rejeitado';
+  total_amount: number;
+  observations?: string;
+  result_files?: Array<{
+    id: string;
+    filename: string;
+    url: string;
+    uploaded_at: string;
+  }>;
+  result_link?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const OrderManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<DatabaseOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<OrderFilter>({});
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<DatabaseOrder | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
@@ -68,11 +97,11 @@ const OrderManagement = () => {
       console.log('Orders loaded:', data);
       
       // Transformar os dados para o formato esperado
-      const transformedOrders: Order[] = (data || []).map(order => ({
+      const transformedOrders: DatabaseOrder[] = (data || []).map(order => ({
         id: order.id,
         order_number: `ORD-${order.id.slice(0, 8).toUpperCase()}`,
         patient_name: order.patient_name,
-        patient_id: order.patient_cpf, // Usando CPF como ID do paciente
+        patient_id: order.patient_cpf,
         customer_name: order.patient_name,
         customer_id: user.id,
         services: order.order_items.map(item => item.service.exam.name),
@@ -83,7 +112,7 @@ const OrderManagement = () => {
         scheduled_time: order.scheduled_date ? new Date(order.scheduled_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : undefined,
         attendance_type: order.scheduled_date ? 'presencial' : 'livre',
         status: order.status || 'pending',
-        payment_status: 'aprovado', // Por enquanto assumindo aprovado
+        payment_status: 'aprovado',
         total_amount: Number(order.total_amount),
         observations: '',
         created_at: order.created_at,
@@ -121,12 +150,12 @@ const OrderManagement = () => {
     return true;
   });
 
-  const handleViewDetails = (order: Order) => {
+  const handleViewDetails = (order: DatabaseOrder) => {
     setSelectedOrder(order);
     setShowDetailsModal(true);
   };
 
-  const handleUpdateOrder = (updatedOrder: Order) => {
+  const handleUpdateOrder = (updatedOrder: DatabaseOrder) => {
     setOrders(prev => prev.map(order => 
       order.id === updatedOrder.id ? updatedOrder : order
     ));
@@ -297,10 +326,10 @@ const OrderManagement = () => {
       {/* Modal de Detalhes */}
       {selectedOrder && (
         <OrderDetailsModal
-          order={selectedOrder}
+          order={selectedOrder as any}
           open={showDetailsModal}
           onOpenChange={setShowDetailsModal}
-          onUpdate={handleUpdateOrder}
+          onUpdate={handleUpdateOrder as any}
         />
       )}
     </div>
