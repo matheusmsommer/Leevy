@@ -207,7 +207,7 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
           {/* Multiple Preparations */}
           {hasMultiplePreparations && (
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Preparações Configuradas</label>
+              <label className="text-sm font-medium text-muted-foreground">Preparações</label>
               <div className="space-y-3 mt-2">
                 {examDetails.exam_preparations?.map((examPrep) => (
                   <div key={examPrep.id} className="p-4 border rounded-lg bg-muted/10">
@@ -234,7 +234,7 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
           {/* Legacy preparation (backward compatibility) */}
           {(examDetails.preparation_name || exam.preparation) && !hasMultiplePreparations && (
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Preparação Padrão</label>
+              <label className="text-sm font-medium text-muted-foreground">Preparação</label>
               {examDetails.preparation_name && (
                 <div className="mt-1 mb-2">
                   <Badge variant="outline" className="border-orange-200 text-orange-800 bg-orange-50">
@@ -244,6 +244,15 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
               )}
               <p className="text-foreground leading-relaxed">
                 {examDetails.preparation_instructions || exam.preparation}
+              </p>
+            </div>
+          )}
+
+          {exam.preparation && (
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Observação</label>
+              <p className="text-foreground mt-1 leading-relaxed bg-muted/20 p-3 rounded-lg">
+                {exam.preparation}
               </p>
             </div>
           )}

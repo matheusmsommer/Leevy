@@ -321,12 +321,12 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
             </div>
 
             <div>
-              <Label htmlFor="preparation">Preparação Padrão (Texto Livre)</Label>
+              <Label htmlFor="preparation">Observação (Texto Livre)</Label>
               <Textarea
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Instruções de preparação em texto livre"
+                placeholder="Observações ou instruções específicas em texto livre"
                 rows={4}
               />
             </div>
@@ -342,7 +342,10 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
           </form>
         ) : (
           <div className="space-y-6">
-            <ExamPreparationsManager examId={createdExamId} />
+            <div>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <ExamPreparationsManager examId={createdExamId} />
+            </div>
             
             <div className="flex justify-end pt-4">
               <Button onClick={handleClose}>
