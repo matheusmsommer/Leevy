@@ -26,15 +26,32 @@ const LoginForm = () => {
         title: "Login realizado com sucesso!",
         description: "Redirecionando para o dashboard...",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      let errorMessage = "Verifique suas credenciais e tente novamente.";
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "E-mail ou senha incorretos. Verifique suas credenciais.";
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = "Confirme seu e-mail antes de fazer login.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Erro no login",
-        description: "Verifique suas credenciais e tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = (demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword('demo123');
   };
 
   return (
@@ -115,23 +132,33 @@ const LoginForm = () => {
             
             <div className="mt-8 p-6 bg-muted/30 rounded-xl border border-border">
               <p className="text-sm text-muted-foreground text-center mb-4 font-medium">
-                🚀 Contas de demonstração
+                <Sparkles className="inline w-4 h-4 mr-1" />
+                Contas de demonstração
               </p>
               <div className="space-y-3 text-xs">
-                <div className="flex justify-between items-center p-2 bg-background rounded-lg">
+                <button
+                  onClick={() => handleDemoLogin('super@teste.com')}
+                  className="w-full flex justify-between items-center p-3 bg-background rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   <span className="font-semibold text-foreground">Superadmin:</span>
                   <span className="text-muted-foreground font-mono">super@teste.com</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-background rounded-lg">
+                </button>
+                <button
+                  onClick={() => handleDemoLogin('admin@teste.com')}
+                  className="w-full flex justify-between items-center p-3 bg-background rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   <span className="font-semibold text-foreground">Admin:</span>
                   <span className="text-muted-foreground font-mono">admin@teste.com</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-background rounded-lg">
+                </button>
+                <button
+                  onClick={() => handleDemoLogin('user@teste.com')}
+                  className="w-full flex justify-between items-center p-3 bg-background rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   <span className="font-semibold text-foreground">Paciente:</span>
                   <span className="text-muted-foreground font-mono">user@teste.com</span>
-                </div>
+                </button>
                 <p className="text-center text-muted-foreground mt-3">
-                  <em>Qualquer senha funciona no modo demo</em>
+                  <em>Clique em uma conta para fazer login automaticamente</em>
                 </p>
               </div>
             </div>
