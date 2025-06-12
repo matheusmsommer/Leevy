@@ -20,7 +20,7 @@ interface ServiceWithCompany {
     id: string;
     name: string;
   };
-  exam: {
+  service: {
     id: string;
     name: string;
     description?: string;
@@ -28,10 +28,10 @@ interface ServiceWithCompany {
     category: string;
     synonyms?: string;
     related_diseases?: string;
-    exam_categories?: {
+    service_categories?: {
       name: string;
     };
-    exam_subcategories?: {
+    service_subcategories?: {
       name: string;
     };
     standard_preparations?: {
@@ -72,7 +72,7 @@ const SearchServices = () => {
             id,
             name
           ),
-          exam:exams!inner(
+          service:services!inner(
             id,
             name,
             description,
@@ -80,10 +80,10 @@ const SearchServices = () => {
             category,
             synonyms,
             related_diseases,
-            exam_categories(
+            service_categories(
               name
             ),
-            exam_subcategories(
+            service_subcategories(
               name
             ),
             standard_preparations(
@@ -93,7 +93,7 @@ const SearchServices = () => {
           )
         `)
         .eq('active', true)
-        .order('exam.name');
+        .order('service.name');
 
       if (error) {
         console.error('Error fetching services:', error);
@@ -116,15 +116,15 @@ const SearchServices = () => {
 
   const filteredServices = services.filter(service => {
     const searchLower = searchTerm.toLowerCase();
-    const synonymsList = service.exam.synonyms ? service.exam.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
-    const diseasesList = service.exam.related_diseases ? service.exam.related_diseases.split(',').map(s => s.trim().toLowerCase()) : [];
-    const categoryName = service.exam.exam_categories?.name || service.exam.category;
-    const subcategoryName = service.exam.exam_subcategories?.name || '';
-    const preparationName = service.exam.standard_preparations?.name || '';
+    const synonymsList = service.service.synonyms ? service.service.synonyms.split(',').map(s => s.trim().toLowerCase()) : [];
+    const diseasesList = service.service.related_diseases ? service.service.related_diseases.split(',').map(s => s.trim().toLowerCase()) : [];
+    const categoryName = service.service.service_categories?.name || service.service.category;
+    const subcategoryName = service.service.service_subcategories?.name || '';
+    const preparationName = service.service.standard_preparations?.name || '';
     
-    return service.exam.name.toLowerCase().includes(searchLower) ||
-           service.exam.description?.toLowerCase().includes(searchLower) ||
-           service.exam.patient_friendly_description?.toLowerCase().includes(searchLower) ||
+    return service.service.name.toLowerCase().includes(searchLower) ||
+           service.service.description?.toLowerCase().includes(searchLower) ||
+           service.service.patient_friendly_description?.toLowerCase().includes(searchLower) ||
            service.company.name.toLowerCase().includes(searchLower) ||
            categoryName.toLowerCase().includes(searchLower) ||
            subcategoryName.toLowerCase().includes(searchLower) ||
@@ -215,28 +215,28 @@ const SearchServices = () => {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{service.exam.name}</CardTitle>
+                      <CardTitle className="text-lg">{service.service.name}</CardTitle>
                       <p className="text-sm text-muted-foreground font-medium">
                         {service.company.name}
                       </p>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-                          {service.exam.exam_categories?.name || service.exam.category}
+                          {service.service.service_categories?.name || service.service.category}
                         </span>
-                        {service.exam.exam_subcategories?.name && (
+                        {service.service.service_subcategories?.name && (
                           <span className="inline-block px-2 py-1 bg-secondary/10 text-secondary text-xs rounded-full">
-                            {service.exam.exam_subcategories.name}
+                            {service.service.service_subcategories.name}
                           </span>
                         )}
-                        {service.exam.standard_preparations?.name && (
+                        {service.service.standard_preparations?.name && (
                           <span className="inline-block px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                            {service.exam.standard_preparations.name}
+                            {service.service.standard_preparations.name}
                           </span>
                         )}
                       </div>
-                      {service.exam.synonyms && (
+                      {service.service.synonyms && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          Também conhecido como: {service.exam.synonyms}
+                          Também conhecido como: {service.service.synonyms}
                         </p>
                       )}
                     </div>
@@ -255,20 +255,20 @@ const SearchServices = () => {
                 </CardHeader>
                 <CardContent>
                   {/* Descrição amigável prioritária */}
-                  {service.exam.patient_friendly_description ? (
+                  {service.service.patient_friendly_description ? (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                      <p className="text-sm text-blue-800">{service.exam.patient_friendly_description}</p>
+                      <p className="text-sm text-blue-800">{service.service.patient_friendly_description}</p>
                     </div>
-                  ) : service.exam.description && (
-                    <p className="text-muted-foreground mb-4">{service.exam.description}</p>
+                  ) : service.service.description && (
+                    <p className="text-muted-foreground mb-4">{service.service.description}</p>
                   )}
                   
                   {/* Preparação (personalizada ou padrão) */}
-                  {(service.custom_preparation || service.exam.standard_preparations?.instructions) && (
+                  {(service.custom_preparation || service.service.standard_preparations?.instructions) && (
                     <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
                       <p className="text-sm font-medium text-orange-800 mb-1">Preparação:</p>
                       <p className="text-sm text-orange-700">
-                        {service.custom_preparation || service.exam.standard_preparations?.instructions}
+                        {service.custom_preparation || service.service.standard_preparations?.instructions}
                       </p>
                     </div>
                   )}
@@ -299,11 +299,11 @@ const SearchServices = () => {
                   </div>
 
                   {/* Doenças relacionadas */}
-                  {service.exam.related_diseases && (
+                  {service.service.related_diseases && (
                     <div className="mb-4">
                       <p className="text-xs font-medium text-muted-foreground mb-1">Doenças relacionadas:</p>
                       <div className="flex flex-wrap gap-1">
-                        {service.exam.related_diseases.split(',').map((disease, index) => (
+                        {service.service.related_diseases.split(',').map((disease, index) => (
                           <span key={index} className="inline-block px-2 py-1 bg-red-50 text-red-700 text-xs rounded border border-red-200">
                             {disease.trim()}
                           </span>

@@ -49,7 +49,7 @@ const OrderManagement = ({ onExportOrders, onMarkCommissionPaid }: OrderManageme
           company:companies!inner(name),
           order_items(
             service:company_services!inner(
-              exam:exams!inner(name)
+              service:services!inner(name)
             )
           )
         `)
@@ -72,7 +72,7 @@ const OrderManagement = ({ onExportOrders, onMarkCommissionPaid }: OrderManageme
         id: order.id,
         company: order.company?.name || 'N/A',
         patient: order.patient_name,
-        service: order.order_items.map(item => item.service.exam.name).join(', '),
+        service: order.order_items.map(item => item.service.service.name).join(', '),
         amount: Number(order.total_amount),
         commission: Number(order.total_amount) * 0.1, // 10% de comissão como exemplo
         date: order.created_at,

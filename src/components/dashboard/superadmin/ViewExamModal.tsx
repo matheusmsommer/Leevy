@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { Star } from 'lucide-react';
 
-interface GlobalExam {
+interface GlobalService {
   id: string;
   name: string;
   code: string;
@@ -21,12 +21,12 @@ interface GlobalExam {
   related_diseases?: string;
 }
 
-interface ExamDetails {
+interface ServiceDetails {
   category_name?: string;
   subcategory_names?: string[];
   preparation_name?: string;
   preparation_instructions?: string;
-  exam_preparations?: Array<{
+  service_preparations?: Array<{
     id: string;
     is_primary: boolean;
     preparation: {
@@ -40,30 +40,30 @@ interface ExamDetails {
 interface ViewExamModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  exam: GlobalExam | null;
+  exam: GlobalService | null;
 }
 
 const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
-  const [examDetails, setExamDetails] = useState<ExamDetails>({});
+  const [serviceDetails, setServiceDetails] = useState<ServiceDetails>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (exam && open) {
-      fetchExamDetails();
+      fetchServiceDetails();
     }
   }, [exam, open]);
 
-  const fetchExamDetails = async () => {
+  const fetchServiceDetails = async () => {
     if (!exam) return;
 
     setLoading(true);
     try {
-      const details: ExamDetails = {};
+      const details: ServiceDetails = {};
 
       // Fetch category name
       if (exam.category_id) {
         const { data: categoryData } = await supabase
-          .from('exam_categories')
+          .from('service_categories')
           .select('name')
           .eq('id', exam.category_id)
           .single();
@@ -75,22 +75,22 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
 
       // Fetch subcategory names from associations
       const { data: subcategoryAssociations } = await supabase
-        .from('exam_subcategory_associations')
+        .from('service_subcategory_associations')
         .select(`
           subcategory_id,
-          exam_subcategories(name)
+          service_subcategories(name)
         `)
-        .eq('exam_id', exam.id);
+        .eq('service_id', exam.id);
 
       if (subcategoryAssociations && subcategoryAssociations.length > 0) {
         details.subcategory_names = subcategoryAssociations
-          .map(assoc => (assoc as any).exam_subcategories?.name)
+          .map(assoc => (assoc as any).service_subcategories?.name)
           .filter(name => name);
       }
 
-      // Fetch exam preparations (multiple)
-      const { data: examPreparationsData } = await supabase
-        .from('exam_preparations')
+      // Fetch service preparations (multiple)
+      const { data: servicePreparationsData } = await supabase
+        .from('service_preparations')
         .select(`
           id,
           is_primary,
@@ -100,11 +100,11 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
             instructions
           )
         `)
-        .eq('exam_id', exam.id)
+        .eq('service_id', exam.id)
         .order('is_primary', { ascending: false });
 
-      if (examPreparationsData) {
-        details.exam_preparations = examPreparationsData;
+      if (servicePreparationsData) {
+        details.service_preparations = servicePreparationsData;
       }
 
       // Fetch legacy preparation details (for backward compatibility)
@@ -121,9 +121,9 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
         }
       }
 
-      setExamDetails(details);
+      setServiceDetails(details);
     } catch (error) {
-      console.error('Error fetching exam details:', error);
+      console.error('Error fetching service details:', error);
     } finally {
       setLoading(false);
     }
@@ -133,24 +133,24 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
 
   const synonymsList = exam.synonyms ? exam.synonyms.split(',').map(s => s.trim()) : [];
   const diseasesList = exam.related_diseases ? exam.related_diseases.split(',').map(s => s.trim()) : [];
-  const hasMultiplePreparations = examDetails.exam_preparations && examDetails.exam_preparations.length > 0;
+  const hasMultiplePreparations = serviceDetails.service_preparations && serviceDetails.service_preparations.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-foreground">
-            Detalhes do Exame
+            Detalhes do Serviço
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Visualizar informações completas do exame
+            Visualizar informações completas do serviço
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-muted-foreground">Nome do Exame</label>
+              <label className="text-sm font-medium text-muted-foreground">Nome do Serviço</label>
               <p className="text-foreground font-medium">{exam.name}</p>
             </div>
             
@@ -167,16 +167,16 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
               <label className="text-sm font-medium text-muted-foreground">Categoria</label>
               <div className="mt-1">
                 <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
-                  {examDetails.category_name || exam.category || 'N/A'}
+                  {serviceDetails.category_name || exam.category || 'N/A'}
                 </Badge>
               </div>
             </div>
 
-            {examDetails.subcategory_names && examDetails.subcategory_names.length > 0 && (
+            {serviceDetails.subcategory_names && serviceDetails.subcategory_names.length > 0 && (
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Subcategorias</label>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {examDetails.subcategory_names.map((name, index) => (
+                  {serviceDetails.subcategory_names.map((name, index) => (
                     <Badge key={index} variant="outline" className="border-secondary/20 text-secondary bg-secondary/5">
                       {name}
                     </Badge>
@@ -209,13 +209,13 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
             <div>
               <label className="text-sm font-medium text-muted-foreground">Preparações</label>
               <div className="space-y-3 mt-2">
-                {examDetails.exam_preparations?.map((examPrep) => (
-                  <div key={examPrep.id} className="p-4 border rounded-lg bg-muted/10">
+                {serviceDetails.service_preparations?.map((servicePrep) => (
+                  <div key={servicePrep.id} className="p-4 border rounded-lg bg-muted/10">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline" className="border-orange-200 text-orange-800 bg-orange-50">
-                        {examPrep.preparation.name}
+                        {servicePrep.preparation.name}
                       </Badge>
-                      {examPrep.is_primary && (
+                      {servicePrep.is_primary && (
                         <Badge variant="default" className="text-xs">
                           <Star className="h-3 w-3 mr-1" />
                           Principal
@@ -223,7 +223,7 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
                       )}
                     </div>
                     <p className="text-sm text-foreground leading-relaxed">
-                      {examPrep.preparation.instructions}
+                      {servicePrep.preparation.instructions}
                     </p>
                   </div>
                 ))}
@@ -232,18 +232,18 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
           )}
 
           {/* Legacy preparation (backward compatibility) */}
-          {(examDetails.preparation_name || exam.preparation) && !hasMultiplePreparations && (
+          {(serviceDetails.preparation_name || exam.preparation) && !hasMultiplePreparations && (
             <div>
               <label className="text-sm font-medium text-muted-foreground">Preparação</label>
-              {examDetails.preparation_name && (
+              {serviceDetails.preparation_name && (
                 <div className="mt-1 mb-2">
                   <Badge variant="outline" className="border-orange-200 text-orange-800 bg-orange-50">
-                    {examDetails.preparation_name}
+                    {serviceDetails.preparation_name}
                   </Badge>
                 </div>
               )}
               <p className="text-foreground leading-relaxed">
-                {examDetails.preparation_instructions || exam.preparation}
+                {serviceDetails.preparation_instructions || exam.preparation}
               </p>
             </div>
           )}

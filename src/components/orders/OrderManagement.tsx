@@ -77,7 +77,7 @@ const OrderManagement = () => {
             quantity,
             unit_price,
             service:company_services!inner(
-              exam:exams!inner(name)
+              service:services!inner(name)
             )
           )
         `)
@@ -104,8 +104,8 @@ const OrderManagement = () => {
         patient_id: order.patient_cpf,
         customer_name: order.patient_name,
         customer_id: user.id,
-        services: order.order_items.map(item => item.service.exam.name),
-        service_names: order.order_items.map(item => item.service.exam.name),
+        services: order.order_items.map(item => item.service.service.name),
+        service_names: order.order_items.map(item => item.service.service.name),
         location_id: '',
         location_name: order.location?.name || 'N/A',
         scheduled_date: order.scheduled_date ? new Date(order.scheduled_date).toISOString().split('T')[0] : undefined,
