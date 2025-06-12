@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -354,12 +353,12 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             </div>
 
             <div>
-              <Label htmlFor="preparation">Preparação</Label>
+              <Label htmlFor="preparation">Observação</Label>
               <Textarea
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Instruções de preparo para o serviço"
+                placeholder="Observações adicionais sobre o serviço"
                 rows={4}
               />
             </div>

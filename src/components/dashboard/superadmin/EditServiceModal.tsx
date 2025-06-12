@@ -396,12 +396,12 @@ const EditServiceModal = ({ open, onOpenChange, onSuccess, service }: EditServic
           </div>
 
           <div>
-            <Label htmlFor="preparation">Preparação</Label>
+            <Label htmlFor="preparation">Observação</Label>
             <Textarea
               id="preparation"
               value={formData.preparation}
               onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-              placeholder="Instruções de preparo para o serviço"
+              placeholder="Observações adicionais sobre o serviço"
               rows={4}
             />
           </div>
