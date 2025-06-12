@@ -13,6 +13,16 @@ import ViewExamModal from './ViewExamModal';
 import EditExamModal from './EditExamModal';
 import DeleteExamModal from './DeleteExamModal';
 
+interface ExamPreparation {
+  id: string;
+  is_primary: boolean;
+  preparation: {
+    id: string;
+    name: string;
+    instructions: string;
+  };
+}
+
 interface GlobalExam {
   id: string;
   name: string;
@@ -21,6 +31,7 @@ interface GlobalExam {
   preparation?: string;
   description?: string;
   synonyms?: string;
+  exam_preparations?: ExamPreparation[];
 }
 
 interface ExamManagementProps {
@@ -44,15 +55,27 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
 
   const fetchGlobalExams = async () => {
     try {
-      console.log('Fetching global exams...');
+      console.log('Fetching global exams with preparations...');
       
-      const { data, error } = await supabase
+      // Buscar exames com suas preparações associadas
+      const { data: examsData, error: examsError } = await supabase
         .from('exams')
-        .select('*')
+        .select(`
+          *,
+          exam_preparations (
+            id,
+            is_primary,
+            preparation:standard_preparations (
+              id,
+              name,
+              instructions
+            )
+          )
+        `)
         .order('name', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching exams:', error);
+      if (examsError) {
+        console.error('Error fetching exams:', examsError);
         toast({
           title: "Erro ao carregar exames",
           description: "Não foi possível carregar os exames.",
@@ -61,13 +84,32 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
         return;
       }
 
-      console.log('Global exams loaded:', data);
-      setExams(data || []);
+      console.log('Global exams loaded with preparations:', examsData);
+      setExams(examsData || []);
     } catch (error) {
       console.error('Error in fetchGlobalExams:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getPreparationDisplay = (exam: GlobalExam) => {
+    // Verificar se há preparações no novo formato (exam_preparations)
+    if (exam.exam_preparations && exam.exam_preparations.length > 0) {
+      const primaryPreparation = exam.exam_preparations.find(ep => ep.is_primary);
+      if (primaryPreparation) {
+        return primaryPreparation.preparation.name;
+      }
+      // Se não há preparação primária, pegar a primeira
+      return exam.exam_preparations[0].preparation.name;
+    }
+    
+    // Fallback para o formato antigo (preparation em texto livre)
+    if (exam.preparation && exam.preparation.trim()) {
+      return exam.preparation;
+    }
+    
+    return 'Sem preparação especial';
   };
 
   const handleAddExam = () => {
@@ -195,8 +237,8 @@ const ExamManagement = ({ globalExams: initialExams, onAddExam }: ExamManagement
                         </Badge>
                       </TableCell>
                       <TableCell className="text-foreground max-w-xs">
-                        <div className="truncate" title={exam.preparation || 'Sem preparação especial'}>
-                          {exam.preparation || 'Sem preparação especial'}
+                        <div className="truncate" title={getPreparationDisplay(exam)}>
+                          {getPreparationDisplay(exam)}
                         </div>
                       </TableCell>
                       <TableCell>
