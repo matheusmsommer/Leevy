@@ -28,7 +28,7 @@ const PatientManagement = () => {
   const mockPatients = [
     {
       id: 'self',
-      name: user?.name || 'Eu mesmo',
+      name: user?.name || user?.full_name || 'Eu mesmo',
       cpf: '123.456.789-00',
       birth_date: '1990-05-15',
       gender: 'masculino',

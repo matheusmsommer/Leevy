@@ -14,7 +14,7 @@ const AccountSettings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.name || user?.full_name || '',
     email: user?.email || '',
     phone: '',
     cpf: ''

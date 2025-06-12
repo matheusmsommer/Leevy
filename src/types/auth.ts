@@ -31,7 +31,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   signOut: () => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
-  userRole: string | null;
+  userRole: UserRole | null;
   companyId: string | null;
 }
 

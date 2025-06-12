@@ -92,7 +92,7 @@ const UserDashboard = () => {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Olá, {user?.name}!</h1>
+            <h1 className="text-2xl font-bold text-foreground">Olá, {user?.name || user?.full_name || 'Usuário'}!</h1>
             <p className="text-sm text-muted-foreground">
               Bem-vindo à sua área pessoal
             </p>

@@ -34,7 +34,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && user.role && !allowedRoles.includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
