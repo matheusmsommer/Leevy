@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -304,6 +305,15 @@ const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
                 onChange={(e) => setFormData(prev => ({ ...prev, related_diseases: e.target.value }))}
                 placeholder="Doenças relacionadas separadas por vírgula"
               />
+            </div>
+
+            <Separator />
+
+            <div>
+              <Label className="text-sm font-medium text-foreground mb-3 block">Preparações</Label>
+              <div className="text-sm text-muted-foreground mb-3">
+                Após criar o exame, você poderá adicionar preparações específicas usando o gerenciador abaixo.
+              </div>
             </div>
 
             <div>
