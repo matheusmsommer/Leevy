@@ -1,17 +1,23 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Minus, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Service {
   id: string;
-  name: string;
   price: number;
-  delivery_time: string;
-  popular?: boolean;
+  active: boolean;
+  exam: {
+    id: string;
+    name: string;
+    description?: string;
+    category: string;
+  };
 }
 
 interface ServiceSelectionProps {
@@ -21,49 +27,71 @@ interface ServiceSelectionProps {
 }
 
 const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }: ServiceSelectionProps) => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockServices: Service[] = [
-    {
-      id: '1',
-      name: 'Hemograma Completo',
-      price: 45.00,
-      delivery_time: '1 dia útil',
-      popular: true
-    },
-    {
-      id: '2',
-      name: 'Glicemia em Jejum',
-      price: 25.00,
-      delivery_time: '1 dia útil',
-      popular: true
-    },
-    {
-      id: '3',
-      name: 'Colesterol Total',
-      price: 30.00,
-      delivery_time: '1 dia útil'
-    },
-    {
-      id: '4',
-      name: 'TSH',
-      price: 35.00,
-      delivery_time: '1 dia útil',
-      popular: true
-    },
-    {
-      id: '5',
-      name: 'Raio-X Tórax',
-      price: 65.00,
-      delivery_time: '2 horas'
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
+    calculateTotal();
+  }, [selectedServices, services]);
+
+  const fetchServices = async () => {
+    try {
+      console.log('Fetching available services...');
+      
+      const { data, error } = await supabase
+        .from('company_services')
+        .select(`
+          id,
+          price,
+          active,
+          exam:exams!inner(
+            id,
+            name,
+            description,
+            category
+          )
+        `)
+        .eq('active', true)
+        .order('exam.name');
+
+      if (error) {
+        console.error('Error fetching services:', error);
+        toast({
+          title: "Erro ao carregar serviços",
+          description: "Não foi possível carregar os serviços disponíveis.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log('Services loaded:', data);
+      setServices(data || []);
+    } catch (error) {
+      console.error('Error in fetchServices:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredServices = mockServices.filter(service =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const calculateTotal = () => {
+    const total = selectedServices.reduce((sum, serviceId) => {
+      const service = services.find(s => s.id === serviceId);
+      return sum + (service?.price || 0);
+    }, 0);
+    onTotalChange(total);
+  };
+
+  const filteredServices = services.filter(service =>
+    service.exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    service.exam.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (service.exam.description && service.exam.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  const popularServices = mockServices.filter(service => service.popular);
 
   const handleServiceToggle = (serviceId: string) => {
     const newServices = selectedServices.includes(serviceId)
@@ -71,17 +99,24 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
       : [...selectedServices, serviceId];
     
     onServicesChange(newServices);
-    
-    const total = newServices.reduce((sum, id) => {
-      const service = mockServices.find(s => s.id === id);
-      return sum + (service?.price || 0);
-    }, 0);
-    onTotalChange(total);
   };
 
-  const selectedServicesData = mockServices.filter(service => 
+  const selectedServicesData = services.filter(service => 
     selectedServices.includes(service.id)
   );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="font-semibold mb-3">Carregando serviços...</h3>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   const totalAmount = selectedServicesData.reduce((sum, service) => sum + service.price, 0);
 
@@ -98,37 +133,30 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
         />
       </div>
 
-      {/* Exames populares */}
-      {searchTerm === '' && (
-        <div>
-          <h3 className="font-semibold mb-3">Mais Populares</h3>
-          <div className="grid grid-cols-1 gap-3">
-            {popularServices.map((service) => (
+      {/* Lista de serviços */}
+      <div>
+        <h3 className="font-semibold mb-3">
+          {searchTerm ? 'Resultados da busca' : 'Serviços Disponíveis'}
+        </h3>
+        <div className="space-y-3">
+          {filteredServices.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {searchTerm ? 'Nenhum serviço encontrado para sua busca' : 'Nenhum serviço disponível no momento'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredServices.map((service) => (
               <ServiceCard
                 key={service.id}
                 service={service}
                 isSelected={selectedServices.includes(service.id)}
                 onToggle={() => handleServiceToggle(service.id)}
               />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Todos os exames */}
-      <div>
-        <h3 className="font-semibold mb-3">
-          {searchTerm ? 'Resultados' : 'Todos os Exames'}
-        </h3>
-        <div className="space-y-3">
-          {filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              isSelected={selectedServices.includes(service.id)}
-              onToggle={() => handleServiceToggle(service.id)}
-            />
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -139,7 +167,7 @@ const ServiceSelection = ({ selectedServices, onServicesChange, onTotalChange }:
             <div className="space-y-2 mb-3">
               {selectedServicesData.map((service) => (
                 <div key={service.id} className="flex justify-between text-sm">
-                  <span>{service.name}</span>
+                  <span>{service.exam.name}</span>
                   <span>R$ {service.price.toFixed(2)}</span>
                 </div>
               ))}
@@ -167,16 +195,13 @@ const ServiceCard = ({ service, isSelected, onToggle }: {
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-medium">{service.name}</h4>
-            {service.popular && (
-              <Badge variant="secondary" className="text-xs">Popular</Badge>
-            )}
+            <h4 className="font-medium">{service.exam.name}</h4>
+            <Badge variant="secondary" className="text-xs">{service.exam.category}</Badge>
           </div>
+          {service.exam.description && (
+            <p className="text-sm text-gray-600 mb-2">{service.exam.description}</p>
+          )}
           <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>{service.delivery_time}</span>
-            </div>
             <span className="font-semibold text-blue-600">R$ {service.price.toFixed(2)}</span>
           </div>
         </div>
