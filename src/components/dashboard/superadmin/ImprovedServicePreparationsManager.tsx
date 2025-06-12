@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Star, StarOff, Trash2, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Star, StarOff, Trash2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -13,13 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface ServicePreparation {
   id: string;
@@ -46,11 +40,12 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
   const { toast } = useToast();
   const [servicePreparations, setServicePreparations] = useState<ServicePreparation[]>([]);
   const [standardPreparations, setStandardPreparations] = useState<StandardPreparation[]>([]);
+  const [filteredPreparations, setFilteredPreparations] = useState<StandardPreparation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedPreparation, setSelectedPreparation] = useState<StandardPreparation | null>(null);
-  const [selectedPreparationId, setSelectedPreparationId] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   useEffect(() => {
     if (serviceId) {
@@ -58,6 +53,22 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
       fetchStandardPreparations();
     }
   }, [serviceId]);
+
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const available = standardPreparations.filter(
+        sp => !servicePreparations.some(ep => ep.preparation.id === sp.id)
+      );
+      const filtered = available.filter(prep => 
+        prep.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPreparations(filtered);
+      setShowSearchResults(true);
+    } else {
+      setFilteredPreparations([]);
+      setShowSearchResults(false);
+    }
+  }, [searchTerm, standardPreparations, servicePreparations]);
 
   const fetchServicePreparations = async () => {
     try {
@@ -108,20 +119,11 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
     }
   };
 
-  const handleAddPreparation = async () => {
-    if (!selectedPreparationId) {
-      toast({
-        title: "Seleção obrigatória",
-        description: "Selecione uma preparação para adicionar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleAddPreparation = async (preparationId: string) => {
     try {
       // Verificar se já existe
       const existing = servicePreparations.find(
-        sp => sp.preparation.id === selectedPreparationId
+        sp => sp.preparation.id === preparationId
       );
 
       if (existing) {
@@ -137,7 +139,7 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
         .from('service_preparations')
         .insert({
           service_id: serviceId,
-          preparation_id: selectedPreparationId,
+          preparation_id: preparationId,
           is_primary: servicePreparations.length === 0 // Primeira preparação é primária
         });
 
@@ -148,8 +150,8 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
         description: "Preparação adicionada com sucesso.",
       });
 
-      setShowAddModal(false);
-      setSelectedPreparationId('');
+      setSearchTerm('');
+      setShowSearchResults(false);
       fetchServicePreparations();
       onUpdate?.();
     } catch (error: any) {
@@ -227,10 +229,6 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
     setShowViewModal(true);
   };
 
-  const availablePreparations = standardPreparations.filter(
-    sp => !servicePreparations.some(ep => ep.preparation.id === sp.id)
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -248,14 +246,40 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
             {servicePreparations.length} preparação(ões) configurada(s)
           </p>
         </div>
-        <Button 
-          onClick={() => setShowAddModal(true)} 
-          size="sm"
-          disabled={availablePreparations.length === 0}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar
-        </Button>
+      </div>
+
+      {/* Campo de busca para adicionar preparações */}
+      <div className="relative">
+        <Input
+          placeholder="Buscar preparação para adicionar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full"
+        />
+        
+        {/* Resultados da busca */}
+        {showSearchResults && (
+          <div className="absolute top-full left-0 right-0 z-50 bg-background border border-border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+            {filteredPreparations.length > 0 ? (
+              filteredPreparations.map((prep) => (
+                <div 
+                  key={prep.id}
+                  className="p-3 hover:bg-muted cursor-pointer border-b border-border last:border-0"
+                  onClick={() => handleAddPreparation(prep.id)}
+                >
+                  <div className="font-medium text-sm">{prep.name}</div>
+                  <div className="text-xs text-muted-foreground line-clamp-2">
+                    {prep.instructions}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-muted-foreground text-center">
+                Nenhuma preparação encontrada
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {servicePreparations.length === 0 ? (
@@ -321,43 +345,6 @@ const ImprovedServicePreparationsManager = ({ serviceId, onUpdate }: ImprovedSer
           ))}
         </div>
       )}
-
-      {/* Modal para adicionar preparação */}
-      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Preparação</DialogTitle>
-            <DialogDescription>
-              Selecione uma preparação padronizada para associar ao serviço
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Preparação</label>
-              <Select value={selectedPreparationId} onValueChange={setSelectedPreparationId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma preparação" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availablePreparations.map((prep) => (
-                    <SelectItem key={prep.id} value={prep.id}>
-                      {prep.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddModal(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAddPreparation}>
-                Adicionar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Modal para visualizar preparação */}
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
