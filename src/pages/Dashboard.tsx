@@ -10,7 +10,7 @@ const Dashboard = () => {
   const { user } = useAuth();
 
   const renderDashboard = () => {
-    switch (user?.role) {
+    switch (user?.role || 'user') {
       case 'superadmin':
         return <SuperAdminDashboard />;
       case 'admin':
