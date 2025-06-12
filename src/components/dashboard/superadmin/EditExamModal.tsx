@@ -38,7 +38,9 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   useEffect(() => {
     if (exam && open) {
       console.log('Loading exam data:', exam);
-      setFormData({
+      
+      // Garantir que os valores são strings válidas ou vazias
+      const examData = {
         name: exam.name || '',
         code: exam.code || '',
         category: exam.category || '',
@@ -48,14 +50,16 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         synonyms: exam.synonyms || '',
         related_diseases: exam.related_diseases || '',
         preparation: exam.preparation || ''
+      };
+      
+      setFormData(examData);
+      
+      fetchCategories().then(() => {
+        // Se o exame tem category_id válido, buscar as subcategorias
+        if (exam.category_id && exam.category_id.trim() !== '') {
+          fetchSubcategories(exam.category_id);
+        }
       });
-      
-      fetchCategories();
-      
-      // Se o exame tem category_id, buscar as subcategorias
-      if (exam.category_id) {
-        fetchSubcategories(exam.category_id);
-      }
     }
   }, [exam, open]);
 
@@ -113,7 +117,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }));
     
     // Buscar subcategorias para a nova categoria
-    if (categoryId) {
+    if (categoryId && categoryId.trim() !== '') {
       fetchSubcategories(categoryId);
     } else {
       setSubcategories([]);
@@ -123,10 +127,10 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.code.trim() || !formData.category.trim()) {
+    if (!formData.name.trim() || !formData.code.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Nome, código e categoria são obrigatórios.",
+        description: "Nome e código são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -136,15 +140,15 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     try {
       // Preparar dados para atualização, convertendo strings vazias para null nos campos UUID
       const updateData = {
-        name: formData.name,
-        code: formData.code,
-        category: formData.category,
-        category_id: formData.category_id || null,
-        subcategory_id: formData.subcategory_id || null,
-        description: formData.description,
-        synonyms: formData.synonyms,
-        related_diseases: formData.related_diseases,
-        preparation: formData.preparation
+        name: formData.name.trim(),
+        code: formData.code.trim(),
+        category: formData.category.trim() || 'Sem categoria',
+        category_id: formData.category_id.trim() || null,
+        subcategory_id: formData.subcategory_id.trim() || null,
+        description: formData.description.trim() || null,
+        synonyms: formData.synonyms.trim() || null,
+        related_diseases: formData.related_diseases.trim() || null,
+        preparation: formData.preparation.trim() || null
       };
 
       console.log('Updating exam with data:', updateData);
@@ -214,7 +218,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="category">Categoria *</Label>
+              <Label htmlFor="category">Categoria</Label>
               <Select value={formData.category_id} onValueChange={handleCategoryChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma categoria" />
@@ -234,6 +238,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
               <Select 
                 value={formData.subcategory_id} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}
+                disabled={!formData.category_id || subcategories.length === 0}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma subcategoria" />
