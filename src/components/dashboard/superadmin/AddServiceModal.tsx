@@ -25,6 +25,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [createdServiceId, setCreatedServiceId] = useState<string | null>(null);
+  const [showPreparations, setShowPreparations] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -33,7 +34,8 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
     description: '',
     synonyms: '',
     related_diseases: '',
-    preparation: ''
+    preparation: '',
+    patient_friendly_description: ''
   });
 
   useEffect(() => {
@@ -41,6 +43,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
       fetchCategories();
       setCreatedServiceId(null);
       setSelectedSubcategories([]);
+      setShowPreparations(false);
     }
   }, [open]);
 
@@ -147,21 +150,11 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
 
       toast({
         title: "Sucesso",
-        description: "Serviço criado com sucesso. Agora você pode adicionar preparações.",
+        description: "Serviço criado com sucesso. Agora você pode configurar as preparações.",
       });
 
       setCreatedServiceId(data.id);
-      setFormData({
-        name: '',
-        code: '',
-        category: '',
-        category_id: '',
-        description: '',
-        synonyms: '',
-        related_diseases: '',
-        preparation: ''
-      });
-      setSelectedSubcategories([]);
+      setShowPreparations(true);
     } catch (error: any) {
       console.error('Error creating service:', error);
       toast({
@@ -179,6 +172,7 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
       onSuccess();
     }
     setCreatedServiceId(null);
+    setShowPreparations(false);
     setFormData({
       name: '',
       code: '',
@@ -187,10 +181,29 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
       description: '',
       synonyms: '',
       related_diseases: '',
-      preparation: ''
+      preparation: '',
+      patient_friendly_description: ''
     });
     setSelectedSubcategories([]);
     onOpenChange(false);
+  };
+
+  const handleCreateAnother = () => {
+    setCreatedServiceId(null);
+    setShowPreparations(false);
+    setFormData({
+      name: '',
+      code: '',
+      category: '',
+      category_id: '',
+      description: '',
+      synonyms: '',
+      related_diseases: '',
+      preparation: '',
+      patient_friendly_description: ''
+    });
+    setSelectedSubcategories([]);
+    onSuccess();
   };
 
   return (
@@ -198,17 +211,17 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {createdServiceId ? 'Configurar Preparações' : 'Adicionar Novo Serviço'}
+            {showPreparations ? 'Configurar Preparações' : 'Adicionar Novo Serviço'}
           </DialogTitle>
           <DialogDescription>
-            {createdServiceId 
+            {showPreparations 
               ? 'Serviço criado! Agora você pode adicionar preparações específicas.' 
               : 'Preencha as informações do novo serviço'
             }
           </DialogDescription>
         </DialogHeader>
 
-        {!createdServiceId ? (
+        {!showPreparations ? (
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -277,12 +290,23 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             )}
 
             <div>
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">Descrição Técnica</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição do serviço"
+                placeholder="Descrição técnica do serviço"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="patient_friendly_description">Descrição Amigável</Label>
+              <Textarea
+                id="patient_friendly_description"
+                value={formData.patient_friendly_description}
+                onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
+                placeholder="Descrição em linguagem simples para o paciente"
                 rows={3}
               />
             </div>
@@ -310,14 +334,17 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
             <Separator />
 
             <div>
-              <Label htmlFor="preparation">Preparação</Label>
+              <Label htmlFor="preparation">Preparação (Opcional)</Label>
               <Textarea
                 id="preparation"
                 value={formData.preparation}
                 onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
-                placeholder="Instruções de preparo para o serviço"
+                placeholder="Instruções de preparo para o serviço (opcional - você pode configurar preparações padronizadas depois)"
                 rows={4}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Após criar o serviço, você poderá adicionar preparações padronizadas específicas.
+              </p>
             </div>
 
             <div className="flex gap-2 pt-4">
@@ -333,10 +360,13 @@ const AddServiceModal = ({ open, onOpenChange, onSuccess }: AddServiceModalProps
           <div className="space-y-6">
             <div>
               <Label className="text-sm font-medium text-foreground mb-3 block">Preparações Padronizadas</Label>
-              <ServicePreparationsManager serviceId={createdServiceId} />
+              <ServicePreparationsManager serviceId={createdServiceId!} />
             </div>
             
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between gap-2 pt-4">
+              <Button variant="outline" onClick={handleCreateAnother}>
+                Criar Outro Serviço
+              </Button>
               <Button onClick={handleClose}>
                 Concluir
               </Button>
