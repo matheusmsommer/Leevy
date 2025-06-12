@@ -41,7 +41,7 @@ const AddSubcategoryModal = ({ open, onOpenChange, onSuccess }: AddSubcategoryMo
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .select('id, name')
         .eq('active', true)
         .order('name', { ascending: true });
@@ -68,7 +68,7 @@ const AddSubcategoryModal = ({ open, onOpenChange, onSuccess }: AddSubcategoryMo
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('exam_subcategories')
+        .from('service_subcategories')
         .insert([formData]);
 
       if (error) throw error;
@@ -99,7 +99,7 @@ const AddSubcategoryModal = ({ open, onOpenChange, onSuccess }: AddSubcategoryMo
         <DialogHeader>
           <DialogTitle>Adicionar Subcategoria</DialogTitle>
           <DialogDescription>
-            Crie uma nova subcategoria de exames
+            Crie uma nova subcategoria de serviços
           </DialogDescription>
         </DialogHeader>
         

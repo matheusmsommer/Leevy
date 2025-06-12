@@ -17,7 +17,7 @@ interface DashboardStats {
     created_at: string;
     order_items: Array<{
       service: {
-        exam: {
+        service: {
           name: string;
         };
       };
@@ -91,7 +91,7 @@ const DashboardOverview = () => {
         .eq('company_id', companyId)
         .eq('active', true);
 
-      // Buscar pedidos recentes
+      // Buscar pedidos recentes com a relação corrigida
       const { data: recentOrders } = await supabase
         .from('orders')
         .select(`
@@ -101,7 +101,7 @@ const DashboardOverview = () => {
           created_at,
           order_items(
             service:company_services!inner(
-              exam:exams!inner(name)
+              service:services!inner(name)
             )
           )
         `)
@@ -251,7 +251,7 @@ const DashboardOverview = () => {
                     <div>
                       <p className="font-semibold text-foreground">{order.patient_name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {order.order_items.map(item => item.service.exam.name).join(', ')}
+                        {order.order_items.map(item => item.service.service.name).join(', ')}
                       </p>
                     </div>
                     <div className="text-right">

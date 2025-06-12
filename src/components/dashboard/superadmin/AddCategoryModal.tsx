@@ -19,9 +19,9 @@ interface AddCategoryModalProps {
 }
 
 const availableIcons = [
-  { name: 'TestTube', component: TestTube, label: 'Exames Laboratoriais' },
-  { name: 'Scan', component: Scan, label: 'Exames de Imagem' },
-  { name: 'Stethoscope', component: Stethoscope, label: 'Exames Médicos' },
+  { name: 'TestTube', component: TestTube, label: 'Análises laboratoriais' },
+  { name: 'Scan', component: Scan, label: 'Diagnóstico por imagem' },
+  { name: 'Stethoscope', component: Stethoscope, label: 'Avaliações médicas' },
   { name: 'Scissors', component: Scissors, label: 'Procedimentos' },
   { name: 'UserCheck', component: UserCheck, label: 'Consultas' },
   { name: 'HardHat', component: HardHat, label: 'Ocupacional' },
@@ -54,7 +54,7 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
 
     try {
       const { error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .insert({
           name: formData.name.trim(),
           description: formData.description.trim() || null,
@@ -98,7 +98,7 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
         <DialogHeader>
           <DialogTitle>Adicionar Nova Categoria</DialogTitle>
           <DialogDescription>
-            Crie uma nova categoria para classificar os exames
+            Crie uma nova categoria para classificar os serviços
           </DialogDescription>
         </DialogHeader>
 

@@ -54,7 +54,7 @@ const CategoryManagement = () => {
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('exam_categories')
+        .from('service_categories')
         .select('*')
         .order('name', { ascending: true });
 
@@ -115,9 +115,9 @@ const CategoryManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Categorias de Exames</h3>
+          <h3 className="text-lg font-semibold">Categorias de Serviços</h3>
           <p className="text-sm text-muted-foreground">
-            Gerencie as categorias disponíveis para classificar os exames
+            Gerencie as categorias disponíveis para classificar os serviços
           </p>
         </div>
         <Button className="bg-primary hover:bg-primary/90" onClick={() => setShowAddModal(true)}>

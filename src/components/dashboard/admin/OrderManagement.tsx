@@ -25,7 +25,7 @@ interface Order {
     quantity: number;
     unit_price: number;
     service: {
-      exam: {
+      service: {
         name: string;
       };
     };
@@ -67,7 +67,7 @@ const OrderManagement = () => {
         return;
       }
 
-      // Buscar pedidos da empresa
+      // Buscar pedidos da empresa com a relação corrigida
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -84,7 +84,7 @@ const OrderManagement = () => {
             quantity,
             unit_price,
             service:company_services!inner(
-              exam:exams!inner(name)
+              service:services!inner(name)
             )
           )
         `)
@@ -127,7 +127,7 @@ const OrderManagement = () => {
   };
 
   const getServiceNames = (orderItems: Order['order_items']) => {
-    return orderItems.map(item => item.service.exam.name).join(', ');
+    return orderItems.map(item => item.service.service.name).join(', ');
   };
 
   if (loading) {

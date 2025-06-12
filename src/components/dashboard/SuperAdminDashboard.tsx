@@ -4,7 +4,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import SuperAdminSidebar from './superadmin/SuperAdminSidebar';
 import DashboardStats from './superadmin/DashboardStats';
 import CompanyManagement from './superadmin/CompanyManagement';
-import ExamManagement from './superadmin/ExamManagement';
+import ServiceManagement from './superadmin/ServiceManagement';
 import OrderManagement from './superadmin/OrderManagement';
 import UserManagement from './superadmin/UserManagement';
 import PlatformSettings from './superadmin/PlatformSettings';
@@ -46,8 +46,8 @@ const SuperAdminDashboard = () => {
     console.log('Blocking company:', companyId);
   };
 
-  const handleAddExam = () => {
-    console.log('Adding new exam');
+  const handleAddService = () => {
+    console.log('Adding new service');
   };
 
   const handleExportOrders = () => {
@@ -69,7 +69,7 @@ const SuperAdminDashboard = () => {
           onBlockCompany={handleBlockCompany}
         />;
       case 'exams':
-        return <ExamManagement globalExams={[]} onAddExam={handleAddExam} />;
+        return <ServiceManagement globalServices={[]} onAddService={handleAddService} />;
       case 'configurations':
         return <ConfigurationManagement />;
       case 'orders':
