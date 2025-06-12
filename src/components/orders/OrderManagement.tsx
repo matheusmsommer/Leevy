@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Search, Filter, Package, Calendar, DollarSign } from 'lucide-react';
+import { Eye, Search, Filter, Package, Calendar, DollarSign, Settings, Wrench } from 'lucide-react';
 import { Order, OrderFilter } from '@/types/order';
 import OrderDetailsModal from './OrderDetailsModal';
 
@@ -98,26 +98,26 @@ const OrderManagement = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-card-foreground">
-            <Package className="h-5 w-5" />
+            <Package className="h-5 w-5 text-primary" />
             Gestão de Pedidos
           </CardTitle>
           <CardDescription className="text-muted-foreground">
             Visualize e gerencie todos os pedidos realizados pelos clientes
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-card">
           {/* Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div>
-              <label className="text-sm font-medium mb-2 block text-foreground">Status</label>
+              <label className="text-sm font-medium mb-2 block text-card-foreground">Status</label>
               <Select value={filters.status || ''} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value || undefined }))}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-input text-foreground">
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   <SelectItem value="">Todos os status</SelectItem>
                   <SelectItem value="aguardando_atendimento">Aguardando Atendimento</SelectItem>
                   <SelectItem value="em_atendimento">Em Atendimento</SelectItem>
@@ -129,29 +129,32 @@ const OrderManagement = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block text-foreground">Nome do Paciente</label>
+              <label className="text-sm font-medium mb-2 block text-card-foreground">Nome do Paciente</label>
               <Input
                 placeholder="Buscar por nome..."
                 value={filters.patientName || ''}
                 onChange={(e) => setFilters(prev => ({ ...prev, patientName: e.target.value || undefined }))}
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block text-foreground">Data Inicial</label>
+              <label className="text-sm font-medium mb-2 block text-card-foreground">Data Inicial</label>
               <Input
                 type="date"
                 value={filters.dateFrom || ''}
                 onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value || undefined }))}
+                className="bg-background border-input text-foreground"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block text-foreground">Data Final</label>
+              <label className="text-sm font-medium mb-2 block text-card-foreground">Data Final</label>
               <Input
                 type="date"
                 value={filters.dateTo || ''}
                 onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value || undefined }))}
+                className="bg-background border-input text-foreground"
               />
             </div>
           </div>
@@ -159,7 +162,7 @@ const OrderManagement = () => {
           {/* Lista de Pedidos */}
           <div className="space-y-4">
             {filteredOrders.map((order) => (
-              <div key={order.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors bg-card">
+              <div key={order.id} className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors bg-card">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-4 mb-2">
@@ -167,29 +170,29 @@ const OrderManagement = () => {
                       {getStatusBadge(order.status)}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                       <div>
-                        <span className="font-medium text-foreground flex items-center gap-1">
-                          <Search className="h-3 w-3" />
+                        <span className="font-medium text-card-foreground flex items-center gap-1 mb-1">
+                          <Search className="h-3 w-3 text-primary" />
                           Paciente:
                         </span>
-                        <p className="text-foreground">{order.patient_name}</p>
+                        <p className="text-muted-foreground">{order.patient_name}</p>
                       </div>
                       
                       <div>
-                        <span className="font-medium text-foreground flex items-center gap-1">
-                          <Package className="h-3 w-3" />
+                        <span className="font-medium text-card-foreground flex items-center gap-1 mb-1">
+                          <Wrench className="h-3 w-3 text-primary" />
                           Exames:
                         </span>
-                        <p className="text-foreground">{order.service_names.join(', ')}</p>
+                        <p className="text-muted-foreground">{order.service_names.join(', ')}</p>
                       </div>
                       
                       <div>
-                        <span className="font-medium text-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                        <span className="font-medium text-card-foreground flex items-center gap-1 mb-1">
+                          <Calendar className="h-3 w-3 text-primary" />
                           Data/Hora:
                         </span>
-                        <p className="text-foreground">
+                        <p className="text-muted-foreground">
                           {order.scheduled_date && order.scheduled_time 
                             ? `${new Date(order.scheduled_date).toLocaleDateString('pt-BR')} às ${order.scheduled_time}`
                             : 'Comparecimento livre'
@@ -198,11 +201,11 @@ const OrderManagement = () => {
                       </div>
                       
                       <div>
-                        <span className="font-medium text-foreground flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" />
+                        <span className="font-medium text-card-foreground flex items-center gap-1 mb-1">
+                          <DollarSign className="h-3 w-3 text-primary" />
                           Valor:
                         </span>
-                        <p className="text-foreground">R$ {order.total_amount.toFixed(2)}</p>
+                        <p className="text-muted-foreground">R$ {order.total_amount.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>
@@ -211,7 +214,7 @@ const OrderManagement = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleViewDetails(order)}
-                    className="ml-4"
+                    className="ml-4 border-border text-foreground hover:bg-accent"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Ver Detalhes
@@ -221,9 +224,9 @@ const OrderManagement = () => {
             ))}
 
             {filteredOrders.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Nenhum pedido encontrado com os filtros aplicados.</p>
+              <div className="text-center py-8">
+                <Filter className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground">Nenhum pedido encontrado com os filtros aplicados.</p>
               </div>
             )}
           </div>

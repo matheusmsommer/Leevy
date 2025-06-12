@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
@@ -115,9 +114,9 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between text-foreground">
+          <DialogTitle className="flex items-center justify-between text-card-foreground">
             Detalhes do Pedido: {order.order_number}
             {getStatusBadge(order.status)}
           </DialogTitle>
@@ -129,47 +128,47 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
         <div className="space-y-6">
           {/* Informações do Paciente */}
           <div>
-            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
-              <User className="h-5 w-5" />
+            <h3 className="font-semibold mb-3 text-card-foreground flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
               Dados do Paciente
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted rounded-lg border border-border">
               <div>
-                <Label className="text-sm font-medium text-foreground">Nome do Paciente</Label>
-                <p className="text-sm text-foreground">{order.patient_name}</p>
+                <Label className="text-sm font-medium text-card-foreground">Nome do Paciente</Label>
+                <p className="text-sm text-muted-foreground mt-1">{order.patient_name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-foreground">Responsável pela Compra</Label>
-                <p className="text-sm text-foreground">{order.customer_name}</p>
+                <Label className="text-sm font-medium text-card-foreground">Responsável pela Compra</Label>
+                <p className="text-sm text-muted-foreground mt-1">{order.customer_name}</p>
               </div>
             </div>
           </div>
 
           {/* Informações do Atendimento */}
           <div>
-            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
+            <h3 className="font-semibold mb-3 text-card-foreground flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
               Dados do Atendimento
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted rounded-lg border border-border">
               <div>
-                <Label className="text-sm font-medium text-foreground">Exames Solicitados</Label>
-                <p className="text-sm text-foreground">{order.service_names.join(', ')}</p>
+                <Label className="text-sm font-medium text-card-foreground">Exames Solicitados</Label>
+                <p className="text-sm text-muted-foreground mt-1">{order.service_names.join(', ')}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-foreground">Local</Label>
-                <p className="text-sm text-foreground">{order.location_name}</p>
+                <Label className="text-sm font-medium text-card-foreground">Local</Label>
+                <p className="text-sm text-muted-foreground mt-1">{order.location_name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-foreground">Tipo de Atendimento</Label>
-                <p className="text-sm text-foreground">
+                <Label className="text-sm font-medium text-card-foreground">Tipo de Atendimento</Label>
+                <p className="text-sm text-muted-foreground mt-1">
                   {order.attendance_type === 'presencial' ? 'Presencial' : 
                    order.attendance_type === 'domiciliar' ? 'Domiciliar' : 'Comparecimento Livre'}
                 </p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-foreground">Data e Hora</Label>
-                <p className="text-sm text-foreground">
+                <Label className="text-sm font-medium text-card-foreground">Data e Hora</Label>
+                <p className="text-sm text-muted-foreground mt-1">
                   {order.scheduled_date && order.scheduled_time 
                     ? `${new Date(order.scheduled_date).toLocaleDateString('pt-BR')} às ${order.scheduled_time}`
                     : 'Comparecimento livre'
@@ -178,8 +177,8 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
               </div>
               {order.observations && (
                 <div className="md:col-span-2">
-                  <Label className="text-sm font-medium text-foreground">Observações</Label>
-                  <p className="text-sm text-foreground">{order.observations}</p>
+                  <Label className="text-sm font-medium text-card-foreground">Observações</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{order.observations}</p>
                 </div>
               )}
             </div>
@@ -187,41 +186,43 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
 
           {/* Informações de Pagamento */}
           <div>
-            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+            <h3 className="font-semibold mb-3 text-card-foreground flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
               Dados do Pagamento
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted rounded-lg border border-border">
               <div>
-                <Label className="text-sm font-medium text-foreground">Valor Total</Label>
-                <p className="text-sm font-bold text-foreground">R$ {order.total_amount.toFixed(2)}</p>
+                <Label className="text-sm font-medium text-card-foreground">Valor Total</Label>
+                <p className="text-sm font-bold text-card-foreground mt-1">R$ {order.total_amount.toFixed(2)}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-foreground">Status do Pagamento</Label>
-                <Badge variant={order.payment_status === 'aprovado' ? 'default' : 'destructive'}>
-                  {order.payment_status === 'aprovado' ? 'Aprovado' : 
-                   order.payment_status === 'pendente' ? 'Pendente' : 'Rejeitado'}
-                </Badge>
+                <Label className="text-sm font-medium text-card-foreground">Status do Pagamento</Label>
+                <div className="mt-1">
+                  <Badge variant={order.payment_status === 'aprovado' ? 'default' : 'destructive'}>
+                    {order.payment_status === 'aprovado' ? 'Aprovado' : 
+                     order.payment_status === 'pendente' ? 'Pendente' : 'Rejeitado'}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-border" />
 
           {/* Atualização de Status */}
           <div>
-            <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+            <h3 className="font-semibold mb-3 text-card-foreground flex items-center gap-2">
+              <Settings className="h-5 w-5 text-primary" />
               Atualizar Status
             </h3>
             <div className="flex items-end gap-4">
               <div className="flex-1">
-                <Label htmlFor="status" className="text-foreground">Novo Status</Label>
+                <Label htmlFor="status" className="text-card-foreground">Novo Status</Label>
                 <Select value={status} onValueChange={handleStatusChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border-border">
                     {statusOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -230,7 +231,11 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleStatusUpdate} disabled={status === order.status}>
+              <Button 
+                onClick={handleStatusUpdate} 
+                disabled={status === order.status}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 Atualizar Status
               </Button>
             </div>
@@ -239,22 +244,22 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
           {/* Envio de Resultados - só aparece se status for "concluído" */}
           {(status === 'concluido' || order.status === 'concluido') && (
             <div>
-              <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+              <h3 className="font-semibold mb-3 text-card-foreground flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
                 Resultados
               </h3>
               
               {/* Upload de Arquivos */}
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="file-upload" className="text-foreground">Upload de Arquivo PDF</Label>
+                  <Label htmlFor="file-upload" className="text-card-foreground">Upload de Arquivo PDF</Label>
                   <div className="mt-2">
                     <Input
                       id="file-upload"
                       type="file"
                       accept=".pdf"
                       onChange={handleFileUpload}
-                      className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                      className="bg-background border-input text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
                     />
                   </div>
                 </div>
@@ -262,17 +267,22 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
                 {/* Arquivos enviados */}
                 {resultFiles.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-foreground">Arquivos Enviados</Label>
+                    <Label className="text-card-foreground">Arquivos Enviados</Label>
                     {resultFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-2 border rounded bg-card">
+                      <div key={file.id} className="flex items-center justify-between p-2 border border-border rounded bg-background">
                         <span className="text-sm text-foreground">{file.filename}</span>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" asChild>
+                          <Button variant="outline" size="sm" asChild className="border-border text-foreground hover:bg-accent">
                             <a href={file.url} download target="_blank" rel="noopener noreferrer">
                               <Download className="h-4 w-4" />
                             </a>
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => removeFile(file.id)}>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => removeFile(file.id)}
+                            className="border-border text-foreground hover:bg-accent"
+                          >
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
@@ -281,19 +291,23 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
                   </div>
                 )}
 
-                <Separator />
+                <Separator className="bg-border" />
 
                 {/* Link Externo */}
                 <div>
-                  <Label htmlFor="result-link" className="text-foreground">Link Externo para Resultado</Label>
+                  <Label htmlFor="result-link" className="text-card-foreground">Link Externo para Resultado</Label>
                   <div className="flex gap-2 mt-2">
                     <Input
                       id="result-link"
                       placeholder="https://..."
                       value={resultLink}
                       onChange={(e) => setResultLink(e.target.value)}
+                      className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                     />
-                    <Button onClick={handleLinkSave}>
+                    <Button 
+                      onClick={handleLinkSave}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
                       <Link className="h-4 w-4 mr-2" />
                       Salvar Link
                     </Button>
