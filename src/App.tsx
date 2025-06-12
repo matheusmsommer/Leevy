@@ -16,6 +16,7 @@ import OrderHistory from "./pages/OrderHistory";
 import AccountSettings from "./pages/AccountSettings";
 import Support from "./pages/Support";
 import BookingSuccess from "./pages/BookingSuccess";
+import PublicCatalog from "./pages/PublicCatalog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/search" element={<SearchServices />} />
             <Route path="/book/:serviceId" element={<BookingFlow />} />
+            <Route path="/book/combo/:comboId" element={<BookingFlow />} />
+            <Route path="/company/:companyId" element={<PublicCatalog />} />
             <Route path="/patients" element={<PatientManagement />} />
             <Route path="/patients/new" element={<PatientManagement />} />
             <Route path="/bookings" element={<BookingHistory />} />
