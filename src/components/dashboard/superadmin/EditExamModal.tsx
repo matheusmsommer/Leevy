@@ -114,9 +114,18 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
     setLoading(true);
     try {
+      // Preparar dados para atualização, convertendo strings vazias para null nos campos UUID
+      const updateData = {
+        ...formData,
+        category_id: formData.category_id || null,
+        subcategory_id: formData.subcategory_id || null
+      };
+
+      console.log('Updating exam with data:', updateData);
+
       const { error } = await supabase
         .from('exams')
-        .update(formData)
+        .update(updateData)
         .eq('id', exam.id);
 
       if (error) throw error;
@@ -196,7 +205,10 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
             <div>
               <Label htmlFor="subcategory">Subcategoria</Label>
-              <Select value={formData.subcategory_id} onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}>
+              <Select 
+                value={formData.subcategory_id} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma subcategoria" />
                 </SelectTrigger>
