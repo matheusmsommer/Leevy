@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Separator } from '@/components/ui/separator';
+import SuperAdminSidebar from './superadmin/SuperAdminSidebar';
 import DashboardStats from './superadmin/DashboardStats';
 import ExamManagement from './superadmin/ExamManagement';
 import CompanyManagement from './superadmin/CompanyManagement';
@@ -12,7 +11,7 @@ import AuditLogs from './superadmin/AuditLogs';
 import PlatformSettings from './superadmin/PlatformSettings';
 
 const SuperAdminDashboard = () => {
-  const { logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // Mock data - seria substituído por dados reais do Supabase
   const platformStats = {
@@ -173,79 +172,77 @@ const SuperAdminDashboard = () => {
     console.log('Marcar comissão como paga:', orderId);
   };
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardStats platformStats={platformStats} topCompanies={topCompanies} />;
+      case 'exams':
+        return <ExamManagement globalExams={globalExams} onAddExam={handleAddExam} />;
+      case 'companies':
+        return (
+          <CompanyManagement 
+            companies={companies}
+            onViewCompany={handleViewCompany}
+            onImpersonateCompany={handleImpersonateCompany}
+            onBlockCompany={handleBlockCompany}
+          />
+        );
+      case 'orders':
+        return (
+          <OrderManagement 
+            allOrders={allOrders}
+            onExportOrders={handleExportOrders}
+            onMarkCommissionPaid={handleMarkCommissionPaid}
+          />
+        );
+      case 'users':
+        return <UserManagement platformUsers={platformUsers} />;
+      case 'audit':
+        return <AuditLogs auditLogs={auditLogs} />;
+      case 'settings':
+        return <PlatformSettings />;
+      default:
+        return <DashboardStats platformStats={platformStats} topCompanies={topCompanies} />;
+    }
+  };
+
+  const getPageTitle = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return 'Dashboard';
+      case 'exams':
+        return 'Gestão de Exames';
+      case 'companies':
+        return 'Gestão de Empresas';
+      case 'orders':
+        return 'Gestão de Vendas';
+      case 'users':
+        return 'Gestão de Usuários';
+      case 'audit':
+        return 'Auditoria e Logs';
+      case 'settings':
+        return 'Configurações da Plataforma';
+      default:
+        return 'Dashboard';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Painel Leevy - Superadmin</h1>
-            <p className="text-sm text-muted-foreground">
-              Gestão completa da plataforma
-            </p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <SuperAdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <h1 className="text-xl font-semibold text-foreground">{getPageTitle()}</h1>
+          </header>
+          <div className="flex-1 space-y-4 p-6">
+            {renderContent()}
           </div>
-          <Button variant="outline" onClick={logout}>
-            Sair
-          </Button>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="exams">Exames</TabsTrigger>
-            <TabsTrigger value="companies">Empresas</TabsTrigger>
-            <TabsTrigger value="orders">Vendas</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="audit">Auditoria</TabsTrigger>
-            <TabsTrigger value="settings">Config</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="dashboard">
-            <DashboardStats 
-              platformStats={platformStats} 
-              topCompanies={topCompanies} 
-            />
-          </TabsContent>
-
-          <TabsContent value="exams">
-            <ExamManagement 
-              globalExams={globalExams} 
-              onAddExam={handleAddExam} 
-            />
-          </TabsContent>
-
-          <TabsContent value="companies">
-            <CompanyManagement 
-              companies={companies}
-              onViewCompany={handleViewCompany}
-              onImpersonateCompany={handleImpersonateCompany}
-              onBlockCompany={handleBlockCompany}
-            />
-          </TabsContent>
-
-          <TabsContent value="orders">
-            <OrderManagement 
-              allOrders={allOrders}
-              onExportOrders={handleExportOrders}
-              onMarkCommissionPaid={handleMarkCommissionPaid}
-            />
-          </TabsContent>
-
-          <TabsContent value="users">
-            <UserManagement platformUsers={platformUsers} />
-          </TabsContent>
-
-          <TabsContent value="audit">
-            <AuditLogs auditLogs={auditLogs} />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <PlatformSettings />
-          </TabsContent>
-        </Tabs>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
