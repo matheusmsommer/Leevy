@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      collection_schedules: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          days_of_week: string[]
+          end_time: string
+          id: string
+          name: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          days_of_week: string[]
+          end_time: string
+          id?: string
+          name: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          days_of_week?: string[]
+          end_time?: string
+          id?: string
+          name?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           cnpj: string | null
@@ -81,41 +114,137 @@ export type Database = {
           },
         ]
       }
+      exam_categories: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exam_subcategories: {
+        Row: {
+          active: boolean | null
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exam_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           category: string
+          category_id: string | null
           code: string
           created_at: string
           description: string | null
           id: string
           name: string
           preparation: string | null
+          preparation_id: string | null
+          subcategory_id: string | null
           synonyms: string | null
           updated_at: string
         }
         Insert: {
           category: string
+          category_id?: string | null
           code: string
           created_at?: string
           description?: string | null
           id?: string
           name: string
           preparation?: string | null
+          preparation_id?: string | null
+          subcategory_id?: string | null
           synonyms?: string | null
           updated_at?: string
         }
         Update: {
           category?: string
+          category_id?: string | null
           code?: string
           created_at?: string
           description?: string | null
           id?: string
           name?: string
           preparation?: string | null
+          preparation_id?: string | null
+          subcategory_id?: string | null
           synonyms?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "exams_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exam_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_preparation_id_fkey"
+            columns: ["preparation_id"]
+            isOneToOne: false
+            referencedRelation: "standard_preparations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "exam_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       locations: {
         Row: {
@@ -309,6 +438,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      standard_preparations: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          id: string
+          instructions: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          instructions: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          id?: string
+          instructions?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

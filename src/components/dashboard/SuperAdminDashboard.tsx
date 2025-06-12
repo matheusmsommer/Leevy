@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import SuperAdminSidebar from './superadmin/SuperAdminSidebar';
@@ -9,6 +8,7 @@ import OrderManagement from './superadmin/OrderManagement';
 import UserManagement from './superadmin/UserManagement';
 import PlatformSettings from './superadmin/PlatformSettings';
 import AuditLogs from './superadmin/AuditLogs';
+import ConfigurationManagement from './superadmin/ConfigurationManagement';
 
 const SuperAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -69,6 +69,8 @@ const SuperAdminDashboard = () => {
         />;
       case 'exams':
         return <ExamManagement globalExams={[]} onAddExam={handleAddExam} />;
+      case 'configurations':
+        return <ConfigurationManagement />;
       case 'orders':
         return <OrderManagement 
           onExportOrders={handleExportOrders}
