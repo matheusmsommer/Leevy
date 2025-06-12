@@ -3,10 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Calendar, File, Search } from 'lucide-react';
+import { Users, Calendar, File, Search, User, History } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,15 +30,15 @@ const UserDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                Buscar Exames
+                Buscar Serviços
               </CardTitle>
               <CardDescription>
-                Encontre e agende exames disponíveis
+                Encontre e agende exames, consultas e check-ups
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
-                Buscar Exames
+              <Button className="w-full" onClick={() => navigate('/search')}>
+                Buscar Serviços
               </Button>
             </CardContent>
           </Card>
@@ -45,15 +47,15 @@ const UserDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Meus Pedidos
+                Meus Agendamentos
               </CardTitle>
               <CardDescription>
                 Acompanhe seus agendamentos e histórico
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
-                Ver Pedidos
+              <Button className="w-full" onClick={() => navigate('/bookings')}>
+                Ver Agendamentos
               </Button>
             </CardContent>
           </Card>
@@ -69,7 +71,7 @@ const UserDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
+              <Button className="w-full" onClick={() => navigate('/results')}>
                 Ver Resultados
               </Button>
             </CardContent>
@@ -79,15 +81,49 @@ const UserDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Dependentes
+                Pacientes
               </CardTitle>
               <CardDescription>
-                Gerencie familiares e dependentes
+                Gerencie pacientes vinculados à sua conta
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full">
-                Gerenciar Dependentes
+              <Button className="w-full" onClick={() => navigate('/patients')}>
+                Gerenciar Pacientes
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Meu Perfil
+              </CardTitle>
+              <CardDescription>
+                Atualize seus dados pessoais
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate('/profile')}>
+                Editar Perfil
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="h-5 w-5" />
+                Histórico
+              </CardTitle>
+              <CardDescription>
+                Visualize todo seu histórico de atividades
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate('/history')}>
+                Ver Histórico
               </Button>
             </CardContent>
           </Card>
@@ -104,11 +140,17 @@ const UserDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => navigate('/search?type=exame')}>
                     Agendar Exame de Sangue
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => navigate('/patients/new')}>
                     Adicionar Dependente
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/search?type=consulta')}>
+                    Agendar Consulta
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/search?type=checkup')}>
+                    Agendar Check-up
                   </Button>
                 </div>
               </div>
