@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ExamPreparationsManager from './ExamPreparationsManager';
+import CategorySelector from './CategorySelector';
 
 interface EditExamModalProps {
   open: boolean;
@@ -141,7 +141,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
     }
   };
 
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategorySelect = (categoryId: string) => {
     if (isInitializing) {
       console.log('Skipping category change during initialization');
       return;
@@ -318,22 +318,19 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
           </div>
 
           <div>
-            <Label htmlFor="category">Categoria</Label>
-            <Select value={formData.category_id} onValueChange={handleCategoryChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-1">
-              Atual: {formData.category_id || 'Nenhuma'}
-            </p>
+            <Label>Categoria</Label>
+            <div className="mt-2">
+              <CategorySelector
+                categories={categories}
+                selectedCategoryId={formData.category_id}
+                onCategorySelect={handleCategorySelect}
+              />
+            </div>
+            {formData.category_id && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Categoria selecionada: {formData.category}
+              </p>
+            )}
           </div>
 
           {formData.category_id && subcategories.length > 0 && (

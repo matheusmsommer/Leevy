@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Plus, Edit, Trash2, Tag, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, Eye, TestTube, Scan, Stethoscope, Scissors, UserCheck, HardHat, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import AddCategoryModal from './AddCategoryModal';
@@ -16,10 +16,26 @@ interface Category {
   id: string;
   name: string;
   description?: string;
+  icon?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
 }
+
+const getIconComponent = (iconName?: string) => {
+  const iconMap = {
+    'TestTube': TestTube,
+    'Scan': Scan,
+    'Stethoscope': Stethoscope,
+    'Scissors': Scissors,
+    'UserCheck': UserCheck,
+    'HardHat': HardHat,
+    'Settings': Settings,
+  };
+  
+  const IconComponent = iconName ? iconMap[iconName as keyof typeof iconMap] : Settings;
+  return IconComponent || Settings;
+};
 
 const CategoryManagement = () => {
   const { toast } = useToast();
@@ -120,62 +136,73 @@ const CategoryManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-border bg-muted/30">
-                <TableHead>Nome</TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id} className="border-border hover:bg-muted/20">
-                  <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {category.description || 'Sem descrição'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={category.active ? "default" : "secondary"}>
-                      {category.active ? 'Ativa' : 'Inativa'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2 justify-center">
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" onClick={() => handleView(category)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </HoverCardTrigger>
-                        <HoverCardContent>
-                          <p className="text-sm">Visualizar categoria</p>
-                        </HoverCardContent>
-                      </HoverCard>
+              {categories.map((category) => {
+                const IconComponent = getIconComponent(category.icon);
+                
+                return (
+                  <TableRow key={category.id} className="border-border hover:bg-muted/20">
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-muted rounded-lg">
+                          <IconComponent className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <span className="font-medium">{category.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {category.description || 'Sem descrição'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={category.active ? "default" : "secondary"}>
+                        {category.active ? 'Ativa' : 'Inativa'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 justify-center">
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Button size="sm" variant="outline" onClick={() => handleView(category)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <p className="text-sm">Visualizar categoria</p>
+                          </HoverCardContent>
+                        </HoverCard>
 
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </HoverCardTrigger>
-                        <HoverCardContent>
-                          <p className="text-sm">Editar categoria</p>
-                        </HoverCardContent>
-                      </HoverCard>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Button size="sm" variant="outline" onClick={() => handleEdit(category)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <p className="text-sm">Editar categoria</p>
+                          </HoverCardContent>
+                        </HoverCard>
 
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(category)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </HoverCardTrigger>
-                        <HoverCardContent>
-                          <p className="text-sm">Excluir categoria</p>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(category)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <p className="text-sm">Excluir categoria</p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

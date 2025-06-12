@@ -6,8 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { TestTube, Scan, Stethoscope, Scissors, UserCheck, HardHat, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface AddCategoryModalProps {
   open: boolean;
@@ -15,12 +18,23 @@ interface AddCategoryModalProps {
   onCategoryAdded: () => void;
 }
 
+const availableIcons = [
+  { name: 'TestTube', component: TestTube, label: 'Exames Laboratoriais' },
+  { name: 'Scan', component: Scan, label: 'Exames de Imagem' },
+  { name: 'Stethoscope', component: Stethoscope, label: 'Exames Médicos' },
+  { name: 'Scissors', component: Scissors, label: 'Procedimentos' },
+  { name: 'UserCheck', component: UserCheck, label: 'Consultas' },
+  { name: 'HardHat', component: HardHat, label: 'Ocupacional' },
+  { name: 'Settings', component: Settings, label: 'Serviços Gerais' },
+];
+
 const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryModalProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    icon: 'Settings',
     active: true
   });
 
@@ -44,6 +58,7 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
         .insert({
           name: formData.name.trim(),
           description: formData.description.trim() || null,
+          icon: formData.icon,
           active: formData.active
         });
 
@@ -62,7 +77,7 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
         description: "Categoria adicionada com sucesso!",
       });
 
-      setFormData({ name: '', description: '', active: true });
+      setFormData({ name: '', description: '', icon: 'Settings', active: true });
       onCategoryAdded();
       onOpenChange(false);
     } catch (error) {
@@ -79,7 +94,7 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Adicionar Nova Categoria</DialogTitle>
           <DialogDescription>
@@ -109,6 +124,43 @@ const AddCategoryModal = ({ open, onOpenChange, onCategoryAdded }: AddCategoryMo
               rows={3}
               disabled={loading}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ícone da Categoria</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {availableIcons.map((icon) => {
+                const IconComponent = icon.component;
+                const isSelected = formData.icon === icon.name;
+                
+                return (
+                  <Card
+                    key={icon.name}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 border-2",
+                      isSelected 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50"
+                    )}
+                    onClick={() => setFormData(prev => ({ ...prev, icon: icon.name }))}
+                  >
+                    <CardContent className="p-3 text-center">
+                      <div className={cn(
+                        "mx-auto p-2 rounded-full w-fit transition-colors",
+                        isSelected 
+                          ? "bg-primary text-primary-foreground" 
+                          : "bg-muted text-muted-foreground"
+                      )}>
+                        <IconComponent className="h-4 w-4" />
+                      </div>
+                      <p className="text-xs mt-1 text-muted-foreground">
+                        {icon.label}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">

@@ -131,6 +131,7 @@ export type Database = {
           active: boolean | null
           created_at: string
           description: string | null
+          icon: string | null
           id: string
           name: string
           updated_at: string
@@ -139,6 +140,7 @@ export type Database = {
           active?: boolean | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
           updated_at?: string
@@ -147,6 +149,7 @@ export type Database = {
           active?: boolean | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
           updated_at?: string
