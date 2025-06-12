@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { User, Plus, UserCheck } from 'lucide-react';
+import { User, Plus, UserCheck, AlertCircle } from 'lucide-react';
 
 interface Patient {
   id: string;
@@ -104,7 +104,7 @@ const PatientSelection = ({ selectedPatientId, onPatientChange }: PatientSelecti
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Para quem é o atendimento?</h3>
+        <h3 className="text-lg font-semibold mb-2 text-foreground">Para quem é o atendimento?</h3>
         <p className="text-muted-foreground">
           Selecione o paciente que receberá os serviços agendados
         </p>
@@ -115,10 +115,10 @@ const PatientSelection = ({ selectedPatientId, onPatientChange }: PatientSelecti
         {mockPatients.map((patient) => (
           <Card
             key={patient.id}
-            className={`cursor-pointer transition-all ${
+            className={`cursor-pointer transition-all border-border ${
               selectedPatientId === patient.id
                 ? 'ring-2 ring-primary bg-primary/5'
-                : 'hover:shadow-md'
+                : 'hover:shadow-md bg-card'
             }`}
             onClick={() => onPatientChange(patient.id)}
           >
@@ -135,7 +135,7 @@ const PatientSelection = ({ selectedPatientId, onPatientChange }: PatientSelecti
                     )}
                   </div>
                   <div>
-                    <h4 className="font-medium">{patient.name}</h4>
+                    <h4 className="font-medium text-card-foreground">{patient.name}</h4>
                     <div className="text-sm text-muted-foreground">
                       <span>CPF: {patient.cpf}</span>
                       <span className="ml-4">
@@ -168,53 +168,57 @@ const PatientSelection = ({ selectedPatientId, onPatientChange }: PatientSelecti
 
       {/* Formulário de cadastro */}
       {showAddForm && (
-        <Card className="border-primary/20">
+        <Card className="border-primary/20 bg-card">
           <CardHeader>
-            <CardTitle className="text-lg">Cadastrar Novo Paciente</CardTitle>
+            <CardTitle className="text-lg text-card-foreground">Cadastrar Novo Paciente</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Nome Completo *</Label>
+                  <Label htmlFor="name" className="text-foreground">Nome Completo *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="Digite o nome completo"
+                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cpf">CPF *</Label>
+                  <Label htmlFor="cpf" className="text-foreground">CPF *</Label>
                   <Input
                     id="cpf"
                     value={formData.cpf}
                     onChange={(e) => handleInputChange('cpf', e.target.value)}
                     placeholder="000.000.000-00"
+                    className="bg-background border-input text-foreground placeholder:text-muted-foreground"
                     required
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ⚠️ CPF é obrigatório para evitar duplicidades
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    CPF é obrigatório para evitar duplicidades
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="birth_date">Data de Nascimento *</Label>
+                  <Label htmlFor="birth_date" className="text-foreground">Data de Nascimento *</Label>
                   <Input
                     id="birth_date"
                     type="date"
                     value={formData.birth_date}
                     onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                    className="bg-background border-input text-foreground"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="gender">Gênero *</Label>
+                  <Label htmlFor="gender" className="text-foreground">Gênero *</Label>
                   <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background border-input text-foreground">
                       <SelectValue placeholder="Selecione o gênero" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border">
                       <SelectItem value="masculino">Masculino</SelectItem>
                       <SelectItem value="feminino">Feminino</SelectItem>
                       <SelectItem value="outro">Outro</SelectItem>
@@ -235,7 +239,10 @@ const PatientSelection = ({ selectedPatientId, onPatientChange }: PatientSelecti
 
       {/* Aviso importante */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-800 mb-1">Importante:</h4>
+        <h4 className="font-medium text-blue-800 mb-1 flex items-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          Importante:
+        </h4>
         <p className="text-sm text-blue-700">
           O CPF é obrigatório para todos os pacientes para garantir a identificação única 
           e evitar duplicidades no sistema. Os dados são mantidos em segurança.

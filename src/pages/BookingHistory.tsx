@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, FileText, Clock, DollarSign } from 'lucide-react';
+import { Calendar, MapPin, FileText, Clock, DollarSign, User, Activity } from 'lucide-react';
 
 const BookingHistory = () => {
   const { user, isLoading } = useAuth();
@@ -56,7 +56,7 @@ const BookingHistory = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
       </div>
     );
@@ -89,15 +89,15 @@ const BookingHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white">
+      <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gradient">Histórico de Agendamentos</h1>
+            <h1 className="text-2xl font-bold text-foreground">Histórico de Agendamentos</h1>
             <p className="text-sm text-muted-foreground">
               Acompanhe todos os seus agendamentos e resultados
             </p>
           </div>
-          <Button onClick={() => navigate('/dashboard')}>
+          <Button onClick={() => navigate('/dashboard')} variant="outline">
             Voltar ao Dashboard
           </Button>
         </div>
@@ -105,7 +105,7 @@ const BookingHistory = () => {
 
       <div className="container mx-auto px-4 py-8">
         {mockBookings.length === 0 ? (
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="py-8 text-center">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">Nenhum agendamento encontrado</p>
@@ -124,11 +124,14 @@ const BookingHistory = () => {
               const paymentBadge = getPaymentStatusBadge(booking.payment_status);
               
               return (
-                <Card key={booking.id}>
+                <Card key={booking.id} className="bg-card border-border">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-lg">{booking.service_name}</CardTitle>
+                        <CardTitle className="text-lg text-card-foreground flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-primary" />
+                          {booking.service_name}
+                        </CardTitle>
                         <p className="text-sm text-muted-foreground">
                           {booking.company_name}
                         </p>
@@ -147,17 +150,17 @@ const BookingHistory = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>Paciente: {booking.patient_name}</span>
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground">Paciente: {booking.patient_name}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>{booking.location_name}</span>
+                          <span className="text-foreground">{booking.location_name}</span>
                         </div>
                         {booking.scheduled_date && booking.scheduled_time && (
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>
+                            <span className="text-foreground">
                               {new Date(booking.scheduled_date).toLocaleDateString('pt-BR')} às {booking.scheduled_time}
                             </span>
                           </div>
@@ -166,9 +169,10 @@ const BookingHistory = () => {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
                           <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">R$ {booking.amount.toFixed(2)}</span>
+                          <span className="font-medium text-foreground">R$ {booking.amount.toFixed(2)}</span>
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
                           Agendado em: {new Date(booking.created_at).toLocaleDateString('pt-BR')}
                         </div>
                       </div>

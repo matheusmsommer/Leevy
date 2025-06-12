@@ -6,14 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Calendar, 
-  File, 
+  FileText, 
   Download, 
   Clock, 
   CheckCircle, 
   AlertCircle,
   Plus,
   ArrowRight,
-  MessageSquare
+  User,
+  Activity
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -70,10 +71,10 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white">
+      <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gradient">Olá, {user?.name}!</h1>
+            <h1 className="text-2xl font-bold text-foreground">Olá, {user?.name}!</h1>
             <p className="text-sm text-muted-foreground">
               Bem-vindo de volta à sua área pessoal
             </p>
@@ -86,11 +87,11 @@ const UserDashboard = () => {
 
       <div className="container mx-auto px-4 py-8">
         {/* Action Hero */}
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 mb-8">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 mb-8">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="mb-4 md:mb-0">
-                <h2 className="text-xl font-bold mb-2">Precisa agendar um exame ou consulta?</h2>
+                <h2 className="text-xl font-bold mb-2 text-foreground">Precisa agendar um exame ou consulta?</h2>
                 <p className="text-muted-foreground">
                   Encontre e agende rapidamente em nossa rede de parceiros
                 </p>
@@ -109,39 +110,39 @@ const UserDashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pagamentos Pendentes</CardTitle>
+              <CardTitle className="text-sm font-medium text-card-foreground">Pagamentos Pendentes</CardTitle>
               <AlertCircle className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{quickStats.pendingPayments}</div>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.pendingPayments}</div>
               <p className="text-xs text-muted-foreground">
                 Finalize para confirmar
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Agendamentos Confirmados</CardTitle>
+              <CardTitle className="text-sm font-medium text-card-foreground">Agendamentos Confirmados</CardTitle>
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{quickStats.confirmedBookings}</div>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.confirmedBookings}</div>
               <p className="text-xs text-muted-foreground">
                 Próximos exames
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Resultados Disponíveis</CardTitle>
+              <CardTitle className="text-sm font-medium text-card-foreground">Resultados Disponíveis</CardTitle>
               <Download className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{quickStats.availableResults}</div>
+              <div className="text-2xl font-bold text-card-foreground">{quickStats.availableResults}</div>
               <p className="text-xs text-muted-foreground">
                 Prontos para download
               </p>
@@ -150,12 +151,12 @@ const UserDashboard = () => {
         </div>
 
         {/* Recent Bookings */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-card border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Próximos Agendamentos</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-card-foreground">Próximos Agendamentos</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Seus agendamentos mais recentes
                 </CardDescription>
               </div>
@@ -184,13 +185,15 @@ const UserDashboard = () => {
             ) : (
               <div className="space-y-4">
                 {recentBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={booking.id} className="flex items-center justify-between p-4 border border-border rounded-lg bg-background">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{booking.service}</h4>
+                        <Activity className="h-4 w-4 text-primary" />
+                        <h4 className="font-medium text-foreground">{booking.service}</h4>
                         {getStatusBadge(booking.status)}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="text-sm text-muted-foreground mb-1 flex items-center gap-2">
+                        <User className="h-3 w-3" />
                         Paciente: {booking.patient}
                       </p>
                       <p className="text-sm text-muted-foreground mb-1">
@@ -223,11 +226,11 @@ const UserDashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
-                <File className="h-8 w-8 text-blue-500 mb-2" />
-                <h3 className="font-medium mb-1">Meus Pedidos</h3>
+                <FileText className="h-8 w-8 text-blue-500 mb-2" />
+                <h3 className="font-medium mb-1 text-card-foreground">Meus Pedidos</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Histórico completo
                 </p>
@@ -238,11 +241,11 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
                 <Calendar className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="font-medium mb-1">Agendamentos</h3>
+                <h3 className="font-medium mb-1 text-card-foreground">Agendamentos</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Próximos exames
                 </p>
@@ -253,11 +256,11 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
                 <Download className="h-8 w-8 text-purple-500 mb-2" />
-                <h3 className="font-medium mb-1">Resultados</h3>
+                <h3 className="font-medium mb-1 text-card-foreground">Resultados</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Laudos disponíveis
                 </p>
@@ -268,11 +271,11 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center">
-                <Plus className="h-8 w-8 text-orange-500 mb-2" />
-                <h3 className="font-medium mb-1">Pacientes</h3>
+                <User className="h-8 w-8 text-orange-500 mb-2" />
+                <h3 className="font-medium mb-1 text-card-foreground">Pacientes</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Gerir dependentes
                 </p>

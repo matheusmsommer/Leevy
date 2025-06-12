@@ -16,7 +16,9 @@ import {
   Search,
   Filter,
   User,
-  Clock
+  Clock,
+  Building2,
+  Activity
 } from 'lucide-react';
 
 const OrderHistory = () => {
@@ -77,7 +79,7 @@ const OrderHistory = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
       </div>
     );
@@ -98,21 +100,15 @@ const OrderHistory = () => {
     return statusConfig[status as keyof typeof statusConfig] || statusConfig.confirmado;
   };
 
-  const getTypeBadge = (type: string) => {
+  const getTypeIcon = (type: string) => {
     const typeConfig = {
-      laboratorial: { label: 'Laboratorial', color: 'bg-blue-100 text-blue-800' },
-      imagem: { label: 'Imagem', color: 'bg-purple-100 text-purple-800' },
-      consulta: { label: 'Consulta', color: 'bg-green-100 text-green-800' },
-      checkup: { label: 'Check-up', color: 'bg-orange-100 text-orange-800' }
+      laboratorial: { icon: Activity, color: 'text-blue-600' },
+      imagem: { icon: FileText, color: 'text-purple-600' },
+      consulta: { icon: User, color: 'text-green-600' },
+      checkup: { icon: Building2, color: 'text-orange-600' }
     };
     
-    const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.laboratorial;
-    
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-        {config.label}
-      </span>
-    );
+    return typeConfig[type as keyof typeof typeConfig] || typeConfig.laboratorial;
   };
 
   const filteredOrders = orders.filter(order => {
@@ -127,15 +123,15 @@ const OrderHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white">
+      <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gradient">Meus Pedidos</h1>
+            <h1 className="text-2xl font-bold text-foreground">Meus Pedidos</h1>
             <p className="text-sm text-muted-foreground">
               Histórico completo dos seus agendamentos e serviços
             </p>
           </div>
-          <Button onClick={() => navigate('/dashboard')}>
+          <Button onClick={() => navigate('/dashboard')} variant="outline">
             Voltar ao Dashboard
           </Button>
         </div>
@@ -143,10 +139,10 @@ const OrderHistory = () => {
 
       <div className="container mx-auto px-4 py-8">
         {/* Filters */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <Filter className="h-5 w-5 text-primary" />
               Filtros
             </CardTitle>
           </CardHeader>
@@ -158,15 +154,15 @@ const OrderHistory = () => {
                   placeholder="Buscar por serviço, paciente ou empresa..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-input text-foreground">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   <SelectItem value="all">Todos os Status</SelectItem>
                   <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
                   <SelectItem value="confirmado">Confirmado</SelectItem>
@@ -176,10 +172,10 @@ const OrderHistory = () => {
               </Select>
 
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-input text-foreground">
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover border-border">
                   <SelectItem value="all">Todos os Tipos</SelectItem>
                   <SelectItem value="laboratorial">Laboratorial</SelectItem>
                   <SelectItem value="imagem">Imagem</SelectItem>
@@ -193,7 +189,7 @@ const OrderHistory = () => {
 
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
-          <Card>
+          <Card className="bg-card border-border">
             <CardContent className="py-8 text-center">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">
@@ -214,17 +210,19 @@ const OrderHistory = () => {
           <div className="space-y-4">
             {filteredOrders.map((order) => {
               const statusBadge = getStatusBadge(order.status);
+              const typeConfig = getTypeIcon(order.type);
+              const TypeIcon = typeConfig.icon;
               
               return (
-                <Card key={order.id}>
+                <Card key={order.id} className="bg-card border-border">
                   <CardContent className="pt-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="flex-1 space-y-3">
                         <div className="flex items-start justify-between">
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{order.service_name}</h3>
-                              {getTypeBadge(order.type)}
+                              <TypeIcon className={`h-5 w-5 ${typeConfig.color}`} />
+                              <h3 className="font-semibold text-lg text-card-foreground">{order.service_name}</h3>
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {order.company_name}
@@ -239,11 +237,11 @@ const OrderHistory = () => {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span>Paciente: {order.patient_name}</span>
+                              <span className="text-foreground">Paciente: {order.patient_name}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span>{order.location_name}</span>
+                              <span className="text-foreground">{order.location_name}</span>
                             </div>
                           </div>
                           
@@ -251,14 +249,14 @@ const OrderHistory = () => {
                             {order.scheduled_date && order.scheduled_time && (
                               <div className="flex items-center gap-2">
                                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span>
+                                <span className="text-foreground">
                                   {new Date(order.scheduled_date).toLocaleDateString('pt-BR')} às {order.scheduled_time}
                                 </span>
                               </div>
                             )}
                             <div className="flex items-center gap-2">
                               <DollarSign className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">R$ {order.amount.toFixed(2)}</span>
+                              <span className="font-medium text-foreground">R$ {order.amount.toFixed(2)}</span>
                             </div>
                           </div>
                         </div>
