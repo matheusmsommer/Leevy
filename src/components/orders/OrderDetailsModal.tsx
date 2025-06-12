@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ interface OrderDetailsModalProps {
 
 const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetailsModalProps) => {
   const { toast } = useToast();
-  const [status, setStatus] = useState(order.status);
+  const [status, setStatus] = useState<Order['status']>(order.status);
   const [resultLink, setResultLink] = useState(order.result_link || '');
   const [resultFiles, setResultFiles] = useState(order.result_files || []);
 
@@ -31,7 +30,11 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
     { value: 'aguardando_pagamento', label: 'Aguardando Pagamento' },
     { value: 'concluido', label: 'Concluído' },
     { value: 'cancelado', label: 'Cancelado' }
-  ];
+  ] as const;
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value as Order['status']);
+  };
 
   const handleStatusUpdate = () => {
     const updatedOrder = { ...order, status, updated_at: new Date().toISOString() };
@@ -201,7 +204,7 @@ const OrderDetailsModal = ({ order, open, onOpenChange, onUpdate }: OrderDetails
             <div className="flex items-end gap-4">
               <div className="flex-1">
                 <Label htmlFor="status">Novo Status</Label>
-                <Select value={status} onValueChange={setStatus}>
+                <Select value={status} onValueChange={handleStatusChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
