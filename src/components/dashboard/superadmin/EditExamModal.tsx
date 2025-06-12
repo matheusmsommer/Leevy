@@ -38,8 +38,9 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
   useEffect(() => {
     if (exam && open) {
       console.log('Loading exam data:', exam);
+      console.log('Exam category_id:', exam.category_id);
+      console.log('Exam subcategory_id:', exam.subcategory_id);
       
-      // Garantir que os valores são strings válidas ou vazias
       const examData = {
         name: exam.name || '',
         code: exam.code || '',
@@ -52,12 +53,18 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
         preparation: exam.preparation || ''
       };
       
+      console.log('Setting form data:', examData);
       setFormData(examData);
       
+      // Primeiro carregar categorias, depois subcategorias
       fetchCategories().then(() => {
-        // Se o exame tem category_id válido, buscar as subcategorias
+        console.log('Categories loaded, now checking for subcategories...');
         if (exam.category_id && exam.category_id.trim() !== '') {
+          console.log('Fetching subcategories for category_id:', exam.category_id);
           fetchSubcategories(exam.category_id);
+        } else {
+          console.log('No category_id found, clearing subcategories');
+          setSubcategories([]);
         }
       });
     }
@@ -65,6 +72,7 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories...');
       const { data, error } = await supabase
         .from('exam_categories')
         .select('*')
@@ -74,13 +82,14 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
       if (error) throw error;
       console.log('Categories loaded:', data);
       setCategories(data || []);
+      return data;
     } catch (error: any) {
       console.error('Error fetching categories:', error);
+      return [];
     }
   };
 
   const fetchSubcategories = async (categoryId: string) => {
-    // Verificar se categoryId é válido antes de fazer a query
     if (!categoryId || categoryId.trim() === '') {
       console.log('Category ID is empty, clearing subcategories');
       setSubcategories([]);
@@ -138,27 +147,36 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
 
     setLoading(true);
     try {
-      // Preparar dados para atualização, convertendo strings vazias para null nos campos UUID
+      // Preparar dados para atualização
       const updateData = {
         name: formData.name.trim(),
         code: formData.code.trim(),
         category: formData.category.trim() || 'Sem categoria',
-        category_id: formData.category_id.trim() || null,
-        subcategory_id: formData.subcategory_id.trim() || null,
-        description: formData.description.trim() || null,
-        synonyms: formData.synonyms.trim() || null,
-        related_diseases: formData.related_diseases.trim() || null,
-        preparation: formData.preparation.trim() || null
+        category_id: formData.category_id && formData.category_id.trim() !== '' ? formData.category_id.trim() : null,
+        subcategory_id: formData.subcategory_id && formData.subcategory_id.trim() !== '' ? formData.subcategory_id.trim() : null,
+        description: formData.description && formData.description.trim() !== '' ? formData.description.trim() : null,
+        synonyms: formData.synonyms && formData.synonyms.trim() !== '' ? formData.synonyms.trim() : null,
+        related_diseases: formData.related_diseases && formData.related_diseases.trim() !== '' ? formData.related_diseases.trim() : null,
+        preparation: formData.preparation && formData.preparation.trim() !== '' ? formData.preparation.trim() : null
       };
 
-      console.log('Updating exam with data:', updateData);
+      console.log('Form data before update:', formData);
+      console.log('Update data being sent:', updateData);
+      console.log('Exam ID:', exam.id);
 
-      const { error } = await supabase
+      const { data: updatedData, error } = await supabase
         .from('exams')
         .update(updateData)
-        .eq('id', exam.id);
+        .eq('id', exam.id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+
+      console.log('Update successful, returned data:', updatedData);
 
       toast({
         title: "Sucesso",
@@ -231,13 +249,19 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Atual: {formData.category_id || 'Nenhuma'}
+              </p>
             </div>
 
             <div>
               <Label htmlFor="subcategory">Subcategoria</Label>
               <Select 
                 value={formData.subcategory_id} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}
+                onValueChange={(value) => {
+                  console.log('Subcategory changed to:', value);
+                  setFormData(prev => ({ ...prev, subcategory_id: value }));
+                }}
                 disabled={!formData.category_id || subcategories.length === 0}
               >
                 <SelectTrigger>
@@ -251,6 +275,9 @@ const EditExamModal = ({ open, onOpenChange, onSuccess, exam }: EditExamModalPro
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Atual: {formData.subcategory_id || 'Nenhuma'} | Disponíveis: {subcategories.length}
+              </p>
             </div>
           </div>
 
