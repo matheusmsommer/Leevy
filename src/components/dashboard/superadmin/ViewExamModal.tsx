@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
+import { Star } from 'lucide-react';
 
 interface GlobalExam {
   id: string;
@@ -25,6 +26,15 @@ interface ExamDetails {
   subcategory_name?: string;
   preparation_name?: string;
   preparation_instructions?: string;
+  exam_preparations?: Array<{
+    id: string;
+    is_primary: boolean;
+    preparation: {
+      id: string;
+      name: string;
+      instructions: string;
+    };
+  }>;
 }
 
 interface ViewExamModalProps {
@@ -76,7 +86,26 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
         }
       }
 
-      // Fetch preparation details
+      // Fetch exam preparations (multiple)
+      const { data: examPreparationsData } = await supabase
+        .from('exam_preparations')
+        .select(`
+          id,
+          is_primary,
+          preparation:standard_preparations(
+            id,
+            name,
+            instructions
+          )
+        `)
+        .eq('exam_id', exam.id)
+        .order('is_primary', { ascending: false });
+
+      if (examPreparationsData) {
+        details.exam_preparations = examPreparationsData;
+      }
+
+      // Fetch legacy preparation details (for backward compatibility)
       if (exam.preparation_id) {
         const { data: preparationData } = await supabase
           .from('standard_preparations')
@@ -102,6 +131,7 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
 
   const synonymsList = exam.synonyms ? exam.synonyms.split(',').map(s => s.trim()) : [];
   const diseasesList = exam.related_diseases ? exam.related_diseases.split(',').map(s => s.trim()) : [];
+  const hasMultiplePreparations = examDetails.exam_preparations && examDetails.exam_preparations.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -170,7 +200,35 @@ const ViewExamModal = ({ open, onOpenChange, exam }: ViewExamModalProps) => {
             </div>
           )}
 
-          {(examDetails.preparation_name || exam.preparation) && (
+          {/* Multiple Preparations */}
+          {hasMultiplePreparations && (
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Preparações Configuradas</label>
+              <div className="space-y-3 mt-2">
+                {examDetails.exam_preparations?.map((examPrep) => (
+                  <div key={examPrep.id} className="p-4 border rounded-lg bg-muted/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="border-orange-200 text-orange-800 bg-orange-50">
+                        {examPrep.preparation.name}
+                      </Badge>
+                      {examPrep.is_primary && (
+                        <Badge variant="default" className="text-xs">
+                          <Star className="h-3 w-3 mr-1" />
+                          Principal
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed">
+                      {examPrep.preparation.instructions}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Legacy preparation (backward compatibility) */}
+          {(examDetails.preparation_name || exam.preparation) && !hasMultiplePreparations && (
             <div>
               <label className="text-sm font-medium text-muted-foreground">Preparação Padrão</label>
               {examDetails.preparation_name && (

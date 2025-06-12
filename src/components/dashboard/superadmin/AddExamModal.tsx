@@ -1,494 +1,311 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface Subcategory {
-  id: string;
-  name: string;
-  category_id: string;
-}
-
-interface Preparation {
-  id: string;
-  name: string;
-  instructions: string;
-}
+import { useToast } from '@/hooks/use-toast';
+import ExamPreparationsManager from './ExamPreparationsManager';
 
 interface AddExamModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onExamAdded: () => void;
+  onSuccess: () => void;
 }
 
-const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) => {
+const AddExamModal = ({ open, onOpenChange, onSuccess }: AddExamModalProps) => {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [synonymInput, setSynonymInput] = useState('');
-  const [diseaseInput, setDiseaseInput] = useState('');
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [preparations, setPreparations] = useState<Preparation[]>([]);
-  const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [subcategories, setSubcategories] = useState<any[]>([]);
+  const [createdExamId, setCreatedExamId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
+    category: '',
     category_id: '',
     subcategory_id: '',
-    preparation_id: '',
-    synonyms: [] as string[],
     description: '',
     patient_friendly_description: '',
-    related_diseases: [] as string[]
+    synonyms: '',
+    related_diseases: '',
+    preparation: ''
   });
 
   useEffect(() => {
     if (open) {
       fetchCategories();
-      fetchSubcategories();
-      fetchPreparations();
+      setCreatedExamId(null);
     }
   }, [open]);
-
-  useEffect(() => {
-    if (formData.category_id) {
-      const filtered = subcategories.filter(sub => sub.category_id === formData.category_id);
-      setFilteredSubcategories(filtered);
-      // Reset subcategory if it doesn't belong to the selected category
-      if (formData.subcategory_id && !filtered.find(sub => sub.id === formData.subcategory_id)) {
-        setFormData(prev => ({ ...prev, subcategory_id: '' }));
-      }
-    } else {
-      setFilteredSubcategories([]);
-    }
-  }, [formData.category_id, subcategories]);
 
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
         .from('exam_categories')
-        .select('id, name')
+        .select('*')
         .eq('active', true)
         .order('name');
 
-      if (error) {
-        console.error('Error fetching categories:', error);
-        return;
-      }
-
+      if (error) throw error;
       setCategories(data || []);
-    } catch (error) {
-      console.error('Error in fetchCategories:', error);
+    } catch (error: any) {
+      console.error('Error fetching categories:', error);
     }
   };
 
-  const fetchSubcategories = async () => {
+  const fetchSubcategories = async (categoryId: string) => {
     try {
       const { data, error } = await supabase
         .from('exam_subcategories')
-        .select('id, name, category_id')
+        .select('*')
+        .eq('category_id', categoryId)
         .eq('active', true)
         .order('name');
 
-      if (error) {
-        console.error('Error fetching subcategories:', error);
-        return;
-      }
-
+      if (error) throw error;
       setSubcategories(data || []);
-    } catch (error) {
-      console.error('Error in fetchSubcategories:', error);
+    } catch (error: any) {
+      console.error('Error fetching subcategories:', error);
     }
   };
 
-  const fetchPreparations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('standard_preparations')
-        .select('id, name, instructions')
-        .eq('active', true)
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching preparations:', error);
-        return;
-      }
-
-      setPreparations(data || []);
-    } catch (error) {
-      console.error('Error in fetchPreparations:', error);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string | string[]) => {
+  const handleCategoryChange = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      category_id: categoryId,
+      category: category?.name || '',
+      subcategory_id: ''
     }));
-  };
-
-  const handleAddSynonym = () => {
-    if (synonymInput.trim() && !formData.synonyms.includes(synonymInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        synonyms: [...prev.synonyms, synonymInput.trim()]
-      }));
-      setSynonymInput('');
-    }
-  };
-
-  const handleRemoveSynonym = (synonymToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      synonyms: prev.synonyms.filter(synonym => synonym !== synonymToRemove)
-    }));
-  };
-
-  const handleAddDisease = () => {
-    if (diseaseInput.trim() && !formData.related_diseases.includes(diseaseInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        related_diseases: [...prev.related_diseases, diseaseInput.trim()]
-      }));
-      setDiseaseInput('');
-    }
-  };
-
-  const handleRemoveDisease = (diseaseToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      related_diseases: prev.related_diseases.filter(disease => disease !== diseaseToRemove)
-    }));
-  };
-
-  const handleSynonymKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddSynonym();
-    }
-  };
-
-  const handleDiseaseKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddDisease();
-    }
+    fetchSubcategories(categoryId);
+    setSubcategories([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.code || !formData.category_id) {
+    if (!formData.name.trim() || !formData.code.trim() || !formData.category.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha nome, código e categoria.",
+        description: "Nome, código e categoria são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-
+    setLoading(true);
     try {
-      console.log('Adding new exam:', formData);
-
-      // Get the selected category name for the legacy category field
-      const selectedCategory = categories.find(cat => cat.id === formData.category_id);
-      
-      // Get preparation instructions if a preparation is selected
-      const selectedPreparation = preparations.find(prep => prep.id === formData.preparation_id);
-
       const { data, error } = await supabase
         .from('exams')
-        .insert([
-          {
-            name: formData.name,
-            code: formData.code.toUpperCase(),
-            category: selectedCategory?.name || '', // Legacy field
-            category_id: formData.category_id,
-            subcategory_id: formData.subcategory_id || null,
-            preparation_id: formData.preparation_id || null,
-            preparation: selectedPreparation?.instructions || null, // Legacy field
-            synonyms: formData.synonyms.length > 0 ? formData.synonyms.join(',') : null,
-            description: formData.description || null,
-            patient_friendly_description: formData.patient_friendly_description || null,
-            related_diseases: formData.related_diseases.length > 0 ? formData.related_diseases.join(',') : null
-          }
-        ])
+        .insert([formData])
         .select()
         .single();
 
-      if (error) {
-        console.error('Error adding exam:', error);
-        toast({
-          title: "Erro ao adicionar exame",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
+      if (error) throw error;
 
-      console.log('Exam added successfully:', data);
       toast({
-        title: "Exame adicionado",
-        description: "O exame foi adicionado com sucesso ao catálogo global.",
+        title: "Sucesso",
+        description: "Exame criado com sucesso. Agora você pode adicionar preparações.",
       });
 
-      // Reset form
+      setCreatedExamId(data.id);
       setFormData({
         name: '',
         code: '',
+        category: '',
         category_id: '',
         subcategory_id: '',
-        preparation_id: '',
-        synonyms: [],
         description: '',
         patient_friendly_description: '',
-        related_diseases: []
+        synonyms: '',
+        related_diseases: '',
+        preparation: ''
       });
-      setSynonymInput('');
-      setDiseaseInput('');
-
-      onExamAdded();
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
+    } catch (error: any) {
+      console.error('Error creating exam:', error);
       toast({
-        title: "Erro inesperado",
-        description: "Ocorreu um erro ao adicionar o exame.",
+        title: "Erro ao criar exame",
+        description: error.message || "Não foi possível criar o exame.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  const handleClose = () => {
+    if (createdExamId) {
+      onSuccess();
+    }
+    setCreatedExamId(null);
+    setFormData({
+      name: '',
+      code: '',
+      category: '',
+      category_id: '',
+      subcategory_id: '',
+      description: '',
+      patient_friendly_description: '',
+      synonyms: '',
+      related_diseases: '',
+      preparation: ''
+    });
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Adicionar Novo Exame</DialogTitle>
+          <DialogTitle>
+            {createdExamId ? 'Configurar Preparações' : 'Adicionar Novo Exame'}
+          </DialogTitle>
           <DialogDescription>
-            Adicione um novo exame ao catálogo global. Este exame ficará disponível para todas as empresas.
+            {createdExamId 
+              ? 'Exame criado! Agora você pode adicionar preparações específicas.' 
+              : 'Preencha as informações do novo exame'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome do Exame *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Ex: Hemograma Completo"
-                required
-                disabled={isLoading}
+        {!createdExamId ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Nome do Exame *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Nome do exame"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="code">Código *</Label>
+                <Input
+                  id="code"
+                  value={formData.code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                  placeholder="Código do exame"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="category">Categoria *</Label>
+                <Select value={formData.category_id} onValueChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="subcategory">Subcategoria</Label>
+                <Select value={formData.subcategory_id} onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory_id: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma subcategoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcategories.map((subcategory) => (
+                      <SelectItem key={subcategory.id} value={subcategory.id}>
+                        {subcategory.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Descrição Técnica</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Descrição técnica do exame"
+                rows={3}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="code">Código *</Label>
-              <Input
-                id="code"
-                value={formData.code}
-                onChange={(e) => handleInputChange('code', e.target.value)}
-                placeholder="Ex: HEM001"
-                required
-                disabled={isLoading}
+
+            <div>
+              <Label htmlFor="patient_friendly_description">Descrição Amigável para o Paciente</Label>
+              <Textarea
+                id="patient_friendly_description"
+                value={formData.patient_friendly_description}
+                onChange={(e) => setFormData(prev => ({ ...prev, patient_friendly_description: e.target.value }))}
+                placeholder="Descrição simplificada para o paciente entender"
+                rows={3}
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="category">Categoria *</Label>
-            <Select 
-              value={formData.category_id} 
-              onValueChange={(value) => handleInputChange('category_id', value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {formData.category_id && filteredSubcategories.length > 0 && (
-            <div className="space-y-2">
-              <Label htmlFor="subcategory">Subcategoria</Label>
-              <Select 
-                value={formData.subcategory_id} 
-                onValueChange={(value) => handleInputChange('subcategory_id', value)}
-                disabled={isLoading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma subcategoria (opcional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredSubcategories.map((subcategory) => (
-                    <SelectItem key={subcategory.id} value={subcategory.id}>
-                      {subcategory.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div>
+              <Label htmlFor="synonyms">Sinônimos</Label>
+              <Input
+                id="synonyms"
+                value={formData.synonyms}
+                onChange={(e) => setFormData(prev => ({ ...prev, synonyms: e.target.value }))}
+                placeholder="Sinônimos separados por vírgula"
+              />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="preparation">Preparação Padrão</Label>
-            <Select 
-              value={formData.preparation_id} 
-              onValueChange={(value) => handleInputChange('preparation_id', value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma preparação (opcional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {preparations.map((preparation) => (
-                  <SelectItem key={preparation.id} value={preparation.id}>
-                    {preparation.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <div>
+              <Label htmlFor="related_diseases">Doenças Relacionadas</Label>
+              <Input
+                id="related_diseases"
+                value={formData.related_diseases}
+                onChange={(e) => setFormData(prev => ({ ...prev, related_diseases: e.target.value }))}
+                placeholder="Doenças relacionadas separadas por vírgula"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição Técnica</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Descrição detalhada do que o exame avalia (técnica)"
-              rows={3}
-              disabled={isLoading}
-            />
-          </div>
+            <div>
+              <Label htmlFor="preparation">Preparação Padrão (Texto Livre)</Label>
+              <Textarea
+                id="preparation"
+                value={formData.preparation}
+                onChange={(e) => setFormData(prev => ({ ...prev, preparation: e.target.value }))}
+                placeholder="Instruções de preparação em texto livre"
+                rows={4}
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="patient_friendly_description">Descrição Amigável</Label>
-            <Textarea
-              id="patient_friendly_description"
-              value={formData.patient_friendly_description}
-              onChange={(e) => handleInputChange('patient_friendly_description', e.target.value)}
-              placeholder="Descrição simplificada para o paciente entender facilmente"
-              rows={3}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="synonyms">Sinônimos / Nomes Alternativos</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  id="synonyms"
-                  value={synonymInput}
-                  onChange={(e) => setSynonymInput(e.target.value)}
-                  onKeyPress={handleSynonymKeyPress}
-                  placeholder="Ex: CBC, Hemograma simples"
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddSynonym}
-                  disabled={!synonymInput.trim() || isLoading}
-                >
-                  Adicionar
-                </Button>
-              </div>
-              {formData.synonyms.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.synonyms.map((synonym, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      {synonym}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => handleRemoveSynonym(synonym)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
+            <div className="flex gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? 'Criando...' : 'Criar Exame'}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-6">
+            <ExamPreparationsManager examId={createdExamId} />
+            
+            <div className="flex justify-end pt-4">
+              <Button onClick={handleClose}>
+                Concluir
+              </Button>
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="related_diseases">Doenças Relacionadas</Label>
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  id="related_diseases"
-                  value={diseaseInput}
-                  onChange={(e) => setDiseaseInput(e.target.value)}
-                  onKeyPress={handleDiseaseKeyPress}
-                  placeholder="Ex: Anemia, Leucemia, Trombocitopenia"
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddDisease}
-                  disabled={!diseaseInput.trim() || isLoading}
-                >
-                  Adicionar
-                </Button>
-              </div>
-              {formData.related_diseases.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.related_diseases.map((disease, index) => (
-                    <Badge key={index} variant="outline" className="flex items-center gap-1 border-red-200 text-red-800 bg-red-50">
-                      {disease}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => handleRemoveDisease(disease)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Doenças que este exame pode diagnosticar ou acompanhar (ajuda na busca)
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adicionando...' : 'Adicionar Exame'}
-            </Button>
-          </DialogFooter>
-        </form>
+        )}
       </DialogContent>
     </Dialog>
   );

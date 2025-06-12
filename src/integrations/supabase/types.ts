@@ -153,6 +153,45 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_preparations: {
+        Row: {
+          created_at: string
+          exam_id: string
+          id: string
+          is_primary: boolean | null
+          preparation_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          id?: string
+          is_primary?: boolean | null
+          preparation_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          id?: string
+          is_primary?: boolean | null
+          preparation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_preparations_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_preparations_preparation_id_fkey"
+            columns: ["preparation_id"]
+            isOneToOne: false
+            referencedRelation: "standard_preparations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_subcategories: {
         Row: {
           active: boolean | null
