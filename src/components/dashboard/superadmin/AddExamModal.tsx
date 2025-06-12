@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -23,7 +24,14 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     code: '',
     category: '',
     preparation: '',
-    description: ''
+    description: '',
+    fastingHours: '',
+    medicationRestrictions: false,
+    hydrationNeeded: false,
+    physicalActivityRestriction: false,
+    collectionTime: '',
+    resultDeliveryDays: '',
+    specialInstructions: ''
   });
 
   const categories = [
@@ -42,11 +50,58 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     'outros'
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const fastingOptions = [
+    { value: '0', label: 'Sem jejum' },
+    { value: '4', label: '4 horas' },
+    { value: '8', label: '8 horas' },
+    { value: '12', label: '12 horas' },
+    { value: '24', label: '24 horas' }
+  ];
+
+  const collectionTimes = [
+    { value: 'any', label: 'Qualquer horário' },
+    { value: 'morning', label: 'Manhã (7h às 10h)' },
+    { value: 'first_urine', label: 'Primeira urina da manhã' },
+    { value: 'specific', label: 'Horário específico' }
+  ];
+
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const generatePreparation = () => {
+    const preparations = [];
+    
+    if (formData.fastingHours && formData.fastingHours !== '0') {
+      preparations.push(`Jejum de ${formData.fastingHours} horas`);
+    }
+    
+    if (formData.medicationRestrictions) {
+      preparations.push('Suspender medicamentos conforme orientação médica');
+    }
+    
+    if (formData.hydrationNeeded) {
+      preparations.push('Manter boa hidratação');
+    }
+    
+    if (formData.physicalActivityRestriction) {
+      preparations.push('Evitar exercícios físicos intensos 24h antes');
+    }
+    
+    if (formData.collectionTime === 'morning') {
+      preparations.push('Coleta preferencialmente pela manhã');
+    } else if (formData.collectionTime === 'first_urine') {
+      preparations.push('Primeira urina da manhã');
+    }
+    
+    if (formData.specialInstructions) {
+      preparations.push(formData.specialInstructions);
+    }
+    
+    return preparations.join('; ');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +121,8 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
     try {
       console.log('Adding new exam:', formData);
 
+      const finalPreparation = generatePreparation();
+
       const { data, error } = await supabase
         .from('exams')
         .insert([
@@ -73,7 +130,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
             name: formData.name,
             code: formData.code.toUpperCase(),
             category: formData.category,
-            preparation: formData.preparation || null,
+            preparation: finalPreparation || null,
             description: formData.description || null
           }
         ])
@@ -102,7 +159,14 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
         code: '',
         category: '',
         preparation: '',
-        description: ''
+        description: '',
+        fastingHours: '',
+        medicationRestrictions: false,
+        hydrationNeeded: false,
+        physicalActivityRestriction: false,
+        collectionTime: '',
+        resultDeliveryDays: '',
+        specialInstructions: ''
       });
 
       onExamAdded();
@@ -121,7 +185,7 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Exame</DialogTitle>
           <DialogDescription>
@@ -169,24 +233,97 @@ const AddExamModal = ({ open, onOpenChange, onExamAdded }: AddExamModalProps) =>
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="preparation">Preparação</Label>
-            <Textarea
-              id="preparation"
-              value={formData.preparation}
-              onChange={(e) => handleInputChange('preparation', e.target.value)}
-              placeholder="Ex: Jejum de 8 horas"
-              rows={2}
-            />
+          <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
+            <Label className="text-sm font-semibold">Preparações Padronizadas</Label>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fastingHours">Jejum</Label>
+                <Select value={formData.fastingHours} onValueChange={(value) => handleInputChange('fastingHours', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o jejum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fastingOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="collectionTime">Horário de Coleta</Label>
+                <Select value={formData.collectionTime} onValueChange={(value) => handleInputChange('collectionTime', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o horário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {collectionTimes.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="medicationRestrictions"
+                  checked={formData.medicationRestrictions}
+                  onCheckedChange={(checked) => handleInputChange('medicationRestrictions', checked as boolean)}
+                />
+                <Label htmlFor="medicationRestrictions" className="text-sm">
+                  Restrições de medicamentos
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="hydrationNeeded"
+                  checked={formData.hydrationNeeded}
+                  onCheckedChange={(checked) => handleInputChange('hydrationNeeded', checked as boolean)}
+                />
+                <Label htmlFor="hydrationNeeded" className="text-sm">
+                  Manter boa hidratação
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="physicalActivityRestriction"
+                  checked={formData.physicalActivityRestriction}
+                  onCheckedChange={(checked) => handleInputChange('physicalActivityRestriction', checked as boolean)}
+                />
+                <Label htmlFor="physicalActivityRestriction" className="text-sm">
+                  Evitar exercícios físicos intensos
+                </Label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="specialInstructions">Instruções Especiais</Label>
+              <Textarea
+                id="specialInstructions"
+                value={formData.specialInstructions}
+                onChange={(e) => handleInputChange('specialInstructions', e.target.value)}
+                placeholder="Ex: Bexiga cheia, evitar álcool 48h antes"
+                rows={2}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description">Descrição do Exame</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Descrição detalhada do exame"
+              placeholder="Descrição detalhada do que o exame avalia"
               rows={3}
             />
           </div>
