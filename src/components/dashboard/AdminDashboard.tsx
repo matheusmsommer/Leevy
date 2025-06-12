@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import AdminSidebar from './AdminSidebar';
 import DashboardOverview from './admin/DashboardOverview';
 import ServiceManagement from './admin/ServiceManagement';
@@ -38,11 +38,16 @@ const AdminDashboard = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-muted/20">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 overflow-auto">
-          <div className="container max-w-7xl mx-auto p-6 space-y-8">
-            {renderContent()}
-          </div>
-        </main>
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <main className="flex-1 overflow-auto">
+            <div className="container max-w-7xl mx-auto p-6 space-y-8">
+              {renderContent()}
+            </div>
+          </main>
+        </SidebarInset>
       </div>
     </SidebarProvider>
   );
