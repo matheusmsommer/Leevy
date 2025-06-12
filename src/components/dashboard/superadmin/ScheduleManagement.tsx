@@ -7,6 +7,10 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Plus, Edit, Trash2, Clock, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import AddScheduleModal from './AddScheduleModal';
+import ViewScheduleModal from './ViewScheduleModal';
+import EditScheduleModal from './EditScheduleModal';
+import DeleteScheduleModal from './DeleteScheduleModal';
 
 interface Schedule {
   id: string;
@@ -15,12 +19,19 @@ interface Schedule {
   end_time: string;
   days_of_week: string[];
   active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const ScheduleManagement = () => {
   const { toast } = useToast();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSchedules();
@@ -65,6 +76,21 @@ const ScheduleManagement = () => {
     return days.map(day => dayNames[day] || day).join(', ');
   };
 
+  const handleView = (schedule: Schedule) => {
+    setSelectedSchedule(schedule);
+    setViewModalOpen(true);
+  };
+
+  const handleEdit = (schedule: Schedule) => {
+    setSelectedSchedule(schedule);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (schedule: Schedule) => {
+    setSelectedSchedule(schedule);
+    setDeleteModalOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -82,7 +108,7 @@ const ScheduleManagement = () => {
             Gerencie os horários disponíveis para coleta de exames
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setAddModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Horário
         </Button>
@@ -126,7 +152,7 @@ const ScheduleManagement = () => {
                     <div className="flex gap-2 justify-center">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleView(schedule)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -137,7 +163,7 @@ const ScheduleManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(schedule)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -148,7 +174,7 @@ const ScheduleManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" className="text-destructive">
+                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(schedule)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -164,6 +190,32 @@ const ScheduleManagement = () => {
           </Table>
         </div>
       )}
+
+      <AddScheduleModal
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSuccess={fetchSchedules}
+      />
+
+      <ViewScheduleModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        schedule={selectedSchedule}
+      />
+
+      <EditScheduleModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        schedule={selectedSchedule}
+        onSuccess={fetchSchedules}
+      />
+
+      <DeleteScheduleModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        schedule={selectedSchedule}
+        onSuccess={fetchSchedules}
+      />
     </div>
   );
 };

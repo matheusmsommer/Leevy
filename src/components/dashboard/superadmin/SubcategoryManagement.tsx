@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,10 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Plus, Edit, Trash2, List, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import AddSubcategoryModal from './AddSubcategoryModal';
+import ViewSubcategoryModal from './ViewSubcategoryModal';
+import EditSubcategoryModal from './EditSubcategoryModal';
+import DeleteSubcategoryModal from './DeleteSubcategoryModal';
 
 interface Subcategory {
   id: string;
@@ -15,6 +18,8 @@ interface Subcategory {
   description?: string;
   category_id: string;
   active: boolean;
+  created_at: string;
+  updated_at: string;
   exam_categories?: {
     name: string;
   };
@@ -24,6 +29,11 @@ const SubcategoryManagement = () => {
   const { toast } = useToast();
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSubcategories();
@@ -59,6 +69,21 @@ const SubcategoryManagement = () => {
     }
   };
 
+  const handleView = (subcategory: Subcategory) => {
+    setSelectedSubcategory(subcategory);
+    setViewModalOpen(true);
+  };
+
+  const handleEdit = (subcategory: Subcategory) => {
+    setSelectedSubcategory(subcategory);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (subcategory: Subcategory) => {
+    setSelectedSubcategory(subcategory);
+    setDeleteModalOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -76,7 +101,7 @@ const SubcategoryManagement = () => {
             Gerencie as subcategorias para uma classificação mais detalhada
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setAddModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Subcategoria
         </Button>
@@ -120,7 +145,7 @@ const SubcategoryManagement = () => {
                     <div className="flex gap-2 justify-center">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleView(subcategory)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -131,7 +156,7 @@ const SubcategoryManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(subcategory)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -142,7 +167,7 @@ const SubcategoryManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" className="text-destructive">
+                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(subcategory)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -158,6 +183,32 @@ const SubcategoryManagement = () => {
           </Table>
         </div>
       )}
+
+      <AddSubcategoryModal
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSuccess={fetchSubcategories}
+      />
+
+      <ViewSubcategoryModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        subcategory={selectedSubcategory}
+      />
+
+      <EditSubcategoryModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        subcategory={selectedSubcategory}
+        onSuccess={fetchSubcategories}
+      />
+
+      <DeleteSubcategoryModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        subcategory={selectedSubcategory}
+        onSuccess={fetchSubcategories}
+      />
     </div>
   );
 };

@@ -7,18 +7,29 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { Plus, Edit, Trash2, FileText, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import AddPreparationModal from './AddPreparationModal';
+import ViewPreparationModal from './ViewPreparationModal';
+import EditPreparationModal from './EditPreparationModal';
+import DeletePreparationModal from './DeletePreparationModal';
 
 interface Preparation {
   id: string;
   name: string;
   instructions: string;
   active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const PreparationManagement = () => {
   const { toast } = useToast();
   const [preparations, setPreparations] = useState<Preparation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPreparation, setSelectedPreparation] = useState<Preparation | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchPreparations();
@@ -49,6 +60,21 @@ const PreparationManagement = () => {
     }
   };
 
+  const handleView = (preparation: Preparation) => {
+    setSelectedPreparation(preparation);
+    setViewModalOpen(true);
+  };
+
+  const handleEdit = (preparation: Preparation) => {
+    setSelectedPreparation(preparation);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (preparation: Preparation) => {
+    setSelectedPreparation(preparation);
+    setDeleteModalOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -66,7 +92,7 @@ const PreparationManagement = () => {
             Gerencie as instruções de preparação para os exames
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90" onClick={() => setAddModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Preparação
         </Button>
@@ -106,7 +132,7 @@ const PreparationManagement = () => {
                     <div className="flex gap-2 justify-center">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleView(preparation)}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -117,7 +143,7 @@ const PreparationManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(preparation)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -128,7 +154,7 @@ const PreparationManagement = () => {
 
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <Button size="sm" variant="outline" className="text-destructive">
+                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleDelete(preparation)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </HoverCardTrigger>
@@ -144,6 +170,32 @@ const PreparationManagement = () => {
           </Table>
         </div>
       )}
+
+      <AddPreparationModal
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSuccess={fetchPreparations}
+      />
+
+      <ViewPreparationModal
+        open={viewModalOpen}
+        onOpenChange={setViewModalOpen}
+        preparation={selectedPreparation}
+      />
+
+      <EditPreparationModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        preparation={selectedPreparation}
+        onSuccess={fetchPreparations}
+      />
+
+      <DeletePreparationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        preparation={selectedPreparation}
+        onSuccess={fetchPreparations}
+      />
     </div>
   );
 };
